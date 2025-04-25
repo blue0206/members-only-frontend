@@ -6,13 +6,14 @@ import {
   RegisterResponseDto,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
+import { HttpMethod } from "@/types";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     registerUser: builder.mutation<RegisterResponseDto, RegisterRequestDto>({
       query: (body: RegisterRequestDto) => ({
         url: "/auth/register",
-        method: "POST",
+        method: HttpMethod.POST,
         body,
       }),
       transformResponse: (returnValue: ApiResponse<RegisterResponseDto>) => {
@@ -26,7 +27,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
     loginUser: builder.mutation<LoginResponseDto, LoginRequestDto>({
       query: (body: LoginRequestDto) => ({
         url: "/auth/login",
-        method: "POST",
+        method: HttpMethod.POST,
         body,
       }),
       transformResponse: (returnValue: ApiResponse<LoginResponseDto>) => {
