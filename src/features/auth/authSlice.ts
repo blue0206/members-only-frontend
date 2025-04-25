@@ -4,13 +4,13 @@ import { UserDto } from "@blue0206/members-only-shared-types";
 interface AuthState {
   user: UserDto | null;
   accessToken: string | null;
-  isAuthenticated: boolean;
+  authStatus: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   accessToken: "",
-  isAuthenticated: false,
+  authStatus: false,
 };
 
 const authSlice = createSlice({
