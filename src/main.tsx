@@ -11,6 +11,7 @@ import { Button } from "./components/ui/button.tsx";
 if (import.meta.env.PROD) {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
+    sendDefaultPii: true,
     integrations: [
       Sentry.browserTracingIntegration(),
       Sentry.breadcrumbsIntegration(),
