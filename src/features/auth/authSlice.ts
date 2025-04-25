@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UserDto } from "@blue0206/members-only-shared-types";
 
 interface AuthState {
@@ -16,7 +16,13 @@ const initialState: AuthState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    setCredentials: (state, action: PayloadAction<AuthState>) => {
+      state = action.payload;
+      return state;
+    },
+  },
 });
 
 export default authSlice.reducer;
+export const { setCredentials } = authSlice.actions;
