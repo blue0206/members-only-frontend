@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
+// This eslint rule has been disabled because void type is used
+// for no arguments in RTK Query.
+
 import {
   ApiResponseError,
   ApiResponseSuccess,
@@ -12,6 +16,7 @@ import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { clearCredentials } from "@/features/auth/authSlice";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -49,6 +54,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
+    // Login Endpoint
     loginUser: builder.mutation<LoginResponseDto, LoginRequestDto>({
       query: (body: LoginRequestDto) => ({
         url: "/auth/login",
@@ -77,6 +83,33 @@ export const authApiSlice = apiSlice.injectEndpoints({
         } else {
           return result.error;
         }
+      },
+    }),
+    // Logout Endpoint
+    logoutUser: builder.mutation<void, void>({
+      query: () => ({
+        url: "/auth/logout",
+        method: HttpMethod.DELETE,
+      }),
+      transformResponse: (result: void) => {
+        return result;
+      },
+      transformErrorResponse: (
+        result: FetchBaseQueryError | ApiResponseError
+      ) => {
+        if ("status" in result) {
+          return result;
+        } else {
+          return result.error;
+        }
+      },
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        await mutationLifeCycleApi.queryFulfilled;
+        // Clear RTK Query cache.
+        mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+        // Clear user auth state.
+        mutationLifeCycleApi.dispatch(clearCredentials());
       },
     }),
   }),
