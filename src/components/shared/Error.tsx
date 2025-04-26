@@ -14,19 +14,15 @@ export default function Error() {
         message: "The requested resource was not found.",
       };
 
-  // Setup error name and message based on status code.
+  // Set error name based on status code.
   let errorName = "Not Found";
-  let message = errorDetails.message;
 
   if (errorDetails.statusCode === 404) {
     errorName = "Not Found";
-    message = errorDetails.message;
   } else if (errorDetails.statusCode === 403) {
     errorName = "Forbidden";
-    message = errorDetails.message;
   } else if (errorDetails.statusCode >= 500) {
     errorName = "Internal Server Error";
-    message = "Something went wrong on the server.";
   }
 
   return (
@@ -35,7 +31,7 @@ export default function Error() {
         {errorDetails.statusCode}: {errorName}
       </h1>
       <div className="flex flex-col items-center gap-5">
-        <p className="text-xl text-gray-500">{message}</p>
+        <p className="text-xl text-gray-500">{errorDetails.message}</p>
         <Button
           variant={"outline"}
           className="cursor-pointer"
