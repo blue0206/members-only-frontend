@@ -1,5 +1,6 @@
-import { isAnyOf } from "@reduxjs/toolkit";
+import { isAnyOf, PayloadAction, UnknownAction } from "@reduxjs/toolkit";
 import { authApiSlice } from "../services/authApi";
+import { ApiErrorPayload } from "@blue0206/members-only-shared-types";
 
 // This type guard is used to determine if action is a rejected
 // action from refresh endpoint.
@@ -13,3 +14,14 @@ import { authApiSlice } from "../services/authApi";
 export const refreshEndpointRejectedAction = isAnyOf(
   authApiSlice.endpoints.refreshTokens.matchRejected
 );
+
+// Ensure that the action is in fact a reject action from
+// the server.
+export const actionHasApiErrorPayload = (
+  action: UnknownAction
+): action is PayloadAction<ApiErrorPayload> => {
+  if (Object.prototype.hasOwnProperty.call(action.payload, "code")) {
+    return true;
+  }
+  return false;
+};
