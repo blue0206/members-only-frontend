@@ -1,9 +1,9 @@
 import {
-  ApiResponse,
   ApiResponseError,
   ApiResponseSuccess,
   LoginRequestDto,
   LoginResponseDto,
+  LoginResponseSchema,
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
@@ -55,11 +55,27 @@ export const authApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.POST,
         body,
       }),
-      transformResponse: (returnValue: ApiResponse<LoginResponseDto>) => {
-        if (returnValue.success) {
-          return returnValue.data;
+      transformResponse: (result: ApiResponseSuccess<LoginResponseDto>) => {
+        // Validate the response against schema.
+        const parsedResult = LoginResponseSchema.safeParse(result.data);
+        // Throw error if validation fails.
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+        // Return the response payload on successful validation.
+        return result.data;
+      },
+      transformErrorResponse: (
+        result: FetchBaseQueryError | ApiResponseError
+      ) => {
+        // Same logic as register endpoint.
+        if ("status" in result) {
+          return result;
         } else {
-          throw new Error(returnValue.error.message);
+          return result.error;
         }
       },
     }),
