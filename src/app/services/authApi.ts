@@ -8,6 +8,8 @@ import {
   LoginRequestDto,
   LoginResponseDto,
   LoginResponseSchema,
+  RefreshResponseDto,
+  RefreshResponseSchema,
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
@@ -38,7 +40,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
           );
         }
         // Return the response payload on successful validation.
-        return result.data;
+        return parsedResult.data;
       },
       transformErrorResponse: (
         result: FetchBaseQueryError | ApiResponseError
@@ -72,7 +74,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
           );
         }
         // Return the response payload on successful validation.
-        return result.data;
+        return parsedResult.data;
       },
       transformErrorResponse: (
         result: FetchBaseQueryError | ApiResponseError
@@ -110,6 +112,31 @@ export const authApiSlice = apiSlice.injectEndpoints({
         mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
         // Clear user auth state.
         mutationLifeCycleApi.dispatch(clearCredentials());
+      },
+    }),
+    refreshTokens: builder.mutation<RefreshResponseDto, void>({
+      query: () => ({
+        url: "/auth/refresh",
+        method: HttpMethod.POST,
+      }),
+      transformResponse: (result: ApiResponseSuccess<RefreshResponseDto>) => {
+        const parsedResult = RefreshResponseSchema.safeParse(result.data);
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+        return parsedResult.data;
+      },
+      transformErrorResponse: (
+        result: FetchBaseQueryError | ApiResponseError
+      ) => {
+        if ("status" in result) {
+          return result;
+        } else {
+          return result.error;
+        }
       },
     }),
   }),
