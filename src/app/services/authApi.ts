@@ -3,7 +3,6 @@
 // for no arguments in RTK Query.
 
 import {
-  ApiResponseError,
   ApiResponseSuccess,
   LoginRequestDto,
   LoginResponseDto,
@@ -17,7 +16,6 @@ import {
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import {
   AuthState,
   clearCredentials,
@@ -52,19 +50,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
           authStatus: true,
         };
       },
-      transformErrorResponse: (
-        result: FetchBaseQueryError | ApiResponseError
-      ) => {
-        // Check if the error is FetchBaseQueryError or ApiResponseError.
-        // If it's FetchBaseQueryError, return the result as it is.
-        // If it's ApiResponseError, extract the error payload from the
-        // response body and return it.
-        if ("status" in result) {
-          return result;
-        } else {
-          return result.error;
-        }
-      },
       onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
         // Wait for the query to be fulfilled.
         const queryResult = await mutationLifeCycleApi.queryFulfilled;
@@ -98,16 +83,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
           authStatus: true,
         };
       },
-      transformErrorResponse: (
-        result: FetchBaseQueryError | ApiResponseError
-      ) => {
-        // Same logic as register endpoint.
-        if ("status" in result) {
-          return result;
-        } else {
-          return result.error;
-        }
-      },
       onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
         // Wait for the query to be fulfilled.
         const queryResult = await mutationLifeCycleApi.queryFulfilled;
@@ -123,15 +98,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       transformResponse: (result: void) => {
         return result;
-      },
-      transformErrorResponse: (
-        result: FetchBaseQueryError | ApiResponseError
-      ) => {
-        if ("status" in result) {
-          return result;
-        } else {
-          return result.error;
-        }
       },
       onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
         // Wait for the query to be fulfilled.
@@ -156,15 +122,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
           );
         }
         return parsedResult.data;
-      },
-      transformErrorResponse: (
-        result: FetchBaseQueryError | ApiResponseError
-      ) => {
-        if ("status" in result) {
-          return result;
-        } else {
-          return result.error;
-        }
       },
     }),
   }),
