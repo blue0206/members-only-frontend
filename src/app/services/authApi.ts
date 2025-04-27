@@ -8,7 +8,6 @@ import {
   LoginResponseDto,
   LoginResponseSchema,
   RefreshResponseDto,
-  RefreshResponseSchema,
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
@@ -107,9 +106,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
         url: "/auth/logout",
         method: HttpMethod.DELETE,
       }),
-      transformResponse: (result: void) => {
-        return result;
-      },
       onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
         // Wait for the query to be fulfilled.
         await mutationLifeCycleApi.queryFulfilled;
@@ -126,16 +122,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
         url: "/auth/refresh",
         method: HttpMethod.POST,
       }),
-      transformResponse: (result: ApiResponseSuccess<RefreshResponseDto>) => {
-        const parsedResult = RefreshResponseSchema.safeParse(result.data);
-        if (!parsedResult.success) {
-          throw new ValidationError(
-            parsedResult.error.message,
-            parsedResult.error.flatten()
-          );
-        }
-        return parsedResult.data;
-      },
     }),
   }),
 });
