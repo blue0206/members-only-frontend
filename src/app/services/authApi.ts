@@ -18,12 +18,16 @@ import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { clearCredentials } from "@/features/auth/authSlice";
+import {
+  AuthState,
+  clearCredentials,
+  setCredentials,
+} from "@/features/auth/authSlice";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Register Endpoint
-    registerUser: builder.mutation<RegisterResponseDto, RegisterRequestDto>({
+    registerUser: builder.mutation<AuthState, RegisterRequestDto>({
       query: (body: RegisterRequestDto) => ({
         url: "/auth/register",
         method: HttpMethod.POST,
@@ -39,8 +43,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
             parsedResult.error.flatten()
           );
         }
-        // Return the response payload on successful validation.
-        return parsedResult.data;
+        // Extract access token and user details from response.
+        const { accessToken, ...userData } = parsedResult.data;
+        // Return the response payload conforming to AuthState type.
+        return {
+          accessToken,
+          user: userData,
+          authStatus: true,
+        };
       },
       transformErrorResponse: (
         result: FetchBaseQueryError | ApiResponseError
@@ -55,9 +65,15 @@ export const authApiSlice = apiSlice.injectEndpoints({
           return result.error;
         }
       },
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        const queryResult = await mutationLifeCycleApi.queryFulfilled;
+        // Dispatch action to update auth state.
+        mutationLifeCycleApi.dispatch(setCredentials(queryResult.data));
+      },
     }),
     // Login Endpoint
-    loginUser: builder.mutation<LoginResponseDto, LoginRequestDto>({
+    loginUser: builder.mutation<AuthState, LoginRequestDto>({
       query: (body: LoginRequestDto) => ({
         url: "/auth/login",
         method: HttpMethod.POST,
@@ -73,8 +89,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
             parsedResult.error.flatten()
           );
         }
-        // Return the response payload on successful validation.
-        return parsedResult.data;
+        // Extract access token and user details from response.
+        const { accessToken, ...userData } = parsedResult.data;
+        // Return the response payload conforming to AuthState type.
+        return {
+          accessToken,
+          user: userData,
+          authStatus: true,
+        };
       },
       transformErrorResponse: (
         result: FetchBaseQueryError | ApiResponseError
@@ -85,6 +107,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
         } else {
           return result.error;
         }
+      },
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        const queryResult = await mutationLifeCycleApi.queryFulfilled;
+        // Dispatch action to update auth state.
+        mutationLifeCycleApi.dispatch(setCredentials(queryResult.data));
       },
     }),
     // Logout Endpoint
@@ -142,4 +170,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useRegisterUserMutation } = authApiSlice;
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useLogoutUserMutation,
+  useRefreshTokensMutation,
+} = authApiSlice;
