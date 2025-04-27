@@ -13,6 +13,7 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
 import { CustomBaseQueryError } from "@/types";
+import { isApiResponseError } from "@/utils/errorUtils";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -114,6 +115,35 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
       // Wait for the mutex to be released.
       await mutex.waitForUnlock();
       result = await baseQuery(args, api, extraOptions);
+    }
+  } else if (result.error) {
+    // If error is present and is not a Token Expiry error, we
+    // transform the error payload here itself instead of having
+    // to do the same in transformErrorResponse of every single
+    // RTK endpoint.
+    // The error result can have error from either the API itself or
+    // from RTK Query. In case of former, we extract the actual error
+    // payload and return it as part of result, else, we return the
+    // result without any mutation.
+
+    // If the status property is a number and the data property is
+    // an ApiResponseError object, the error is from the API.
+    if (
+      typeof result.error.status === "number" &&
+      typeof result.error.data === "object" &&
+      isApiResponseError(result.error.data)
+    ) {
+      // Extract actual error payload and return as part of error
+      // property of result.
+      return {
+        error: result.error.data.error,
+        data: result.data,
+        meta: result.meta,
+      };
+    } else {
+      // Return the result without any mutation since the
+      // error is from RTK Query.
+      return result;
     }
   }
   return result;
