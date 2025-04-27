@@ -21,6 +21,7 @@ import {
   clearCredentials,
   setCredentials,
 } from "@/features/auth/authSlice";
+import * as Sentry from "@sentry/react";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -55,6 +56,11 @@ export const authApiSlice = apiSlice.injectEndpoints({
         const queryResult = await mutationLifeCycleApi.queryFulfilled;
         // Dispatch action to update auth state.
         mutationLifeCycleApi.dispatch(setCredentials(queryResult.data));
+        // Set user in Sentry.
+        Sentry.setUser({
+          id: queryResult.data.user?.id,
+          username: queryResult.data.user?.username,
+        });
       },
     }),
     // Login Endpoint
@@ -88,6 +94,11 @@ export const authApiSlice = apiSlice.injectEndpoints({
         const queryResult = await mutationLifeCycleApi.queryFulfilled;
         // Dispatch action to update auth state.
         mutationLifeCycleApi.dispatch(setCredentials(queryResult.data));
+        // Set user in Sentry.
+        Sentry.setUser({
+          id: queryResult.data.user?.id,
+          username: queryResult.data.user?.username,
+        });
       },
     }),
     // Logout Endpoint
@@ -106,6 +117,8 @@ export const authApiSlice = apiSlice.injectEndpoints({
         mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
         // Clear user auth state.
         mutationLifeCycleApi.dispatch(clearCredentials());
+        // Remove user from Sentry.
+        Sentry.setUser(null);
       },
     }),
     refreshTokens: builder.mutation<RefreshResponseDto, void>({
