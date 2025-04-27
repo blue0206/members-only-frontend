@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UserDto } from "@blue0206/members-only-shared-types";
 
-interface AuthState {
+export interface AuthState {
   user: UserDto | null;
   accessToken: string | null;
   authStatus: boolean;
