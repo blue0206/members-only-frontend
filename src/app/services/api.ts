@@ -15,6 +15,7 @@ import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
 import { CustomBaseQueryError } from "@/types";
 import { isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
+import * as Sentry from "@sentry/react";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -105,6 +106,9 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 
           api.dispatch(clearCredentials());
           apiSlice.util.resetApiState();
+
+          // Remove user from Sentry.
+          Sentry.setUser(null);
         } else {
           logger.info(
             "Token refresh successful, retrying original request...."
@@ -127,9 +131,26 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
           "Unexpected error during token refresh mutation call with mutex. Logging out the user...."
         );
 
+        // Capture the error in Sentry.
+        Sentry.captureException(error, {
+          extra: {
+            endpoint: api.endpoint,
+          },
+          tags: {
+            errorType: "MUTEX/REFRESH",
+          },
+          user: {
+            id: (api.getState() as RootState).auth.user?.id,
+            username: (api.getState() as RootState).auth.user?.username,
+          },
+        });
+
         // Logout the user and reset RTKQ cache since refresh failed.
         api.dispatch(clearCredentials());
         apiSlice.util.resetApiState();
+
+        // Remove user from Sentry.
+        Sentry.setUser(null);
       } finally {
         logger.info({ endpoint: api.endpoint }, "Releasing mutex.");
 
@@ -169,6 +190,31 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
       typeof result.error.data === "object" &&
       isApiResponseError(result.error.data)
     ) {
+      // Since the result structure is confusing, here's a rough layout for its error:
+      // result/
+      // ├──error
+      // |  ├──data
+      // |  |  └──ApiResponseError
+      // │  └──status
+
+      // Capture the error in Sentry.
+      Sentry.captureException(result.error.data.error, {
+        extra: {
+          endpoint: api.endpoint,
+          requestId: result.error.data.requestId,
+          code: result.error.data.error.code,
+          statusCode: result.meta?.response?.status,
+        },
+        tags: {
+          errorType: "API",
+          apiCode: result.error.data.error.code,
+        },
+        user: {
+          id: (api.getState() as RootState).auth.user?.id,
+          username: (api.getState() as RootState).auth.user?.username,
+        },
+      });
+
       // Extract actual error payload and return as part of error
       // property of result.
       return {
@@ -177,6 +223,23 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         meta: result.meta,
       };
     } else {
+      // Capture the error in Sentry.
+      Sentry.captureException(result.error, {
+        extra: {
+          endpoint: api.endpoint,
+          status: result.error.status,
+          data: result.error.data,
+        },
+        tags: {
+          errorType: "RTK_QUERY",
+          code: result.error.status,
+        },
+        user: {
+          id: (api.getState() as RootState).auth.user?.id,
+          username: (api.getState() as RootState).auth.user?.username,
+        },
+      });
+
       // Return the result without any mutation since the
       // error is from RTK Query.
       return result;
