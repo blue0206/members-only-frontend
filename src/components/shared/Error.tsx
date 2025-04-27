@@ -1,5 +1,5 @@
 import { useLocation } from "react-router";
-import { ErrorPageDetailsType } from "@/types/error.types";
+import { ErrorPageDetailsType } from "@/types";
 import { Button } from "../ui/button";
 
 export default function Error() {
