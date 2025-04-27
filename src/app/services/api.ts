@@ -14,6 +14,7 @@ import {
 import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
 import { CustomBaseQueryError } from "@/types";
 import { isApiResponseError } from "@/utils/errorUtils";
+import { logger } from "@/utils/logger";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -75,45 +76,80 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
     result.error.status === 401 &&
     (result.error.data as ApiResponseError).error.code === "EXPIRED_TOKEN"
   ) {
+    logger.warn(
+      { endpoint: api.endpoint },
+      "Access Token expired, attempting refresh."
+    );
+
     if (!mutex.isLocked()) {
       // Lock the mutex.
       const release = await mutex.acquire();
+
+      logger.info({ endpoint: api.endpoint }, "Acquired mutex.");
+
       try {
-        // Run the refresh request and unwrap to check success.
+        logger.info("Dispatching call to refresh endpoint.");
+        // Run the refresh request and check success.
         const refreshResult = await baseQuery(
           "/refreshTokens",
           api,
           extraOptions
         );
+
+        // If refresh failed, logout the user and reset RTKQ cache.
         if (refreshResult.error) {
-          // Logout the user and reset RTKQ cache since refresh failed.
+          logger.error(
+            { error: refreshResult.error },
+            "Token refresh failed, logging out...."
+          );
+
           api.dispatch(clearCredentials());
           apiSlice.util.resetApiState();
-          console.error(refreshResult.error);
         } else {
-          // Refresh was successful, dispatch the access token and
-          // run the initial query again.
+          logger.info(
+            "Token refresh successful, retrying original request...."
+          );
+
+          // Refresh was successful, dispatch the access token.
           api.dispatch(
             updateAccessToken(
               (refreshResult.data as RefreshResponseDto).accessToken
             )
           );
+
+          // Retry the original request and return result.
           result = await baseQuery(args, api, extraOptions);
           return result;
         }
       } catch (error) {
+        logger.error(
+          { error },
+          "Unexpected error during token refresh mutation call with mutex. Logging out the user...."
+        );
+
         // Logout the user and reset RTKQ cache since refresh failed.
         api.dispatch(clearCredentials());
         apiSlice.util.resetApiState();
-        console.error(error);
       } finally {
+        logger.info({ endpoint: api.endpoint }, "Releasing mutex.");
+
         // Release the mutex.
         release();
       }
       //----------------Re-Auth Logic ends here---------------
     } else {
+      logger.debug(
+        { endpoint: api.endpoint },
+        "Token refresh in progress, waiting for mutex release...."
+      );
+
       // Wait for the mutex to be released.
       await mutex.waitForUnlock();
+      logger.debug(
+        { endpoint: api.endpoint },
+        "Mutex unlocked, retrying request...."
+      );
+
       result = await baseQuery(args, api, extraOptions);
     }
   } else if (result.error) {
@@ -146,6 +182,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
       return result;
     }
   }
+
   return result;
 };
 
