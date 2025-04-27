@@ -1,11 +1,8 @@
 import { useMemo } from "react";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import {
-  ApiErrorPayload,
-  ErrorCodes,
-} from "@blue0206/members-only-shared-types";
+import { ErrorCodes } from "@blue0206/members-only-shared-types";
+import { CustomBaseQueryError } from "@/types";
 
-type ErrorType = ApiErrorPayload | FetchBaseQueryError | null | undefined;
+type ErrorType = CustomBaseQueryError | null | undefined;
 
 interface ErrorDetailsType {
   isApiError: boolean;
