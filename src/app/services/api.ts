@@ -11,6 +11,7 @@ import {
   ApiResponseSuccess,
   ErrorCodes,
   RefreshResponseDto,
+  RefreshResponseSchema,
 } from "@blue0206/members-only-shared-types";
 import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
 import { CustomBaseQueryError, HttpMethod } from "@/types";
@@ -70,6 +71,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
   // Check if error is present, its status code is 401, and the error code is "EXPIRED_TOKEN".
   if (
     result.error &&
+    result.error.status === 401 &&
     "data" in result.error &&
     isApiResponseError(result.error.data) &&
     result.error.data.errorPayload.code === ErrorCodes.EXPIRED_TOKEN
@@ -112,17 +114,19 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
           // Remove user from Sentry.
           Sentry.setUser(null);
         } else {
+          // Validate the result against schema.
+          const parsedResult: RefreshResponseDto = RefreshResponseSchema.parse(
+            (refreshResult.data as ApiResponseSuccess<RefreshResponseDto>)
+              .payload
+          );
+
+          // Re-auth was successful, log the event.
           logger.info(
             "Token refresh successful, retrying original request...."
           );
 
           // Refresh was successful, dispatch the access token.
-          api.dispatch(
-            updateAccessToken(
-              (refreshResult.data as ApiResponseSuccess<RefreshResponseDto>)
-                .payload.accessToken
-            )
-          );
+          api.dispatch(updateAccessToken(parsedResult.accessToken));
 
           // Retry the original request and return result.
           result = await baseQuery(args, api, extraOptions);
