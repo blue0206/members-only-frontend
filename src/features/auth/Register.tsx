@@ -21,27 +21,69 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { UserPlus, User } from "lucide-react";
+import { useState, useRef } from "react";
+import { logger } from "@/utils/logger";
 
 export function Register() {
+  // Avatar state.
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  // Initialize form.
   const form = useForm<RegisterRequestDto>({
     resolver: zodResolver(RegisterRequestSchema),
     defaultValues: {
       username: "",
       firstname: "",
+      middlename: "",
+      lastname: "",
       password: "",
+      avatar: null,
     },
   });
+
+  // File input ref to allow reselect of same file after removal.
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const submitHandler = (data: RegisterRequestDto) => {
     // RTK Query call here.
     console.log(data);
   };
 
+  const fileUploadHandler = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (...event: unknown[]) => void
+  ) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      // Update form state with file.
+      onChange(file);
+
+      // Initialize reader.
+      const reader = new FileReader();
+
+      // Set avatar preview when loaded.
+      reader.onload = () => {
+        setAvatarPreview(reader.result as string);
+      };
+
+      // Set avatar preview to null on error and log.
+      reader.onerror = (e) => {
+        setAvatarPreview(null);
+        onChange(null);
+        logger.error({ fileError: e }, "Error reading uploaded file.");
+      };
+
+      // Read file as data URL.
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="w-screen h-screen">
       <Header />
 
-      <div className="container max-w-2xl px-4 md:max-w-4xl md:px-0 py-11 mx-auto">
+      <div className="container max-w-2xl px-4 md:max-w-4xl py-11 mx-auto">
         <div className="flex flex-col items-center mb-8">
           <div className="bg-primary/10 p-3 rounded-full mb-4">
             <UserPlus className="h-11 w-11 text-primary" />
@@ -57,6 +99,7 @@ export function Register() {
         <Separator className="my-6" />
 
         <Form {...form}>
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <form onSubmit={form.handleSubmit(submitHandler)}>
             <div className="flex flex-col md:flex-row gap-8">
               <div className="flex-1 space-y-6">
@@ -176,11 +219,17 @@ export function Register() {
                     <FormField
                       control={form.control}
                       name={"avatar"}
-                      render={({ field }) => (
+                      render={({
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        field: { onChange, value, ref, ...rest },
+                      }) => (
                         <FormItem className="flex flex-col items-center space-y-4 w-full">
                           <div className="relative">
                             <Avatar className="h-32 w-32">
-                              <AvatarImage src={""} alt="Avatar preview" />
+                              <AvatarImage
+                                src={avatarPreview ?? undefined}
+                                alt="Avatar preview"
+                              />
                               <AvatarFallback className="bg-muted">
                                 <User className="h-16 w-16 text-muted-foreground" />
                               </AvatarFallback>
@@ -200,9 +249,34 @@ export function Register() {
                                 accept={
                                   "image/png,image/jpeg,image/jpg,image/webp"
                                 }
+                                max={1}
                                 className="sr-only"
-                                {...field}
+                                onChange={(e) => {
+                                  fileUploadHandler(e, onChange);
+                                }}
+                                ref={(e) => {
+                                  ref(e);
+                                  fileInputRef.current = e;
+                                }}
+                                {...rest}
                               />
+                              <Button
+                                variant={
+                                  avatarPreview ? "destructive" : "destructive"
+                                }
+                                className="px-4 py-2 rounded-md cursor-pointer mt-4"
+                                size={"sm"}
+                                disabled={!avatarPreview}
+                                onClick={() => {
+                                  setAvatarPreview(null);
+                                  onChange(null);
+                                  if (fileInputRef.current) {
+                                    fileInputRef.current.value = "";
+                                  }
+                                }}
+                              >
+                                Remove
+                              </Button>
                               <p className="text-sm text-muted-foreground mt-2">
                                 JPG, JPEG, PNG or WEBP (max. 8MB)
                               </p>
