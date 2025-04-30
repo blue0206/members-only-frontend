@@ -7,7 +7,6 @@ import {
   LoginRequestDto,
   LoginResponseDto,
   LoginResponseSchema,
-  RefreshResponseDto,
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
@@ -117,12 +116,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
         Sentry.setUser(null);
       },
     }),
-    refreshTokens: builder.mutation<RefreshResponseDto, void>({
-      query: () => ({
-        url: "/auth/refresh",
-        method: HttpMethod.POST,
-      }),
-    }),
   }),
 });
 
@@ -130,5 +123,4 @@ export const {
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
-  useRefreshTokensMutation,
 } = authApiSlice;
