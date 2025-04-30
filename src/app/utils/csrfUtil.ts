@@ -8,3 +8,14 @@ export const getCsrfTokenFromCookie = () => {
   // Trim and return the token.
   return csrfToken?.trim();
 };
+
+export const setCsrfHeader = (): Headers => {
+  // Create headers object.
+  const headers = new Headers();
+  // Get CSRF token from cookie.
+  const csrfToken = getCsrfTokenFromCookie();
+  // Append to headers if present.
+  if (csrfToken) headers.append("x-csrf-token", csrfToken);
+  // Return headers.
+  return headers;
+};
