@@ -30,7 +30,7 @@ const baseQuery = fetchBaseQuery({
     // Define endpoints where both access token and CSRF token are required.
     const commonEndpoints = ["logoutUser"];
     // Define endpoints where only CSRF token is required.
-    const csrfEndpoints = [...commonEndpoints, "refreshTokens"];
+    const csrfEndpoints = [...commonEndpoints];
     // Define endpoints where only access token is required.
     const accessTokenEndpoints = [...commonEndpoints, "getMessagesWithAuthor"];
 
@@ -55,6 +55,31 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
+/**
+ * An RTK Query base query wrapper that handles automatic token refreshing.
+ *
+ * If a request returns a 401 status with an `EXPIRED_TOKEN` code, it attempts
+ * to fetch a new access token from the `/auth/refresh` endpoint.
+ *
+ * A mutex ensures only one refresh happens at a time. Other requests encountering
+ * the 401 error while a refresh is in progress will wait for the refresh to
+ * complete before retrying.
+ *
+ * On successful refresh, the new token is stored, and the original request is retried.
+ * On failed refresh, the user is logged out (`clearCredentials`), and the API state is reset.
+ *
+ * For other errors, it standardizes the error format by extracting the `errorPayload`
+ * from API responses and logs/reports all significant errors (API, RTK Query, Refresh)
+ * to the console and Sentry. It also ensures the CSRF token is included in the
+ * refresh request.
+ *
+ * @param args - The query arguments (URL string or FetchArgs object).
+ * @param api - The BaseQueryApi provided by RTK Query, containing methods like `dispatch`, `getState`, etc.
+ * @param extraOptions - Extra options passed to the query hook or mutation trigger.
+ * @returns A Promise resolving to the query result (either successful response, transformed error payload,
+ *          or an RTK Query error object).
+ *
+ */
 // Define customized base query with re-auth logic.
 const customizedBaseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
