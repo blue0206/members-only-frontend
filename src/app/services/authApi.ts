@@ -33,7 +33,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       transformResponse: (result: ApiResponseSuccess<RegisterResponseDto>) => {
         // Validate the response against schema.
-        const parsedResult = RegisterResponseSchema.safeParse(result.data);
+        const parsedResult = RegisterResponseSchema.safeParse(result.payload);
         // Throw error if validation fails.
         if (!parsedResult.success) {
           throw new ValidationError(
@@ -71,7 +71,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       transformResponse: (result: ApiResponseSuccess<LoginResponseDto>) => {
         // Validate the response against schema.
-        const parsedResult = LoginResponseSchema.safeParse(result.data);
+        const parsedResult = LoginResponseSchema.safeParse(result.payload);
         // Throw error if validation fails.
         if (!parsedResult.success) {
           throw new ValidationError(

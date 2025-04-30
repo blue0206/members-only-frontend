@@ -8,7 +8,8 @@ import {
 import { RootState } from "../store";
 import { Mutex } from "async-mutex";
 import {
-  ApiResponseError,
+  ApiResponseSuccess,
+  ErrorCodes,
   RefreshResponseDto,
 } from "@blue0206/members-only-shared-types";
 import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
@@ -29,7 +30,7 @@ const baseQuery = fetchBaseQuery({
     // Define endpoints where only CSRF token is required.
     const csrfEndpoints = [...commonEndpoints, "refreshTokens"];
     // Define endpoints where only access token is required.
-    const accessTokenEndpoints = [...commonEndpoints];
+    const accessTokenEndpoints = [...commonEndpoints, "getMessagesWithAuthor"];
 
     // Add access token to headers if the current endpoint
     // is listed in access token endpoints.
@@ -74,8 +75,9 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
   // Check if error is present, its status code is 401, and the error code is "EXPIRED_TOKEN".
   if (
     result.error &&
-    result.error.status === 401 &&
-    (result.error.data as ApiResponseError).error.code === "EXPIRED_TOKEN"
+    "data" in result.error &&
+    isApiResponseError(result.error.data) &&
+    result.error.data.errorPayload.code === ErrorCodes.EXPIRED_TOKEN
   ) {
     logger.warn(
       { endpoint: api.endpoint },
@@ -117,7 +119,8 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
           // Refresh was successful, dispatch the access token.
           api.dispatch(
             updateAccessToken(
-              (refreshResult.data as RefreshResponseDto).accessToken
+              (refreshResult.data as ApiResponseSuccess<RefreshResponseDto>)
+                .payload.accessToken
             )
           );
 
@@ -166,6 +169,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 
       // Wait for the mutex to be released.
       await mutex.waitForUnlock();
+
       logger.debug(
         { endpoint: api.endpoint },
         "Mutex unlocked, retrying request...."
@@ -198,27 +202,28 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
       // │  └──status
 
       // Capture the error in Sentry.
-      Sentry.captureException(result.error.data.error, {
+      Sentry.captureException(result.error.data.errorPayload, {
         extra: {
           endpoint: api.endpoint,
           requestId: result.error.data.requestId,
-          code: result.error.data.error.code,
+          code: result.error.data.errorPayload.code,
           statusCode: result.meta?.response?.status,
         },
         tags: {
           errorType: "API",
-          apiCode: result.error.data.error.code,
+          apiCode: result.error.data.errorPayload.code,
         },
         user: {
           id: (api.getState() as RootState).auth.user?.id,
           username: (api.getState() as RootState).auth.user?.username,
         },
       });
+      logger.error({ error: result.error.data.errorPayload }, "API Error");
 
       // Extract actual error payload and return as part of error
       // property of result.
       return {
-        error: result.error.data.error,
+        error: result.error.data.errorPayload,
         data: result.data,
         meta: result.meta,
       };
@@ -240,12 +245,15 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         },
       });
 
+      logger.error({ error: result.error.data }, "RTK Query Error");
+
       // Return the result without any mutation since the
       // error is from RTK Query.
       return result;
     }
   }
 
+  // If the result is not an error and is not for auto-refresh, return.
   return result;
 };
 

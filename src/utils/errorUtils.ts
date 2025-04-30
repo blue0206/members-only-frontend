@@ -7,7 +7,7 @@ export const isApiResponseError = (
     typeof error === "object" &&
     error &&
     "success" in error &&
-    "error" in error
+    "errorPayload" in error
   ) {
     return true;
   }
