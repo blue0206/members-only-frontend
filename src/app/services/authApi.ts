@@ -29,6 +29,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         url: "/auth/register",
         method: HttpMethod.POST,
         body,
+        credentials: "include",
       }),
       transformResponse: (result: ApiResponseSuccess<RegisterResponseDto>) => {
         // Validate the response against schema.
@@ -67,6 +68,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         url: "/auth/login",
         method: HttpMethod.POST,
         body,
+        credentials: "include",
       }),
       transformResponse: (result: ApiResponseSuccess<LoginResponseDto>) => {
         // Validate the response against schema.
@@ -104,6 +106,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url: "/auth/logout",
         method: HttpMethod.DELETE,
+        credentials: "include",
       }),
       onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
         // Wait for the query to be fulfilled.
