@@ -4,6 +4,8 @@
 
 import {
   ApiResponseSuccess,
+  GetMessagesResponseDto,
+  GetMessagesResponseSchema,
   GetMessagesWithoutAuthorResponseDto,
   GetMessagesWithoutAuthorResponseSchema,
 } from "@blue0206/members-only-shared-types";
@@ -48,7 +50,41 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         return parsedResult.data;
       },
     }),
+    getMessagesWithAuthor: builder.query<GetMessagesResponseDto, void>({
+      query: () => ({
+        url: "/messages",
+        method: HttpMethod.GET,
+      }),
+      transformResponse: (
+        response: ApiResponseSuccess<GetMessagesResponseDto>
+      ) => {
+        // Validate the response against schema.
+        const parsedResult = GetMessagesResponseSchema.safeParse(
+          response.payload
+        );
+
+        // Throw error if validation fails.
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+
+        // Log the response success event.
+        logger.info(
+          { messages: parsedResult.data },
+          "Fetched messages with author."
+        );
+
+        // Return the response payload conforming to the DTO.
+        return parsedResult.data;
+      },
+    }),
   }),
 });
 
-export const { useGetMessagesWithoutAuthorQuery } = messageApiSlice;
+export const {
+  useGetMessagesWithoutAuthorQuery,
+  useGetMessagesWithAuthorQuery,
+} = messageApiSlice;
