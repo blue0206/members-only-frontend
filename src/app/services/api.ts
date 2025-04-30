@@ -13,10 +13,11 @@ import {
   RefreshResponseDto,
 } from "@blue0206/members-only-shared-types";
 import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
-import { CustomBaseQueryError } from "@/types";
+import { CustomBaseQueryError, HttpMethod } from "@/types";
 import { isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
+import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -43,14 +44,8 @@ const baseQuery = fetchBaseQuery({
     // Add CSRF token to headers if the current endpoint is listed in
     // CSRF endpoints.
     if (csrfEndpoints.includes(endpoint)) {
-      // Get all cookies in array.
-      const cookies = document.cookie.split(";");
-      // Get CSRF cookie from array.
-      const csrfCookie = cookies.find((cookie) =>
-        cookie.startsWith("csrf-token")
-      );
       // Extract CSRF token from cookie.
-      const csrfToken = csrfCookie?.split("=")[1];
+      const csrfToken = getCsrfTokenFromCookie();
       // If present, populate header.
       if (csrfToken) headers.append("x-csrf-token", csrfToken.trim());
     }
@@ -94,7 +89,12 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         logger.info("Dispatching call to refresh endpoint.");
         // Run the refresh request and check success.
         const refreshResult = await baseQuery(
-          "/refreshTokens",
+          {
+            url: "/auth/refresh",
+            method: HttpMethod.POST,
+            credentials: "include",
+            headers: setCsrfHeader(),
+          },
           api,
           extraOptions
         );
