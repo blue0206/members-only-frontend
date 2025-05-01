@@ -28,7 +28,20 @@ const initialError: ErrorDetailsType = {
   originalError: null,
 };
 
-// Hook to handle API errors.
+/**
+ * Handles and categorizes API errors, providing detailed error information.
+ *
+ * This hook processes potential errors that occur during API requests
+ * or other RTK Query operations, categorizing them as seems appropriate.
+ * It provides a structured error details object for further handling
+ * or display.
+ *
+ * @param error - The error object received, which could be `null`, `undefined`,
+ *                a `CustomBaseQueryError`, or a `SerializedError`.
+ * @returns An `ErrorDetailsType` object containing categorized error
+ *          attributes, including flags for API, network, and validation
+ *          errors, error message, status code, error code, and details.
+ */
 export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
   const errorDetails: ErrorDetailsType = useMemo(() => {
     initialError.originalError = error;
@@ -43,7 +56,6 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
     if (isSerializedError(error)) {
       initialError.isNetworkError = true;
       initialError.message = "An error occurred while processing your request.";
-      return initialError;
 
       // Next, we check if the error is from API response.
     } else if (isApiErrorPayload(error)) {
