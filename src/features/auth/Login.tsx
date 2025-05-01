@@ -4,7 +4,7 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Header } from "@/components/layout";
 import {
   Card,
@@ -24,8 +24,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useLoginUserMutation } from "@/app/services/authApi";
+import { Spinner } from "@/components/ui/spinner";
 
 export function Login() {
+  // Initialize form.
   const form = useForm<LoginRequestDto>({
     resolver: zodResolver(LoginRequestSchema),
     defaultValues: {
@@ -34,14 +37,20 @@ export function Login() {
     },
   });
 
-  const submitHandler = (data: LoginRequestDto) => {
-    // RTK Query call here.
-    console.log(data);
+  const navigate = useNavigate();
+
+  const [loginUser, { isLoading, isSuccess }] = useLoginUserMutation();
+  if (isSuccess) {
+    void navigate("/");
+  }
+
+  const submitHandler = async (data: LoginRequestDto): Promise<void> => {
+    await loginUser(data);
   };
 
   return (
     <div className="w-screen h-screen">
-      <Header />
+      <Header className="bg-background" />
       <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
         <div className="flex w-full max-w-sm flex-col gap-6">
           <div className="flex flex-col gap-6">
@@ -52,6 +61,7 @@ export function Login() {
               </CardHeader>
               <CardContent>
                 <Form {...form}>
+                  {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
                   <form onSubmit={form.handleSubmit(submitHandler)}>
                     <div className="grid gap-6">
                       <FormField
@@ -61,7 +71,7 @@ export function Login() {
                           <FormItem>
                             <FormLabel>Username</FormLabel>
                             <FormControl>
-                              <Input placeholder="johndoe" {...field} />
+                              <Input placeholder="darkness" {...field} />
                             </FormControl>
                             <FormDescription>
                               This is your public display name.
@@ -83,12 +93,21 @@ export function Login() {
                                 {...field}
                               />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="whitespace-pre-line" />
                           </FormItem>
                         )}
                       ></FormField>
-                      <Button type="submit" className="w-full cursor-pointer">
-                        Login
+                      <Button
+                        type="submit"
+                        className={`w-full cursor-pointer ${
+                          isLoading ? "opacity-80" : ""
+                        }`}
+                      >
+                        {isLoading ? (
+                          <Spinner className="text-background" size={"small"} />
+                        ) : (
+                          "Login"
+                        )}
                       </Button>
                       <div className="text-center text-sm">
                         Don&apos;t have an account?{" "}
