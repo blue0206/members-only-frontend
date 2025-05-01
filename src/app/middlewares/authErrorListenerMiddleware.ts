@@ -3,10 +3,18 @@ import {
   isRejectedWithValue,
   UnknownAction,
 } from "@reduxjs/toolkit";
-import { actionHasSerializedError } from "./typeGuards";
+import {
+  actionHasApiErrorPayload,
+  actionHasSerializedError,
+} from "./typeGuards";
 import * as Sentry from "@sentry/react";
 import { logger } from "@/utils/logger";
 import { RootState } from "../store";
+import { ErrorCodes } from "@blue0206/members-only-shared-types";
+import { authApiSlice } from "../services/authApi";
+import { apiSlice } from "../services/api";
+import { clearCredentials } from "@/features/auth/authSlice";
+import { toast } from "sonner";
 
 // Initialize the listener middleware.
 const authErrorListenerMiddleware = createListenerMiddleware();
@@ -39,6 +47,39 @@ authErrorListenerMiddleware.startListening({
         { error: action.payload },
         "RTK Query Serialized error. Possible reason: Validation failure inside `transformResponse` of RTK Query."
       );
+    }
+  },
+});
+
+// Handle errors that require revoking/clearing the user session.
+authErrorListenerMiddleware.startListening({
+  predicate: (action: UnknownAction) =>
+    isRejectedWithValue(action) && actionHasApiErrorPayload(action),
+  effect: async (action: UnknownAction, listenerApi) => {
+    if (actionHasApiErrorPayload(action)) {
+      if (
+        action.payload.code === ErrorCodes.CSRF_TOKEN_MISMATCH ||
+        action.payload.code === ErrorCodes.MISSING_CSRF_COOKIE ||
+        action.payload.code === ErrorCodes.MISSING_CSRF_HEADER ||
+        action.payload.code === ErrorCodes.INVALID_TOKEN
+      ) {
+        // Log the error for development.
+        logger.error({ error: action.payload }, action.payload.message);
+
+        // Logout the user.
+        await listenerApi.dispatch(
+          authApiSlice.endpoints.logoutUser.initiate()
+        );
+        // Reset the API state.
+        listenerApi.dispatch(apiSlice.util.resetApiState());
+        // Clear credentials.
+        listenerApi.dispatch(clearCredentials());
+        // Remove user from Sentry.
+        Sentry.setUser(null);
+        // Notify user to login again to continue.
+        window.location.replace("/login");
+        toast.info("Your session has expired. Please login again to continue.");
+      }
     }
   },
 });
