@@ -19,6 +19,7 @@ import { isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
+import { toast } from "sonner";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -126,7 +127,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
           extraOptions
         );
 
-        // If refresh failed, logout the user and reset RTKQ cache.
+        // If refresh failed, logout & notify the user and reset RTKQ cache.
         if (refreshResult.error) {
           logger.error(
             { error: refreshResult.error },
@@ -135,6 +136,10 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 
           api.dispatch(clearCredentials());
           apiSlice.util.resetApiState();
+          window.location.replace("/login");
+          toast.info(
+            "Your session has expired. Please login again to continue."
+          );
 
           // Remove user from Sentry.
           Sentry.setUser(null);
@@ -180,6 +185,8 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         // Logout the user and reset RTKQ cache since refresh failed.
         api.dispatch(clearCredentials());
         apiSlice.util.resetApiState();
+        window.location.replace("/login");
+        toast.info("Your session has expired. Please login again to continue.");
 
         // Remove user from Sentry.
         Sentry.setUser(null);
