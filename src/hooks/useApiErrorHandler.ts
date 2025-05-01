@@ -1,9 +1,13 @@
 import { useMemo } from "react";
 import { ErrorCodes } from "@blue0206/members-only-shared-types";
 import { CustomBaseQueryError } from "@/types";
+import { SerializedError } from "@reduxjs/toolkit";
+import { isApiErrorPayload, isSerializedError } from "@/utils/errorUtils";
 
-type ErrorType = CustomBaseQueryError | null | undefined;
+// Define possible error to be received.
+type ErrorType = CustomBaseQueryError | SerializedError | null | undefined;
 
+// Define error details type.
 interface ErrorDetailsType {
   isApiError: boolean;
   isNetworkError: boolean;
@@ -15,6 +19,7 @@ interface ErrorDetailsType {
   originalError?: ErrorType;
 }
 
+// Initialize error details.
 const initialError: ErrorDetailsType = {
   isApiError: false,
   isNetworkError: false,
@@ -23,15 +28,25 @@ const initialError: ErrorDetailsType = {
   originalError: null,
 };
 
+// Hook to handle API errors.
 export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
   const errorDetails: ErrorDetailsType = useMemo(() => {
     initialError.originalError = error;
 
+    // Check if error is null or undefined.
     if (!error) {
       return initialError;
     }
 
-    if ("code" in error) {
+    // Check if error is a Serialized error, possibly thrown in
+    // validation failure inside `transformResponse` of RTK Query.
+    if (isSerializedError(error)) {
+      initialError.isNetworkError = true;
+      initialError.message = "An error occurred while processing your request.";
+      return initialError;
+
+      // Next, we check if the error is from API response.
+    } else if (isApiErrorPayload(error)) {
       initialError.isApiError = true;
       initialError.statusCode = error.statusCode;
       initialError.code = error.code;
@@ -134,6 +149,9 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
             "An error occurred while processing your request.";
         }
       }
+
+      // Finally, if the error is not from API, or is not RTKQ SerializedError,
+      // it must be a network/fetch/parse/custom/timeout error from RTKQ.
     } else {
       initialError.isNetworkError = true;
       initialError.statusCode =
