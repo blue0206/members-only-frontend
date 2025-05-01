@@ -1,5 +1,6 @@
 import {
   ApiErrorCode,
+  ApiErrorPayload,
   ApiResponseError,
   ErrorCodes,
 } from "@blue0206/members-only-shared-types";
@@ -21,5 +22,17 @@ export const isApiResponseError = (
 export const isApiErrorCode = (code: unknown): code is ApiErrorCode => {
   const search = Object.values(ErrorCodes).find((value) => value === code);
   if (search) return true;
+  return false;
+};
+
+export const isApiErrorPayload = (error: unknown): error is ApiErrorPayload => {
+  if (
+    typeof error === "object" &&
+    error &&
+    "code" in error &&
+    isApiErrorCode(error.code)
+  ) {
+    return true;
+  }
   return false;
 };
