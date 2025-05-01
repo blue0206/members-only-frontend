@@ -4,6 +4,7 @@ import {
   ApiResponseError,
   ErrorCodes,
 } from "@blue0206/members-only-shared-types";
+import { SerializedError } from "@reduxjs/toolkit";
 
 export const isApiResponseError = (
   error: unknown
@@ -31,6 +32,18 @@ export const isApiErrorPayload = (error: unknown): error is ApiErrorPayload => {
     error &&
     "code" in error &&
     isApiErrorCode(error.code)
+  ) {
+    return true;
+  }
+  return false;
+};
+
+export const isSerializedError = (error: unknown): error is SerializedError => {
+  if (
+    typeof error === "object" &&
+    error &&
+    "code" in error &&
+    !isApiErrorCode(error.code)
   ) {
     return true;
   }
