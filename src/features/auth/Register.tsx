@@ -72,10 +72,20 @@ export function Register() {
     );
   }
 
+  // Submit the form data by calling the register user mutation.
   const submitHandler = async (data: RegisterRequestDto) => {
     await registerUser(data);
   };
 
+  /**
+   * Handles file upload input changes by updating the form state with the file and setting an avatar preview.
+   *
+   * If the file is valid, it is read as a data URL and set as the avatar preview.
+   * If the file is invalid, the avatar preview is set to null and an error is logged.
+   *
+   * @param e - The change event.
+   * @param onChange - The react-hook-form function to update the form state.
+   */
   const fileUploadHandler = (
     e: React.ChangeEvent<HTMLInputElement>,
     onChange: (...event: unknown[]) => void
