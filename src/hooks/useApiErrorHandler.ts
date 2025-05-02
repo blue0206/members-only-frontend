@@ -132,6 +132,8 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
             initialError.message = "The username is too long.";
           } else if (error.message.includes("content")) {
             initialError.message = "The message is too long.";
+          } else if (error.message.includes("password")) {
+            initialError.message = "The password is too long.";
           } else {
             initialError.message =
               "This request could not be processed as the input provided is too long.";
