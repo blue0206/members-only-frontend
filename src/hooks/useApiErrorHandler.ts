@@ -158,7 +158,7 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
         }
         default: {
           initialError.message =
-            "An error occurred while processing your request.";
+            "An error occurred while processing your request. Please try again later.";
         }
       }
 
@@ -171,9 +171,10 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
 
       if (error.status === "FETCH_ERROR") {
         initialError.message =
-          "Cannot connect to the server. Please check your network connection.";
+          "Cannot connect to the server. Please check your internet connection and try again later.";
       } else if (error.status === "PARSING_ERROR") {
-        initialError.message = "An error occurred while parsing the response.";
+        initialError.message =
+          "Something went wrong while processing the response. Please try again later.";
       } else if (error.status === "TIMEOUT_ERROR") {
         initialError.message = "Request timed out. Please try again later.";
       } else if (error.status === "CUSTOM_ERROR") {
