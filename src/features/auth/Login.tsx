@@ -80,8 +80,7 @@ export function Login() {
         // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#login-user)
         // Show a generic toast for other errors.
         switch (errorDetails.code) {
-          case ErrorCodes.UNAUTHORIZED:
-          case ErrorCodes.VALUE_TOO_LONG: {
+          case ErrorCodes.UNAUTHORIZED: {
             // Show error via toast.
             toast.error(errorDetails.message, {
               position: "top-center",
@@ -93,6 +92,25 @@ export function Login() {
             form.resetField("password");
             break;
           }
+          case ErrorCodes.VALUE_TOO_LONG: {
+            // Show error in field if field name is known.
+            if (errorDetails.message.includes("username")) {
+              form.setError("username", {
+                message: errorDetails.message,
+              });
+            } else if (errorDetails.message.includes("password")) {
+              form.setError("password", {
+                message: errorDetails.message,
+              });
+            } else {
+              // Show a toast message if field not known.
+              toast.error(errorDetails.message, {
+                position: "top-center",
+                closeButton: true,
+              });
+            }
+            break;
+          }
           default: {
             toast.error(errorDetails.message); // Displayed on bottom-right by default.
           }
@@ -100,12 +118,13 @@ export function Login() {
 
         // Check if error is from failed Validation.
       } else if (errorDetails.isValidationError) {
-        form.setError("username", {
-          message: "Please enter your username.",
-        });
-        form.setError("password", {
-          message: "Please enter your password.",
-        });
+        // Show a generic toast for validation errors. They are unlikely as handled by RHF anyways.
+        toast.error(errorDetails.message); // Displayed on bottom-right by default.
+
+        // Just to be safe, we also trigger the validation of all fields to show validation errors
+        // if they are present.
+        // This is unlikely as frontend and backend use the same schema to validate the form data.
+        void form.trigger(["username", "password"]);
 
         // Navigate to error page for all other errors.
       } else {
