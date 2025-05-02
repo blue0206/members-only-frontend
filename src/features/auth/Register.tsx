@@ -105,9 +105,6 @@ export function Register() {
               form.setError("username", {
                 message: errorDetails.message,
               });
-
-              // Clear the field.
-              form.resetField("username");
             } else {
               // Show a toast message if field not known.
               toast.error(errorDetails.message, {
@@ -126,9 +123,6 @@ export function Register() {
               form.setError("username", {
                 message: errorDetails.message,
               });
-
-              // Reset the field.
-              form.resetField("username");
             } else {
               // Show a toast message if field not known.
               toast.error(errorDetails.message, {
