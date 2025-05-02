@@ -1,6 +1,7 @@
 import {
   LoginRequestSchema,
   LoginRequestDto,
+  ErrorCodes,
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -26,6 +27,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLoginUserMutation } from "@/app/services/authApi";
 import { Spinner } from "@/components/ui/spinner";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import { toast } from "sonner";
+import { useEffect } from "react";
+import { ErrorPageDetailsType } from "@/types";
 
 export function Login() {
   // Initialize form.
@@ -37,12 +42,82 @@ export function Login() {
     },
   });
 
+  // Initialize navigation.
   const navigate = useNavigate();
 
-  const [loginUser, { isLoading, isSuccess }] = useLoginUserMutation();
+  // Initialize login user mutation.
+  const [loginUser, { isLoading, isSuccess, isError, error }] =
+    useLoginUserMutation();
+
+  // Handle form submission success.
   if (isSuccess) {
-    void navigate("/");
+    void navigate("/", {
+      replace: true,
+    });
+    toast.success("Login successful!");
   }
+  // Get error details from custom hook.
+  const errorDetails = useApiErrorHandler(error);
+
+  // Handle form submission errors.
+  useEffect(() => {
+    // Check if there is an error.
+    if (isError) {
+      // Check if error is from API.
+      if (errorDetails.isApiError) {
+        // Navigate to error page for server errors.
+        if (errorDetails.statusCode && errorDetails.statusCode >= 500) {
+          void navigate("/error", {
+            state: {
+              statusCode: errorDetails.statusCode,
+              message: errorDetails.message,
+            } satisfies ErrorPageDetailsType,
+          });
+        }
+
+        // Conditionally filter out errors specific to Login page
+        // and handle them separately, see the api documentation link:
+        // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#login-user)
+        // Show a generic toast for other errors.
+        switch (errorDetails.code) {
+          case ErrorCodes.UNAUTHORIZED:
+          case ErrorCodes.VALUE_TOO_LONG: {
+            // Show error via toast.
+            toast.error(errorDetails.message, {
+              position: "top-center",
+              closeButton: true,
+            });
+
+            // Reset the form fields.
+            form.resetField("username");
+            form.resetField("password");
+            break;
+          }
+          default: {
+            toast.error(errorDetails.message); // Displayed on bottom-right by default.
+          }
+        }
+
+        // Check if error is from failed Validation.
+      } else if (errorDetails.isValidationError) {
+        form.setError("username", {
+          message: "Please enter your username.",
+        });
+        form.setError("password", {
+          message: "Please enter your password.",
+        });
+
+        // Navigate to error page for all other errors.
+      } else {
+        void navigate("/error", {
+          state: {
+            statusCode: errorDetails.statusCode ?? 500,
+            message: errorDetails.message,
+          } satisfies ErrorPageDetailsType,
+        });
+      }
+    }
+  }, [errorDetails, isError, form, navigate]);
 
   const submitHandler = async (data: LoginRequestDto): Promise<void> => {
     await loginUser(data);
