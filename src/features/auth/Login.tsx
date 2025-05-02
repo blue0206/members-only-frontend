@@ -119,6 +119,7 @@ export function Login() {
     }
   }, [errorDetails, isError, form, navigate]);
 
+  // Submit the form data by calling the login user mutation.
   const submitHandler = async (data: LoginRequestDto): Promise<void> => {
     await loginUser(data);
   };
