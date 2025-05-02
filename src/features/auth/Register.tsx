@@ -1,6 +1,7 @@
 import {
   RegisterRequestSchema,
   RegisterRequestDto,
+  ErrorCodes,
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,11 +22,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { UserPlus, User } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { logger } from "@/utils/logger";
 import { useRegisterUserMutation } from "@/app/services/authApi";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import { ErrorPageDetailsType } from "@/types";
 
 export function Register() {
   // Avatar state.
@@ -51,7 +54,7 @@ export function Register() {
   const navigate = useNavigate();
 
   // Initialize register user mutation.
-  const [registerUser, { data, isLoading, isSuccess }] =
+  const [registerUser, { data, isLoading, isSuccess, error, isError }] =
     useRegisterUserMutation();
 
   // Handle user registration success.
@@ -71,6 +74,104 @@ export function Register() {
       </>
     );
   }
+
+  // Get error details from custom hook.
+  const errorDetails = useApiErrorHandler(error);
+
+  // Handle form submission errors.
+  useEffect(() => {
+    // Check if error is present.
+    if (isError) {
+      // Check if error is an API error.
+      if (errorDetails.isApiError) {
+        // Navigate to error page for server errors.
+        if (errorDetails.statusCode && errorDetails.statusCode >= 500) {
+          void navigate("/error", {
+            state: {
+              statusCode: errorDetails.statusCode,
+              message: errorDetails.message,
+            } satisfies ErrorPageDetailsType,
+          });
+        }
+
+        // Conditionally filter out errors specific to Register page
+        // and handle them separately, see the api documentation link:
+        // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#register-user)
+        // Show a generic toast for other errors.
+        switch (errorDetails.code) {
+          case ErrorCodes.VALUE_TOO_LONG: {
+            // Show error in field if field name is known.
+            if (errorDetails.message.includes("username")) {
+              form.setError("username", {
+                message: errorDetails.message,
+              });
+
+              // Clear the field.
+              form.resetField("username");
+            } else {
+              // Show a toast message if field not known.
+              toast.error(errorDetails.message, {
+                position: "top-center",
+                closeButton: true,
+              });
+
+              // Reset all form fields.
+              form.reset();
+            }
+            break;
+          }
+          case ErrorCodes.UNIQUE_CONSTRAINT_VIOLATION: {
+            if (errorDetails.message.includes("username")) {
+              // Show error in field if field name is known.
+              form.setError("username", {
+                message: errorDetails.message,
+              });
+
+              // Reset the field.
+              form.resetField("username");
+            } else {
+              // Show a toast message if field not known.
+              toast.error(errorDetails.message, {
+                position: "top-center",
+                closeButton: true,
+              });
+
+              // Reset all form fields.
+              form.reset();
+            }
+            break;
+          }
+          default: {
+            // Show a generic toast for other errors.
+            toast.error(errorDetails.message); // Displayed on bottom-right by default.
+          }
+        }
+      } else if (errorDetails.isValidationError) {
+        // Show a generic toast for validation errors. They are unlikely as handled by RHF anyways.
+        toast.error(errorDetails.message); // Displayed on bottom-right by default.
+
+        // Just to be safe, we also trigger the validation of all fields to show validation errors
+        // if they are present.
+        // This is unlikely as frontend and backend use the same schema to validate the form data.
+        void form.trigger([
+          "username",
+          "password",
+          "avatar",
+          "firstname",
+          "middlename",
+          "lastname",
+        ]);
+      } else {
+        // Navigate to error page for other errors.
+        void navigate("/error", {
+          state: {
+            statusCode: errorDetails.statusCode ?? 500,
+            message: errorDetails.message,
+          } satisfies ErrorPageDetailsType,
+        });
+      }
+    }
+  }, [errorDetails, isError, navigate, form]);
 
   // Submit the form data by calling the register user mutation.
   const submitHandler = async (data: RegisterRequestDto) => {
