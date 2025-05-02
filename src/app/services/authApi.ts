@@ -20,6 +20,7 @@ import {
   setCredentials,
 } from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
+import convertToFormData from "@/utils/convertToFormData";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -28,7 +29,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       query: (body: RegisterRequestDto) => ({
         url: "/auth/register",
         method: HttpMethod.POST,
-        body,
+        body: convertToFormData(body),
         credentials: "include",
       }),
       transformResponse: (result: ApiResponseSuccess<RegisterResponseDto>) => {
