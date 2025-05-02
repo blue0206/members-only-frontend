@@ -4,7 +4,7 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Header } from "@/components/layout";
 import {
   Form,
@@ -23,6 +23,9 @@ import { Label } from "@/components/ui/label";
 import { UserPlus, User } from "lucide-react";
 import { useState, useRef } from "react";
 import { logger } from "@/utils/logger";
+import { useRegisterUserMutation } from "@/app/services/authApi";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export function Register() {
   // Avatar state.
@@ -44,9 +47,33 @@ export function Register() {
   // File input ref to allow reselect of same file after removal.
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const submitHandler = (data: RegisterRequestDto) => {
-    // RTK Query call here.
-    console.log(data);
+  // Initialize navigation.
+  const navigate = useNavigate();
+
+  // Initialize register user mutation.
+  const [registerUser, { data, isLoading, isSuccess }] =
+    useRegisterUserMutation();
+
+  // Handle user registration success.
+  if (isSuccess) {
+    // Navigate to home page.
+    void navigate("/", {
+      replace: true,
+    });
+    // Show success toast.
+    toast.success(
+      <>
+        <div>Registration successful!</div>
+        <div>
+          <span>Welcome to the club, </span>
+          <span className="font-bold">{data.user?.username}!</span>
+        </div>
+      </>
+    );
+  }
+
+  const submitHandler = async (data: RegisterRequestDto) => {
+    await registerUser(data);
   };
 
   const fileUploadHandler = (
@@ -262,7 +289,7 @@ export function Register() {
                               />
                               <Button
                                 variant={
-                                  avatarPreview ? "destructive" : "destructive"
+                                  avatarPreview ? "destructive" : "outline"
                                 }
                                 className="px-4 py-2 rounded-md cursor-pointer mt-4"
                                 size={"sm"}
@@ -299,7 +326,11 @@ export function Register() {
                 size={"lg"}
                 className="px-8 cursor-pointer"
               >
-                Register
+                {isLoading ? (
+                  <Spinner className="text-background w-[6ch]" size={"small"} />
+                ) : (
+                  "Register"
+                )}
               </Button>
               <div className="text-center text-sm">
                 Have an account?{" "}
