@@ -29,7 +29,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
       query: (body: RegisterRequestDto) => ({
         url: "/auth/register",
         method: HttpMethod.POST,
-        body: convertToFormData(body),
+        body: convertToFormData<RegisterRequestDto>(body) satisfies
+          | RegisterRequestDto
+          | FormData,
         credentials: "include",
       }),
       transformResponse: (result: ApiResponseSuccess<RegisterResponseDto>) => {
