@@ -296,5 +296,6 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: customizedBaseQueryWithReauth,
+  tagTypes: ["Messages"],
   endpoints: () => ({}),
 });
