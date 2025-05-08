@@ -100,6 +100,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         url: "/messages",
         method: HttpMethod.POST,
         body,
+        credentials: "include",
       }),
       transformResponse: (
         result: ApiResponseSuccess<CreateMessageResponseDto>
@@ -175,6 +176,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         url: `/messages/${messageId.toString()}`,
         method: HttpMethod.PATCH,
         body: newMessage,
+        credentials: "include",
       }),
       transformResponse: (
         result: ApiResponseSuccess<EditMessageResponseDto>
@@ -270,6 +272,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
       query: (messageId: MessageParamsDto["messageId"]) => ({
         url: `/messages/${messageId.toString()}`,
         method: HttpMethod.DELETE,
+        credentials: "include",
       }),
       onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
         //-----------------------------OPTIMISTIC UPDATE---------------------------
