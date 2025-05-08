@@ -16,6 +16,7 @@ import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { logger } from "@/utils/logger";
+import { RootState } from "../store";
 
 export const messageApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -111,9 +112,6 @@ export const messageApiSlice = apiSlice.injectEndpoints({
           );
         }
 
-        // Log the response success event and author from auth state.
-        logger.info({ message: parsedResult.data }, "Created message.");
-
         // Return the response payload conforming to the DTO.
         return parsedResult.data;
       },
@@ -122,6 +120,16 @@ export const messageApiSlice = apiSlice.injectEndpoints({
 
         // Wait for the query to be fulfilled.
         const { data } = await mutationLifeCycleApi.queryFulfilled;
+
+        // Log the success event and author from auth state.
+        logger.info(
+          {
+            user: (mutationLifeCycleApi.getState() as RootState).auth.user
+              ?.username,
+            message: data,
+          },
+          "Created message."
+        );
 
         // Check whether message has edited flag and conditionally
         // dispatch action to update messages with/without author.
