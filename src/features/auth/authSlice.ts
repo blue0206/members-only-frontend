@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserDto } from "@blue0206/members-only-shared-types";
+import { UserDto, Role } from "@blue0206/members-only-shared-types";
 
 export interface AuthState {
   user: UserDto | null;
@@ -33,6 +33,12 @@ const authSlice = createSlice({
       state.user = action.payload;
       return state;
     },
+    updateUserRole: (state, action: PayloadAction<Role>) => {
+      if (state.user) {
+        state.user.role = action.payload;
+      }
+      return state;
+    },
   },
   selectors: {
     isAuthenticated: (state) => state.authStatus,
@@ -46,5 +52,6 @@ export const {
   clearCredentials,
   updateAccessToken,
   updateUserDetails,
+  updateUserRole,
 } = authSlice.actions;
 export const { isAuthenticated, getUserAvatar } = authSlice.selectors;
