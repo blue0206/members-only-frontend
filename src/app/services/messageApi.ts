@@ -13,6 +13,7 @@ import {
   GetMessagesResponseSchema,
   GetMessagesWithoutAuthorResponseDto,
   GetMessagesWithoutAuthorResponseSchema,
+  MessageParamsDto,
   Role,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
@@ -251,6 +252,71 @@ export const messageApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Messages"],
     }),
+    deleteMessage: builder.mutation<void, MessageParamsDto["messageId"]>({
+      query: (messageId: MessageParamsDto["messageId"]) => ({
+        url: `/messages/${messageId.toString()}`,
+        method: HttpMethod.DELETE,
+      }),
+      onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
+        //-----------------------------OPTIMISTIC DELETE---------------------------
+
+        // First we check user role to ascertain which endpoint to update (with/without author).
+        const userRole = (mutationLifeCycleApi.getState() as RootState).auth
+          .user?.role;
+        const isMember = userRole === Role.MEMBER || userRole === Role.ADMIN;
+
+        // We perform the optimistic delete.
+        const patchResult = mutationLifeCycleApi.dispatch(
+          messageApiSlice.util.updateQueryData(
+            isMember ? "getMessagesWithAuthor" : "getMessagesWithoutAuthor",
+            undefined,
+            (draft) => {
+              logger.debug(
+                "Running updateQueryData for optimistic delete of deleteMessage endpoint"
+              );
+
+              if (Array.isArray(draft)) {
+                // Check if cache entry has the message being deleted.
+                const messageIndex = draft.findIndex(
+                  (draftMessage) => draftMessage.messageId === queryArgument
+                );
+
+                if (messageIndex === -1) {
+                  // Warn if message not found in cache.
+                  logger.warn(
+                    `Message with id ${queryArgument.toString()} not found in cache.`
+                  );
+                } else {
+                  // Delete the message using the index.
+                  draft.splice(messageIndex, 1);
+
+                  // Log event.
+                  logger.info("Optimistically deleted the message in cache.");
+                }
+              } else {
+                // Log if cache entry is not an array.
+                logger.debug(
+                  "Cache entry for messages not found or not an array."
+                );
+              }
+            }
+          )
+        );
+
+        // Next, we wait for query to fulfill and if there are any errors
+        // we roll back the optimistic delete.
+        try {
+          await mutationLifeCycleApi.queryFulfilled;
+
+          logger.debug("Optimistic delete successful, message deleted.");
+        } catch (error) {
+          // Query failed, we log the error and roll back.
+          logger.error({ error }, "Optimistic delete failed, rolling back...");
+          patchResult.undo();
+        }
+      },
+      invalidatesTags: ["Messages"],
+    }),
   }),
 });
 
@@ -258,4 +324,6 @@ export const {
   useGetMessagesWithoutAuthorQuery,
   useGetMessagesWithAuthorQuery,
   useCreateMessageMutation,
+  useEditMessageMutation,
+  useDeleteMessageMutation,
 } = messageApiSlice;
