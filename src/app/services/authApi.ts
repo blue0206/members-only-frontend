@@ -7,6 +7,8 @@ import {
   LoginRequestDto,
   LoginResponseDto,
   LoginResponseSchema,
+  RefreshResponseDto,
+  RefreshResponseSchema,
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
@@ -18,9 +20,13 @@ import {
   AuthState,
   clearCredentials,
   setCredentials,
+  updateAccessToken,
 } from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import convertToFormData from "@/utils/convertToFormData";
+import { logger } from "@/utils/logger";
+import { RootState } from "../store";
+import { toast } from "sonner";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -120,6 +126,91 @@ export const authApiSlice = apiSlice.injectEndpoints({
         mutationLifeCycleApi.dispatch(clearCredentials());
         // Remove user from Sentry.
         Sentry.setUser(null);
+      },
+    }),
+    tokenRefresh: builder.mutation<RefreshResponseDto, void>({
+      query: () => ({
+        url: "/auth/refresh",
+        method: HttpMethod.POST,
+        credentials: "include",
+      }),
+      transformResponse: (result: ApiResponseSuccess<RefreshResponseDto>) => {
+        // Validate the response against schema.
+        const parsedResult = RefreshResponseSchema.safeParse(result.payload);
+
+        // Throw error if validation fails.
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+
+        // Return the response payload conforming to the DTO.
+        return result.payload;
+      },
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        try {
+          // Wait for the query to be fulfilled.
+          const { data } = await mutationLifeCycleApi.queryFulfilled;
+
+          // Log the response success event.
+          logger.info(
+            {
+              user: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+            },
+            "The tokens have been refreshed successfully."
+          );
+
+          // Dispatch action to update the access token in auth state.
+          mutationLifeCycleApi.dispatch(updateAccessToken(data.accessToken));
+
+          // Set user in Sentry.
+          Sentry.setUser({
+            id: (mutationLifeCycleApi.getState() as RootState).auth.user?.id,
+            username: (mutationLifeCycleApi.getState() as RootState).auth.user
+              ?.username,
+          });
+        } catch (error) {
+          // Log the error.
+          logger.error(
+            { error },
+            "Unexpected error during token refresh. Logging out the user...."
+          );
+
+          // Capture the error in Sentry.
+          Sentry.captureException(error, {
+            extra: {
+              endpoint: "tokenRefresh",
+            },
+            tags: {
+              errorType: "MANUAL_REFRESH",
+            },
+            user: {
+              id: (mutationLifeCycleApi.getState() as RootState).auth.user?.id,
+              username: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+            },
+          });
+
+          // Reset RTK Query cache.
+          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+
+          // Dispatch action to clear auth state.
+          mutationLifeCycleApi.dispatch(clearCredentials());
+
+          // Remove user from Sentry.
+          Sentry.setUser(null);
+
+          // Navigate to login page.
+          window.location.replace("/login");
+
+          // Notify user via toast.
+          toast.info(
+            "Your session has expired. Please login again to continue."
+          );
+        }
       },
     }),
   }),
