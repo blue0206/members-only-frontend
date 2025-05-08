@@ -34,11 +34,11 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.GET,
       }),
       transformResponse: (
-        response: ApiResponseSuccess<GetMessagesWithoutAuthorResponseDto>
+        result: ApiResponseSuccess<GetMessagesWithoutAuthorResponseDto>
       ) => {
-        // Validate the response against schema.
+        // Validate the result against schema.
         const parsedResult = GetMessagesWithoutAuthorResponseSchema.safeParse(
-          response.payload
+          result.payload
         );
 
         // Throw error if validation fails.
@@ -66,11 +66,11 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.GET,
       }),
       transformResponse: (
-        response: ApiResponseSuccess<GetMessagesResponseDto>
+        result: ApiResponseSuccess<GetMessagesResponseDto>
       ) => {
-        // Validate the response against schema.
+        // Validate the result against schema.
         const parsedResult = GetMessagesResponseSchema.safeParse(
-          response.payload
+          result.payload
         );
 
         // Throw error if validation fails.
@@ -102,11 +102,11 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         body,
       }),
       transformResponse: (
-        response: ApiResponseSuccess<CreateMessageResponseDto>
+        result: ApiResponseSuccess<CreateMessageResponseDto>
       ) => {
-        // Validate the response against schema.
+        // Validate the result against schema.
         const parsedResult = CreateMessageResponseSchema.safeParse(
-          response.payload
+          result.payload
         );
 
         // Throw error if validation fails.
@@ -176,9 +176,13 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.PATCH,
         body: newMessage,
       }),
-      transformResponse: (Response: EditMessageResponseDto) => {
-        // Validate the response against schema.
-        const parsedResult = EditMessageResponseSchema.safeParse(Response);
+      transformResponse: (
+        result: ApiResponseSuccess<EditMessageResponseDto>
+      ) => {
+        // Validate the result against schema.
+        const parsedResult = EditMessageResponseSchema.safeParse(
+          result.payload
+        );
 
         // Throw error if validation fails.
         if (!parsedResult.success) {
