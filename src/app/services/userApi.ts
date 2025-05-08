@@ -15,9 +15,12 @@ import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import convertToFormData from "@/utils/convertToFormData";
-import { updateUserDetails } from "@/features/auth/authSlice";
+import { clearCredentials, updateUserDetails } from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import { authApiSlice } from "./authApi";
+import { DeleteUserEndpointQueryType } from "@/types/api.types";
+import { RootState } from "../store";
+import { toast } from "sonner";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -92,7 +95,54 @@ export const userApiSlice = apiSlice.injectEndpoints({
         );
       },
     }),
+    // This endpoint serves either of the two use cases:
+    // 1. User deleting their own account.
+    // 2. ADMIN deleting another user's account.
+    // If the username is provided, it means Case-2 else, it is Case-1
+    deleteUser: builder.mutation<void, DeleteUserEndpointQueryType>({
+      query: ({ username }: DeleteUserEndpointQueryType) => ({
+        url: username ? `/users/${username}` : "/users",
+        method: HttpMethod.DELETE,
+        credentials: "include",
+      }),
+      onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        await mutationLifeCycleApi.queryFulfilled;
+
+        // Log the response success event.
+        logger.info(
+          {
+            user: (mutationLifeCycleApi.getState() as RootState).auth.user
+              ?.username,
+            role: (mutationLifeCycleApi.getState() as RootState).auth.user
+              ?.role,
+            userDeleted: queryArgument.username,
+          },
+          "User deleted."
+        );
+
+        // If user has deleted their own account (Case-1), clear auth state
+        // and perform necessary actions.
+        if (!queryArgument.username) {
+          // Clear credentials.
+          mutationLifeCycleApi.dispatch(clearCredentials());
+          // Reset RTK Query cache.
+          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+          // Remove user from Sentry.
+          Sentry.setUser(null);
+          // Navigate to login page.
+          window.location.replace("/login");
+        } else {
+          // Notify ADMIN that the user has been deleted successfully.
+          toast.success("The user was deleted successfully.");
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetUserMessagesQuery } = userApiSlice;
+export const {
+  useGetUserMessagesQuery,
+  useEditUserDetailsMutation,
+  useDeleteUserMutation,
+} = userApiSlice;
