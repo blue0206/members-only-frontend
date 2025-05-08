@@ -9,6 +9,7 @@ import {
   EditUserResponseSchema,
   GetUserMessagesResponseDto,
   GetUserMessagesResponseSchema,
+  ResetPasswordRequestDto,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
@@ -138,6 +139,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
+    resetPassword: builder.mutation<void, ResetPasswordRequestDto>({
+      query: (body: ResetPasswordRequestDto) => ({
+        url: "/users/reset-password",
+        method: HttpMethod.PATCH,
+        body,
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
@@ -145,4 +154,5 @@ export const {
   useGetUserMessagesQuery,
   useEditUserDetailsMutation,
   useDeleteUserMutation,
+  useResetPasswordMutation,
 } = userApiSlice;
