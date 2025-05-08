@@ -7,15 +7,19 @@ import {
   CreateMessageRequestDto,
   CreateMessageResponseDto,
   CreateMessageResponseSchema,
+  EditMessageResponseDto,
+  EditMessageResponseSchema,
   GetMessagesResponseDto,
   GetMessagesResponseSchema,
   GetMessagesWithoutAuthorResponseDto,
   GetMessagesWithoutAuthorResponseSchema,
+  Role,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { logger } from "@/utils/logger";
+import { EditMessageEndpointQueryType } from "@/types/api.types";
 import { RootState } from "../store";
 
 export const messageApiSlice = apiSlice.injectEndpoints({
@@ -152,6 +156,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
               (draft) => {
                 // Append the data to cached list of messages.
                 if (Array.isArray(draft)) draft.push(data);
+                return draft;
               }
             )
           );
@@ -159,6 +164,91 @@ export const messageApiSlice = apiSlice.injectEndpoints({
       },
       // We still invalidate tag so that even though the user is given realistic
       // update, we do refresh the cache with updated data.
+      invalidatesTags: ["Messages"],
+    }),
+    editMessage: builder.mutation<
+      EditMessageResponseDto,
+      EditMessageEndpointQueryType
+    >({
+      query: ({ newMessage, messageId }: EditMessageEndpointQueryType) => ({
+        url: `/messages/${messageId.toString()}`,
+        method: HttpMethod.PATCH,
+        body: newMessage,
+      }),
+      transformResponse: (Response: EditMessageResponseDto) => {
+        // Validate the response against schema.
+        const parsedResult = EditMessageResponseSchema.safeParse(Response);
+
+        // Throw error if validation fails.
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+
+        // Return the response payload conforming to the DTO.
+        return parsedResult.data;
+      },
+      onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
+        //--------------------OPTIMISTIC UPDATE--------------------------
+
+        // First we check user role to ascertain which endpoint to update (with/without author).
+        const userRole = (mutationLifeCycleApi.getState() as RootState).auth
+          .user?.role;
+        const isMember = userRole === Role.MEMBER || userRole === Role.ADMIN;
+
+        // We perform the optimistic update.
+        const patchResult = mutationLifeCycleApi.dispatch(
+          messageApiSlice.util.updateQueryData(
+            isMember ? "getMessagesWithAuthor" : "getMessagesWithoutAuthor",
+            undefined,
+            (draft) => {
+              logger.debug(
+                "Running updateQueryData for optimistic update of editMessage endpoint"
+              );
+
+              if (Array.isArray(draft)) {
+                // Check if cache entry has the message being edited.
+                const messageIndex = draft.findIndex(
+                  (draftMessage) =>
+                    draftMessage.messageId === queryArgument.messageId
+                );
+
+                if (messageIndex === -1) {
+                  // Warn if message not found in cache.
+                  logger.warn(
+                    `Message with id ${queryArgument.messageId.toString()} not found in cache.`
+                  );
+                } else {
+                  // Update the message using the index.
+                  draft[messageIndex].message = queryArgument.newMessage;
+
+                  // Log event.
+                  logger.info("Optimistically updated the message in cache.");
+                }
+              } else {
+                // Log if cache entry is not an array.
+                logger.debug(
+                  "Cache entry for messages not found or not an array."
+                );
+              }
+            }
+          )
+        );
+
+        // Next, we wait for query to fulfill and if there are any errors
+        // we roll back the optimistic update.
+        try {
+          await mutationLifeCycleApi.queryFulfilled;
+
+          logger.debug("Optimistic update successful, message updated.");
+        } catch (error) {
+          // Query failed, we log the error and roll back.
+          logger.error({ error }, "Optimistic update failed, rolling back...");
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Messages"],
     }),
   }),
