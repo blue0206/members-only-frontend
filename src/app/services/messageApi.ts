@@ -245,9 +245,19 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         // Next, we wait for query to fulfill and if there are any errors
         // we roll back the optimistic update.
         try {
-          await mutationLifeCycleApi.queryFulfilled;
+          const { data } = await mutationLifeCycleApi.queryFulfilled;
 
-          logger.debug("Optimistic update successful, message updated.");
+          // Log the success event and author from auth state.
+          logger.info(
+            {
+              user: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+              role: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.role,
+              message: data,
+            },
+            "Optimistic update successful, message updated."
+          );
         } catch (error) {
           // Query failed, we log the error and roll back.
           logger.error({ error }, "Optimistic update failed, rolling back...");
@@ -262,7 +272,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.DELETE,
       }),
       onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
-        //-----------------------------OPTIMISTIC DELETE---------------------------
+        //-----------------------------OPTIMISTIC UPDATE---------------------------
 
         // First we check user role to ascertain which endpoint to update (with/without author).
         const userRole = (mutationLifeCycleApi.getState() as RootState).auth
@@ -312,7 +322,17 @@ export const messageApiSlice = apiSlice.injectEndpoints({
         try {
           await mutationLifeCycleApi.queryFulfilled;
 
-          logger.debug("Optimistic delete successful, message deleted.");
+          // Log the success event and author from auth state.
+          logger.info(
+            {
+              user: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+              role: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.role,
+              messageId: queryArgument,
+            },
+            "Optimistic update successful, message deleted."
+          );
         } catch (error) {
           // Query failed, we log the error and roll back.
           logger.error({ error }, "Optimistic delete failed, rolling back...");
