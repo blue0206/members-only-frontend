@@ -1,6 +1,7 @@
 import {
   EditMessageRequestDto,
   MessageParamsDto,
+  SetRoleRequestQueryDto,
   UsernameParamsDto,
 } from "@blue0206/members-only-shared-types";
 
@@ -13,4 +14,10 @@ export interface EditMessageEndpointQueryType {
 // Export "deleteUser" endpoint query type.
 export interface DeleteUserEndpointQueryType {
   username: UsernameParamsDto["username"] | null;
+}
+
+// Export "setRole" endpoint query type.
+export interface SetRoleEndpointQueryType {
+  username: UsernameParamsDto["username"];
+  role: SetRoleRequestQueryDto["role"];
 }
