@@ -20,6 +20,7 @@ import { logger } from "@/utils/logger";
 import convertToFormData from "@/utils/convertToFormData";
 import {
   clearCredentials,
+  setUserAvatar,
   updateUserDetails,
   updateUserRole,
 } from "@/features/auth/authSlice";
@@ -193,6 +194,32 @@ export const userApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    deleteAvatar: builder.mutation<void, void>({
+      query: () => ({
+        url: "/users/avatar",
+        method: HttpMethod.DELETE,
+        credentials: "include",
+      }),
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        //------------------------------OPTIMISTIC UPDATE--------------------------------
+
+        // We perform the optimistic update to auth slice.
+        const deletedAvatar = (mutationLifeCycleApi.getState() as RootState)
+          .auth.user?.avatar;
+        mutationLifeCycleApi.dispatch(setUserAvatar(null));
+
+        // Next, we wait for query to fulfill and if there are any errors
+        // we roll back the optimistic update.
+        try {
+          await mutationLifeCycleApi.queryFulfilled;
+        } catch (error) {
+          logger.error({ error }, "Error deleting user avatar.");
+
+          // Roll back the optimistic update.
+          mutationLifeCycleApi.dispatch(setUserAvatar(deletedAvatar));
+        }
+      },
+    }),
   }),
 });
 
@@ -203,4 +230,5 @@ export const {
   useResetPasswordMutation,
   useMemberRoleUpdateMutation,
   useSetRoleMutation,
+  useDeleteAvatarMutation,
 } = userApiSlice;
