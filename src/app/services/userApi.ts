@@ -9,14 +9,20 @@ import {
   EditUserResponseSchema,
   GetUserMessagesResponseDto,
   GetUserMessagesResponseSchema,
+  MemberRoleUpdateRequestDto,
   ResetPasswordRequestDto,
+  Role,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import convertToFormData from "@/utils/convertToFormData";
-import { clearCredentials, updateUserDetails } from "@/features/auth/authSlice";
+import {
+  clearCredentials,
+  updateUserDetails,
+  updateUserRole,
+} from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import { authApiSlice } from "./authApi";
 import { DeleteUserEndpointQueryType } from "@/types/api.types";
@@ -147,6 +153,36 @@ export const userApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    memberRoleUpdate: builder.mutation<void, MemberRoleUpdateRequestDto>({
+      query: (body: MemberRoleUpdateRequestDto) => ({
+        url: "/users/role",
+        method: HttpMethod.PATCH,
+        body,
+        credentials: "include",
+      }),
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        await mutationLifeCycleApi.queryFulfilled;
+
+        // Log the response success event.
+        logger.info(
+          `The user ${
+            (mutationLifeCycleApi.getState() as RootState).auth.user
+              ?.username ?? ""
+          } is now a member.`
+        );
+
+        // Update user role in auth state.
+        mutationLifeCycleApi.dispatch(updateUserRole(Role.MEMBER));
+
+        // Refresh user tokens so that the tokens have updated details in payload.
+        await mutationLifeCycleApi.dispatch(
+          authApiSlice.endpoints.tokenRefresh.initiate()
+        );
+      },
+      // Invalidate messages endpoint to fetch the new list with author names instead.
+      invalidatesTags: ["Messages"],
+    }),
   }),
 });
 
@@ -155,4 +191,5 @@ export const {
   useEditUserDetailsMutation,
   useDeleteUserMutation,
   useResetPasswordMutation,
+  useMemberRoleUpdateMutation,
 } = userApiSlice;
