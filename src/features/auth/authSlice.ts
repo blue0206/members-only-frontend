@@ -39,6 +39,12 @@ const authSlice = createSlice({
       }
       return state;
     },
+    setUserAvatar: (state, action: PayloadAction<UserDto["avatar"]>) => {
+      if (state.user) {
+        state.user.avatar = action.payload;
+      }
+      return state;
+    },
   },
   selectors: {
     isAuthenticated: (state) => state.authStatus,
@@ -53,5 +59,6 @@ export const {
   updateAccessToken,
   updateUserDetails,
   updateUserRole,
+  setUserAvatar,
 } = authSlice.actions;
 export const { isAuthenticated, getUserAvatar } = authSlice.selectors;
