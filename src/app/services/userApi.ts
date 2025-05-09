@@ -25,7 +25,10 @@ import {
 } from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import { authApiSlice } from "./authApi";
-import { DeleteUserEndpointQueryType } from "@/types/api.types";
+import {
+  DeleteUserEndpointQueryType,
+  SetRoleEndpointQueryType,
+} from "@/types/api.types";
 import { RootState } from "../store";
 import { toast } from "sonner";
 
@@ -183,6 +186,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
       // Invalidate messages endpoint to fetch the new list with author names instead.
       invalidatesTags: ["Messages"],
     }),
+    setRole: builder.mutation<void, SetRoleEndpointQueryType>({
+      query: (queryArg: SetRoleEndpointQueryType) => ({
+        url: `/users/role/${queryArg.username}/?role=${queryArg.role}`,
+        method: HttpMethod.PATCH,
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
@@ -192,4 +202,5 @@ export const {
   useDeleteUserMutation,
   useResetPasswordMutation,
   useMemberRoleUpdateMutation,
+  useSetRoleMutation,
 } = userApiSlice;
