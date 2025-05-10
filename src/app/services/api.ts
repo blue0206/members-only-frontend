@@ -29,11 +29,26 @@ const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
   prepareHeaders: (headers, { getState, endpoint }) => {
     // Define endpoints where both access token and CSRF token are required.
-    const commonEndpoints = ["logoutUser"];
+    const commonEndpoints = [
+      "logoutUser",
+      "createMessage",
+      "editMessage",
+      "deleteMessage",
+      "editUserDetails",
+      "deleteUser",
+      "resetPassword",
+      "memberRoleUpdate",
+      "setRole",
+      "deleteAvatar",
+    ];
     // Define endpoints where only CSRF token is required.
-    const csrfEndpoints = [...commonEndpoints];
+    const csrfEndpoints = [...commonEndpoints, "tokenRefresh"];
     // Define endpoints where only access token is required.
-    const accessTokenEndpoints = [...commonEndpoints, "getMessagesWithAuthor"];
+    const accessTokenEndpoints = [
+      ...commonEndpoints,
+      "getMessagesWithAuthor",
+      "getUserMessages",
+    ];
 
     // Add access token to headers if the current endpoint
     // is listed in access token endpoints.
