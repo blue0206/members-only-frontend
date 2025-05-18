@@ -3,9 +3,11 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { Provider } from "react-redux";
-import { store } from "./app/store.ts";
+import { store, persistor } from "./app/store.ts";
+import { PersistGate } from "redux-persist/integration/react";
 import * as Sentry from "@sentry/react";
 import { Button } from "./components/ui/button.tsx";
+import { Spinner } from "./components/ui/spinner.tsx";
 
 // Sentry initialization for production.
 if (import.meta.env.PROD) {
@@ -32,24 +34,29 @@ if (import.meta.env.PROD) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
-      {/* Sentry Error Boundary wrapper for App. */}
-      <Sentry.ErrorBoundary
-        fallback={
-          <div>
-            <h2>Oops! Something went wrong.</h2>
-            <Button
-              onClick={() => {
-                window.location.reload();
-              }}
-            >
-              Reload Page
-            </Button>
-          </div>
-        }
-        showDialog={import.meta.env.DEV}
+      <PersistGate
+        loading={<Spinner size={"medium"} className="text-background" />}
+        persistor={persistor}
       >
-        <App />
-      </Sentry.ErrorBoundary>
+        {/* Sentry Error Boundary wrapper for App. */}
+        <Sentry.ErrorBoundary
+          fallback={
+            <div>
+              <h2>Oops! Something went wrong.</h2>
+              <Button
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
+                Reload Page
+              </Button>
+            </div>
+          }
+          showDialog={import.meta.env.DEV}
+        >
+          <App />
+        </Sentry.ErrorBoundary>
+      </PersistGate>
     </Provider>
   </StrictMode>
 );
