@@ -13,6 +13,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+import authErrorListenerMiddleware from "./middlewares/authErrorListenerMiddleware";
 
 // Combine all the reducers.
 const rootReducer = combineReducers({
@@ -41,7 +42,9 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(apiSlice.middleware), // RTK Query middleware.
+    })
+      .prepend(authErrorListenerMiddleware.middleware) // Error listener middleware.
+      .concat(apiSlice.middleware), // RTK Query middleware.
 });
 
 export const persistor = persistStore(store);
