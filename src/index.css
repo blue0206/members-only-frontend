@@ -74,6 +74,7 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.623 0.214 259.815);
+  --nav-link: oklch(0.27 0.0687 268.82);
 }
 
 .dark {
@@ -117,4 +118,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+a.active {
+  color: var(--color-primary);
 }
