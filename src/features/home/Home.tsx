@@ -1,11 +1,12 @@
 import { useAppSelector } from "@/app/hooks";
 import { Header } from "@/components/layout";
-import { isAuthenticated } from "../auth/authSlice";
+import { getUserRole, isAuthenticated } from "../auth/authSlice";
 import {
   useGetMessagesWithAuthorQuery,
   useGetMessagesWithoutAuthorQuery,
 } from "@/app/services/messageApi";
 import Message from "./Message";
+import { Role } from "@blue0206/members-only-shared-types";
 
 // Messages Without Author Component
 function MessagesWithAuthor() {
@@ -33,13 +34,18 @@ function MessagesWithoutAuthor() {
 
 export default function Home() {
   const isAuth = useAppSelector(isAuthenticated);
+  const role = useAppSelector(getUserRole);
 
   return (
     <div className="w-screen h-screen">
       <Header />
       <div className="w-full">
         <div className="container max-w-2xl px-4 md:max-w-4xl py-11 mx-auto">
-          {isAuth ? <MessagesWithAuthor /> : <MessagesWithoutAuthor />}
+          {isAuth && role !== Role.USER ? (
+            <MessagesWithAuthor />
+          ) : (
+            <MessagesWithoutAuthor />
+          )}
         </div>
       </div>
     </div>
