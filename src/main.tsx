@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import { Provider } from "react-redux";
 import { store, persistor } from "./app/store.ts";
 import { PersistGate } from "redux-persist/integration/react";
+import { ThemeProvider } from "./components/layout/";
 import * as Sentry from "@sentry/react";
 import { Button } from "./components/ui/button.tsx";
 import { Spinner } from "./components/ui/spinner.tsx";
@@ -38,24 +39,26 @@ createRoot(document.getElementById("root")!).render(
         loading={<Spinner size={"medium"} className="text-background" />}
         persistor={persistor}
       >
-        {/* Sentry Error Boundary wrapper for App. */}
-        <Sentry.ErrorBoundary
-          fallback={
-            <div>
-              <h2>Oops! Something went wrong.</h2>
-              <Button
-                onClick={() => {
-                  window.location.reload();
-                }}
-              >
-                Reload Page
-              </Button>
-            </div>
-          }
-          showDialog={import.meta.env.DEV}
-        >
-          <App />
-        </Sentry.ErrorBoundary>
+        <ThemeProvider>
+          {/* Sentry Error Boundary wrapper for App. */}
+          <Sentry.ErrorBoundary
+            fallback={
+              <div>
+                <h2>Oops! Something went wrong.</h2>
+                <Button
+                  onClick={() => {
+                    window.location.reload();
+                  }}
+                >
+                  Reload Page
+                </Button>
+              </div>
+            }
+            showDialog={import.meta.env.DEV}
+          >
+            <App />
+          </Sentry.ErrorBoundary>
+        </ThemeProvider>
       </PersistGate>
     </Provider>
   </StrictMode>
