@@ -50,6 +50,7 @@ const authSlice = createSlice({
     isAuthenticated: (state) => state.authStatus,
     getUserAvatar: (state) => state.user?.avatar,
     getUserRole: (state) => state.user?.role,
+    getUser: (state) => state.user,
   },
 });
 
@@ -62,5 +63,5 @@ export const {
   updateUserRole,
   setUserAvatar,
 } = authSlice.actions;
-export const { isAuthenticated, getUserAvatar, getUserRole } =
+export const { isAuthenticated, getUserAvatar, getUserRole, getUser } =
   authSlice.selectors;
