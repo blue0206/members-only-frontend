@@ -1,4 +1,5 @@
 import authSlice from "@/features/auth/authSlice";
+import uiSlice from "@/features/ui/uiSlice";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { apiSlice } from "./services/api";
@@ -19,6 +20,7 @@ import authErrorListenerMiddleware from "./middlewares/authErrorListenerMiddlewa
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   auth: authSlice,
+  ui: uiSlice,
 });
 
 // redux-persist config
@@ -26,7 +28,7 @@ const persistConfig = {
   key: "members-only-root",
   storage, // local storage
   version: 1,
-  whitelist: ["auth"], // only persist auth state
+  whitelist: ["auth", "ui"], // only persist auth and ui state
 };
 
 // Wrap the root reducer with the persisted reducer
