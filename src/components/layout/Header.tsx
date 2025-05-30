@@ -14,9 +14,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Users, User, Settings, Bookmark, LogOut } from "lucide-react";
+import {
+  Users,
+  User,
+  Settings,
+  Bookmark,
+  LogOut,
+  Shield,
+  Crown,
+} from "lucide-react";
 import { useLogoutUserMutation } from "@/app/services/authApi";
 import { Badge } from "@/components/ui/badge";
+import { Role } from "@blue0206/members-only-shared-types";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
@@ -87,9 +96,31 @@ export function Header() {
                       <p className="text-sm text-muted-foreground">
                         @{user?.username}
                       </p>
-                      <Badge variant={"secondary"} className="w-fit">
-                        {user?.role}
-                      </Badge>
+                      {user && user.role === Role.ADMIN ? (
+                        <Badge
+                          variant={"destructive"}
+                          className="w-fit flex items-center gap-1"
+                        >
+                          <Shield className="h-3.5 w-3.5" />
+                          {user.role}
+                        </Badge>
+                      ) : user?.role === Role.MEMBER ? (
+                        <Badge
+                          variant={"default"}
+                          className="w-fit flex items-center gap-1"
+                        >
+                          <Crown className="h-3.5 w-3.5" />
+                          {user.role}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant={"secondary"}
+                          className="w-fit flex items-center gap-1"
+                        >
+                          <User className="h-3.5 w-3.5" />
+                          {user?.role}
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
