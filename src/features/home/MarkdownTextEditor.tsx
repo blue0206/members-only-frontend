@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCreateMessageMutation } from "@/app/services/messageApi";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsTrigger, TabsList, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -6,9 +7,23 @@ import { Textarea } from "@/components/ui/textarea";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Edit3, Eye, Send } from "lucide-react";
+import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function MarkdownTextEditor() {
   const [text, setText] = useState<string>("");
+
+  const [createMessage, { isLoading, isSuccess, isError }] =
+    useCreateMessageMutation();
+
+  const sendHandler = async () => {
+    if (!text.trim()) return;
+
+    const messageBody: CreateMessageRequestDto = {
+      message: text,
+    };
+    await createMessage(messageBody);
+  };
 
   return (
     <Card className="w-full h-full p-5">
@@ -72,10 +87,20 @@ You can also use:
           <p className="text-sm text-muted-foreground">Supports Markdown</p>
           <Button
             className="cursor-pointer flex items-center justify-center space-x-2"
-            disabled={!text.trim()}
+            disabled={!text.trim() || isLoading}
+            onClick={() => void sendHandler()}
           >
-            <Send />
-            <span>Send Message</span>
+            {isLoading ? (
+              <Spinner
+                className="text-background dark:text-foreground w-30"
+                size={"small"}
+              />
+            ) : (
+              <>
+                <Send />
+                <span>Send Message</span>
+              </>
+            )}
           </Button>
         </div>
       </div>
