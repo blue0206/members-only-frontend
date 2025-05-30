@@ -97,26 +97,17 @@ export function Header() {
                         @{user?.username}
                       </p>
                       {user && user.role === Role.ADMIN ? (
-                        <Badge
-                          variant={"destructive"}
-                          className="w-fit flex items-center gap-1"
-                        >
+                        <Badge className="w-fit flex items-center gap-1 bg-red-100 text-red-800 border-red-200">
                           <Shield className="h-3.5 w-3.5" />
                           {user.role}
                         </Badge>
                       ) : user?.role === Role.MEMBER ? (
-                        <Badge
-                          variant={"default"}
-                          className="w-fit flex items-center gap-1"
-                        >
+                        <Badge className="w-fit flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
                           <Crown className="h-3.5 w-3.5" />
                           {user.role}
                         </Badge>
                       ) : (
-                        <Badge
-                          variant={"secondary"}
-                          className="w-fit flex items-center gap-1"
-                        >
+                        <Badge className="w-fit flex items-center gap-1 bg-gray-100 text-gray-800 border-gray-200">
                           <User className="h-3.5 w-3.5" />
                           {user?.role}
                         </Badge>
