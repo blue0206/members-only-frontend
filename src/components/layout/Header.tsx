@@ -3,20 +3,24 @@ import { useAppSelector } from "@/app/hooks";
 import {
   isAuthenticated,
   getUserAvatar,
-  getUserRole,
+  getUser,
 } from "@/features/auth/authSlice";
 import {
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Users, User } from "lucide-react";
+import { Users, User, Settings, Bookmark, LogOut } from "lucide-react";
 import { useLogoutUserMutation } from "@/app/services/authApi";
+import { Badge } from "@/components/ui/badge";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
-  const role = useAppSelector(getUserRole);
+  const user = useAppSelector(getUser);
   const avatar = useAppSelector(getUserAvatar);
   const [logoutUser] = useLogoutUserMutation();
 
@@ -64,16 +68,55 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant={"ghost"}
-                    className="relative h-8 w-8 rounded-full"
+                    className="h-11 w-11 rounded-full p-0.5 cursor-pointer"
                   >
-                    <Avatar>
+                    <Avatar className="w-11 h-11">
                       <AvatarImage src={avatar ?? ""} />
                       <AvatarFallback>
-                        <User />
+                        <User className="h-11 w-11" />
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 align-end">
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium">
+                        {user?.firstname} {user?.middlename} {user?.lastname}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        @{user?.username}
+                      </p>
+                      <Badge variant={"secondary"} className="w-fit">
+                        {user?.role}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem>
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    Bookmarks
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Profile Settings
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => void logoutHandler()}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="space-x-4">
