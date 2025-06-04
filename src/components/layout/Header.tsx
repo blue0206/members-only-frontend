@@ -20,17 +20,14 @@ import {
   Settings,
   Bookmark,
   LogOut,
-  Shield,
-  Crown,
   Sun,
   Moon,
   Server,
   Check,
 } from "lucide-react";
 import { useLogoutUserMutation } from "@/app/services/authApi";
-import { Badge } from "@/components/ui/badge";
-import { Role } from "@blue0206/members-only-shared-types";
 import { getTheme, setTheme } from "@/features/ui/uiSlice";
+import { getRoleBadge } from "@/utils/getRoleBadge";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
@@ -103,22 +100,7 @@ export function Header() {
                       <p className="text-sm text-muted-foreground">
                         @{user?.username}
                       </p>
-                      {user && user.role === Role.ADMIN ? (
-                        <Badge className="w-fit flex items-center gap-1 bg-red-100 text-red-800 border-red-200 dark:bg-red-800 dark:text-red-100">
-                          <Shield className="h-4 w-4" />
-                          {user.role}
-                        </Badge>
-                      ) : user?.role === Role.MEMBER ? (
-                        <Badge className="w-fit flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-800 dark:text-blue-100">
-                          <Crown className="h-4 w-4" />
-                          {user.role}
-                        </Badge>
-                      ) : (
-                        <Badge className="w-fit flex items-center gap-1 bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-100">
-                          <User className="h-4 w-4" />
-                          {user?.role}
-                        </Badge>
-                      )}
+                      {user && getRoleBadge(user.role)}
                     </div>
                   </div>
 
