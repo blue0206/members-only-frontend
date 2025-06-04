@@ -1,4 +1,4 @@
-export const getTimeElapsed = (timestamp: string): string => {
+export const getTimeElapsed = (timestamp: string | Date): string => {
   const timestampDate = new Date(timestamp);
   const currentDate = new Date();
 
