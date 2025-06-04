@@ -145,7 +145,7 @@ export function Login() {
 
   return (
     <div className="w-screen h-screen">
-      <Header className="bg-background" />
+      <Header />
       <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
         <div className="flex w-full max-w-sm flex-col gap-6">
           <div className="flex flex-col gap-6">
@@ -197,9 +197,13 @@ export function Login() {
                         className={`w-full cursor-pointer ${
                           isLoading ? "opacity-80" : ""
                         }`}
+                        disabled={isLoading}
                       >
                         {isLoading ? (
-                          <Spinner className="text-background" size={"small"} />
+                          <Spinner
+                            className="text-background dark:text-foreground"
+                            size={"small"}
+                          />
                         ) : (
                           "Login"
                         )}

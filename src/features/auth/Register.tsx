@@ -371,7 +371,7 @@ export function Register() {
                             <div className="flex flex-col items-center">
                               <Label
                                 htmlFor="avatar-upload"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md cursor-pointer"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md cursor-pointer dark:text-foreground"
                               >
                                 Choose Image
                               </Label>
@@ -430,9 +430,13 @@ export function Register() {
                 type={"submit"}
                 size={"lg"}
                 className="px-8 cursor-pointer"
+                disabled={isLoading}
               >
                 {isLoading ? (
-                  <Spinner className="text-background w-[6ch]" size={"small"} />
+                  <Spinner
+                    className="text-background w-[6ch] dark:text-foreground"
+                    size={"small"}
+                  />
                 ) : (
                   "Register"
                 )}
