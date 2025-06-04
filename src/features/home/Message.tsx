@@ -83,6 +83,7 @@ export default function Message(props: MessagePropsType) {
               </div>
             </div>
 
+            {/* Message Options */}
             <TooltipProvider>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -121,12 +122,60 @@ export default function Message(props: MessagePropsType) {
       </Card>
     );
   } else {
+    const messageData = props.messageData;
     // For Unregistered Users or USER role.
     return (
-      <>
-        <h1>USER / Unregistered</h1>
-        {props.messageData.message}
-      </>
+      <Card className="p-5 hover:shadow-md transition-shadow">
+        <div className="space-y-4">
+          {/* Message Header (Author Details + Options) */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 dark:ring-blue-950">
+                <AvatarImage src={""} />
+                <AvatarFallback>?</AvatarFallback>
+              </Avatar>
+
+              <div>
+                <p className="font-medium text-muted-foreground">
+                  Anonymous Member
+                </p>
+
+                <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{getTimeElapsed(messageData.timestamp)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Message Options (USER only) */}
+            {authUser?.role === Role.USER &&
+              messageData.userId &&
+              authUser.id === messageData.userId && (
+                <TooltipProvider>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size={"sm"}
+                        variant={"ghost"}
+                        className="cursor-pointer"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem variant={"destructive"}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Message
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TooltipProvider>
+              )}
+          </div>
+
+          {/* Message Content */}
+        </div>
+      </Card>
     );
   }
 }
