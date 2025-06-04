@@ -20,6 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/app/hooks";
 import { getUser } from "../auth/authSlice";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type MessagePropsType =
   | {
@@ -118,6 +120,13 @@ export default function Message(props: MessagePropsType) {
           </div>
 
           {/* Message Content */}
+          <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
+            <Markdown remarkPlugins={[remarkGfm]}>
+              {messageData.message}
+            </Markdown>
+          </div>
+
+          {/* Message Footer (Like and Bookmark) */}
         </div>
       </Card>
     );
@@ -174,6 +183,13 @@ export default function Message(props: MessagePropsType) {
           </div>
 
           {/* Message Content */}
+          <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
+            <Markdown remarkPlugins={[remarkGfm]}>
+              {messageData.message}
+            </Markdown>
+          </div>
+
+          {/* Message Footer (Like and Bookmark) */}
         </div>
       </Card>
     );
