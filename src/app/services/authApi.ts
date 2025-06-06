@@ -194,24 +194,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
             },
           });
 
-          // Logout user.
-          try {
-            await mutationLifeCycleApi.dispatch(
-              authApiSlice.endpoints.logoutUser.initiate()
-            );
-          } catch (error) {
-            logger.error(
-              { error },
-              "Unexpected error during logout mutation call."
-            );
-            // Reset RTK Query cache.
-            mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
-            // Dispatch action to clear auth state.
-            mutationLifeCycleApi.dispatch(clearCredentials());
-            // Remove user from Sentry.
-            Sentry.setUser(null);
-          }
-
+          // Reset RTK Query cache.
+          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+          // Dispatch action to clear auth state.
+          mutationLifeCycleApi.dispatch(clearCredentials());
+          // Remove user from Sentry.
+          Sentry.setUser(null);
           window.location.replace("/login");
           toast.info(
             "Your session has expired. Please login again to continue.",

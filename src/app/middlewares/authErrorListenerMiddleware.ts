@@ -11,7 +11,6 @@ import * as Sentry from "@sentry/react";
 import { logger } from "@/utils/logger";
 import { RootState } from "../store";
 import { ErrorCodes } from "@blue0206/members-only-shared-types";
-import { authApiSlice } from "../services/authApi";
 import { apiSlice } from "../services/api";
 import { clearCredentials } from "@/features/auth/authSlice";
 import { toast } from "sonner";
@@ -55,7 +54,7 @@ authErrorListenerMiddleware.startListening({
 authErrorListenerMiddleware.startListening({
   predicate: (action: UnknownAction) =>
     isRejectedWithValue(action) && actionHasApiErrorPayload(action),
-  effect: async (action: UnknownAction, listenerApi) => {
+  effect: (action: UnknownAction, listenerApi) => {
     if (actionHasApiErrorPayload(action)) {
       if (
         action.payload.code === ErrorCodes.CSRF_TOKEN_MISMATCH ||
@@ -67,25 +66,13 @@ authErrorListenerMiddleware.startListening({
         // Log the error for development.
         logger.error({ error: action.payload }, action.payload.message);
 
-        // Logout the user.
-        try {
-          await listenerApi.dispatch(
-            authApiSlice.endpoints.logoutUser.initiate()
-          );
-        } catch (error) {
-          logger.error(
-            { error },
-            "Unexpected error during logout mutation call."
-          );
-          // Reset the API state.
-          listenerApi.dispatch(apiSlice.util.resetApiState());
-          // Clear credentials.
-          listenerApi.dispatch(clearCredentials());
-          // Remove user from Sentry.
-          Sentry.setUser(null);
-          // Notify user to login again to continue.
-        }
-
+        // Reset the API state.
+        listenerApi.dispatch(apiSlice.util.resetApiState());
+        // Clear credentials.
+        listenerApi.dispatch(clearCredentials());
+        // Remove user from Sentry.
+        Sentry.setUser(null);
+        // Notify user to login again to continue.
         window.location.replace("/login");
         toast.info(
           "Your session has expired. Please login again to continue.",

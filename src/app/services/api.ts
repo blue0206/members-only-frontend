@@ -20,7 +20,6 @@ import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
 import { toast } from "sonner";
-import { authApiSlice } from "./authApi";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -150,7 +149,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
             "Token refresh failed, logging out...."
           );
 
-          await forceLogout(api);
+          forceLogout(api);
         } else {
           // Validate the result against schema.
           const parsedResult: RefreshResponseDto = RefreshResponseSchema.parse(
@@ -191,7 +190,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         });
 
         // Logout the user and reset RTKQ cache since refresh failed.
-        await forceLogout(api);
+        forceLogout(api);
       } finally {
         logger.info({ endpoint: api.endpoint }, "Releasing mutex.");
 
@@ -302,17 +301,11 @@ export const apiSlice = createApi({
   endpoints: () => ({}),
 });
 
-const forceLogout = async (api: BaseQueryApi): Promise<void> => {
-  try {
-    await api.dispatch(authApiSlice.endpoints.logoutUser.initiate());
-  } catch (error) {
-    logger.error({ error }, "Unexpected error during logout mutation call.");
-
-    // Clears redux state, RTK Query Cache and remove user from Sentry.
-    api.dispatch(clearCredentials());
-    apiSlice.util.resetApiState();
-    Sentry.setUser(null);
-  }
+const forceLogout = (api: BaseQueryApi): void => {
+  // Clears redux state, RTK Query Cache and remove user from Sentry.
+  api.dispatch(clearCredentials());
+  apiSlice.util.resetApiState();
+  Sentry.setUser(null);
   // Redirect to login page and show toast.
   window.location.replace("/login");
   toast.info("Your session has expired. Please login again to continue.", {
