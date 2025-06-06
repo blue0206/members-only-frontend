@@ -172,10 +172,10 @@ export const messageApiSlice = apiSlice.injectEndpoints({
       EditMessageResponseDto,
       EditMessageEndpointQueryType
     >({
-      query: ({ newMessage, messageId }: EditMessageEndpointQueryType) => ({
+      query: ({ messageBody, messageId }: EditMessageEndpointQueryType) => ({
         url: `/messages/${messageId.toString()}`,
         method: HttpMethod.PATCH,
-        body: newMessage,
+        body: messageBody,
         credentials: "include",
       }),
       transformResponse: (
@@ -229,7 +229,8 @@ export const messageApiSlice = apiSlice.injectEndpoints({
                   );
                 } else {
                   // Update the message using the index.
-                  draft[messageIndex].message = queryArgument.newMessage;
+                  draft[messageIndex].message =
+                    queryArgument.messageBody.newMessage;
 
                   // Log event.
                   logger.info("Optimistically updated the message in cache.");

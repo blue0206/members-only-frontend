@@ -7,7 +7,7 @@ import {
 
 // Export "editMessage" endpoint query type.
 export interface EditMessageEndpointQueryType {
-  newMessage: EditMessageRequestDto["newMessage"];
+  messageBody: EditMessageRequestDto;
   messageId: MessageParamsDto["messageId"];
 }
 
