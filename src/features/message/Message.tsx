@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { getTimeElapsed } from "@/utils/timestampFormat";
 import {
   GetMessagesWithoutAuthorResponseDto,
@@ -15,8 +15,6 @@ import {
   Trash2,
   ThumbsUp,
   Bookmark,
-  X,
-  Check,
 } from "lucide-react";
 import { getRoleBadge } from "@/utils/getRoleBadge";
 import {
@@ -38,11 +36,7 @@ import { getUser } from "../auth/authSlice";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-import { useEditMessageMutation } from "@/app/services/messageApi";
-import { ErrorPageDetailsType } from "@/types";
-import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
-import { useNavigate } from "react-router";
+import EditMessage from "./EditMessage";
 
 type MessagePropsType =
   | {
@@ -63,20 +57,6 @@ function Message(props: MessagePropsType) {
 
   const [editMessageContent, setEditMessageContent] = useState<string>("");
 
-  // Message Edit Mutation
-  const [
-    editMessage,
-    {
-      isSuccess: editIsSuccess,
-      reset: editReset,
-      isError: editIsError,
-      error: editError,
-    },
-  ] = useEditMessageMutation();
-  const editErrorDetails = useApiErrorHandler(editError);
-
-  const navigate = useNavigate();
-
   // Initialize like fill to blue if user has liked the message, or else default to white.
   const [likeFill, setLikeFill] = useState<string>(
     "liked" in props.messageData && props.messageData.liked
@@ -89,57 +69,6 @@ function Message(props: MessagePropsType) {
       ? "#ffc107"
       : "#ffffff"
   );
-
-  // Handle message edit success.
-  useEffect(() => {
-    if (editIsSuccess) {
-      editReset();
-    }
-  }, [editIsSuccess, editReset]);
-
-  // Handle message edit errors
-  useEffect(() => {
-    if (editIsError) {
-      if (editErrorDetails.isApiError) {
-        // Navigate to error page for server errors, else show toast.
-        if (editErrorDetails.statusCode && editErrorDetails.statusCode >= 500) {
-          void navigate("/error", {
-            state: {
-              statusCode: editErrorDetails.statusCode,
-              message: editErrorDetails.message,
-            } satisfies ErrorPageDetailsType,
-          });
-        } else {
-          toast.error(editErrorDetails.message);
-        }
-        editReset();
-      } else if (editErrorDetails.isValidationError) {
-        toast.error(editErrorDetails.message);
-        editReset();
-      } else {
-        // Navigate to error page for all other errors.
-        void navigate("/error", {
-          state: {
-            statusCode: editErrorDetails.statusCode ?? 500,
-            message: editErrorDetails.message,
-          } satisfies ErrorPageDetailsType,
-        });
-        editReset();
-      }
-    }
-  }, [editErrorDetails, editIsError, navigate, editReset]);
-
-  const handleMessageEdit = async () => {
-    if (props.setEditMessageId) {
-      props.setEditMessageId(null);
-      await editMessage({
-        messageId: props.messageData.messageId,
-        messageBody: {
-          newMessage: editMessageContent,
-        },
-      });
-    }
-  };
 
   const handleEditOption = () => {
     if (props.setEditMessageId) {
@@ -194,37 +123,12 @@ function Message(props: MessagePropsType) {
           */}
           {props.editMessageId === messageData.messageId &&
           accessControlFlags.edit ? (
-            <>
-              <Textarea
-                value={editMessageContent}
-                onChange={(e) => {
-                  setEditMessageContent(e.target.value);
-                }}
-                className="min-h-[150px]"
-              />
-              <div className="flex items-center justify-end space-x-2">
-                <Button
-                  variant={"outline"}
-                  size={"sm"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    props.setEditMessageId(null);
-                  }}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-
-                <Button
-                  size={"sm"}
-                  className="cursor-pointer"
-                  onClick={() => void handleMessageEdit()}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  Save Changes
-                </Button>
-              </div>
-            </>
+            <EditMessage
+              setEditMessageId={props.setEditMessageId}
+              currentMessageId={messageData.messageId}
+              editMessageContent={editMessageContent}
+              setEditMessageContent={setEditMessageContent}
+            />
           ) : (
             <>
               {/* Message Header (Author Details + Options) */}
