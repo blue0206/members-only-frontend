@@ -57,26 +57,28 @@ export function Register() {
   const [registerUser, { data, isLoading, isSuccess, error, isError }] =
     useRegisterUserMutation();
 
-  // Handle user registration success.
-  if (isSuccess) {
-    // Navigate to home page.
-    void navigate("/", {
-      replace: true,
-    });
-    // Show success toast.
-    toast.success(
-      <>
-        <div>Registration successful!</div>
-        <div>
-          <span>Welcome to the club, </span>
-          <span className="font-bold">{data.user?.username}!</span>
-        </div>
-      </>
-    );
-  }
-
   // Get error details from custom hook.
   const errorDetails = useApiErrorHandler(error);
+
+  // Handle user registration success.
+  useEffect(() => {
+    if (isSuccess) {
+      // Navigate to home page.
+      void navigate("/", {
+        replace: true,
+      });
+      // Show success toast.
+      toast.success(
+        <>
+          <div>Registration successful!</div>
+          <div>
+            <span>Welcome to the club, </span>
+            <span className="font-bold">{data.user?.username}!</span>
+          </div>
+        </>
+      );
+    }
+  }, [isSuccess, data?.user?.username, navigate]);
 
   // Handle form submission errors.
   useEffect(() => {

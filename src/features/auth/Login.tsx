@@ -49,15 +49,18 @@ export function Login() {
   const [loginUser, { isLoading, isSuccess, isError, error }] =
     useLoginUserMutation();
 
-  // Handle form submission success.
-  if (isSuccess) {
-    void navigate("/", {
-      replace: true,
-    });
-    toast.success("Login successful!");
-  }
   // Get error details from custom hook.
   const errorDetails = useApiErrorHandler(error);
+
+  // Handle form submission success.
+  useEffect(() => {
+    if (isSuccess) {
+      void navigate("/", {
+        replace: true,
+      });
+      toast.success("Login successful!");
+    }
+  }, [isSuccess, navigate]);
 
   // Handle form submission errors.
   useEffect(() => {
