@@ -1,18 +1,18 @@
 import { useAppSelector } from "@/app/hooks";
 import { Header } from "@/components/layout";
-import { getUserRole, isAuthenticated } from "../auth/authSlice";
+import { getUserRole, isAuthenticated } from "@/features/auth/authSlice";
 import {
   useGetMessagesWithAuthorQuery,
   useGetMessagesWithoutAuthorQuery,
 } from "@/app/services/messageApi";
-import Message from "./Message";
+import Message from "@/features/message/Message";
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
   Role,
 } from "@blue0206/members-only-shared-types";
-import MarkdownTextEditor from "./MarkdownTextEditor";
-import { useState } from "react";
+import MarkdownTextEditor from "@/features/message/MarkdownTextEditor";
+import { useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -31,9 +31,9 @@ function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
   const { data, isSuccess } = useGetMessagesWithAuthorQuery();
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
-  const sortedData: GetMessagesResponseDto = data
-    ? sortMessages<GetMessagesResponseDto>(data, sortOption)
-    : [];
+  const sortedData: GetMessagesResponseDto = useMemo(() => {
+    return data ? sortMessages<GetMessagesResponseDto>(data, sortOption) : [];
+  }, [data, sortOption]);
 
   return (
     <>
@@ -59,9 +59,11 @@ function MessagesWithoutAuthor({
 }) {
   const { data, isSuccess } = useGetMessagesWithoutAuthorQuery();
 
-  const sortedData: GetMessagesWithoutAuthorResponseDto = data
-    ? sortMessages<GetMessagesWithoutAuthorResponseDto>(data, sortOption)
-    : [];
+  const sortedData: GetMessagesWithoutAuthorResponseDto = useMemo(() => {
+    return data
+      ? sortMessages<GetMessagesWithoutAuthorResponseDto>(data, sortOption)
+      : [];
+  }, [data, sortOption]);
 
   return (
     <>

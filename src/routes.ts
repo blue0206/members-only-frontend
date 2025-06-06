@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router";
-import Home from "./features/home/Home";
+import Home from "./pages/Home";
 import Error from "./components/shared/Error";
 import { Login, Register } from "./features/auth";
 
