@@ -61,24 +61,39 @@ authErrorListenerMiddleware.startListening({
         action.payload.code === ErrorCodes.CSRF_TOKEN_MISMATCH ||
         action.payload.code === ErrorCodes.MISSING_CSRF_COOKIE ||
         action.payload.code === ErrorCodes.MISSING_CSRF_HEADER ||
-        action.payload.code === ErrorCodes.INVALID_TOKEN
+        action.payload.code === ErrorCodes.INVALID_TOKEN ||
+        action.payload.code === ErrorCodes.AUTHENTICATION_REQUIRED
       ) {
         // Log the error for development.
         logger.error({ error: action.payload }, action.payload.message);
 
         // Logout the user.
-        await listenerApi.dispatch(
-          authApiSlice.endpoints.logoutUser.initiate()
-        );
-        // Reset the API state.
-        listenerApi.dispatch(apiSlice.util.resetApiState());
-        // Clear credentials.
-        listenerApi.dispatch(clearCredentials());
-        // Remove user from Sentry.
-        Sentry.setUser(null);
-        // Notify user to login again to continue.
+        try {
+          await listenerApi.dispatch(
+            authApiSlice.endpoints.logoutUser.initiate()
+          );
+        } catch (error) {
+          logger.error(
+            { error },
+            "Unexpected error during logout mutation call."
+          );
+          // Reset the API state.
+          listenerApi.dispatch(apiSlice.util.resetApiState());
+          // Clear credentials.
+          listenerApi.dispatch(clearCredentials());
+          // Remove user from Sentry.
+          Sentry.setUser(null);
+          // Notify user to login again to continue.
+        }
+
         window.location.replace("/login");
-        toast.info("Your session has expired. Please login again to continue.");
+        toast.info(
+          "Your session has expired. Please login again to continue.",
+          {
+            position: "top-center",
+            closeButton: true,
+          }
+        );
       }
     }
   },

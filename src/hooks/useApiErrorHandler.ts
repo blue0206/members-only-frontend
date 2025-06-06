@@ -79,7 +79,6 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
           }
           break;
         }
-        case ErrorCodes.AUTHENTICATION_REQUIRED:
         case ErrorCodes.FORBIDDEN: {
           initialError.message =
             "You are not authorized to perform this action.";
