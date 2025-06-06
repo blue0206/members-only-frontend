@@ -231,6 +231,9 @@ export const messageApiSlice = apiSlice.injectEndpoints({
                   // Update the message using the index.
                   draft[messageIndex].message =
                     queryArgument.messageBody.newMessage;
+                  if ("edited" in draft[messageIndex]) {
+                    draft[messageIndex].edited = true;
+                  }
 
                   // Log event.
                   logger.info("Optimistically updated the message in cache.");
