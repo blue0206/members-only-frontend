@@ -20,6 +20,7 @@ import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
 import { toast } from "sonner";
+import { authApiSlice } from "./authApi";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -149,15 +150,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
             "Token refresh failed, logging out...."
           );
 
-          api.dispatch(clearCredentials());
-          apiSlice.util.resetApiState();
-          window.location.replace("/login");
-          toast.info(
-            "Your session has expired. Please login again to continue."
-          );
-
-          // Remove user from Sentry.
-          Sentry.setUser(null);
+          await forceLogout(api);
         } else {
           // Validate the result against schema.
           const parsedResult: RefreshResponseDto = RefreshResponseSchema.parse(
@@ -198,13 +191,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         });
 
         // Logout the user and reset RTKQ cache since refresh failed.
-        api.dispatch(clearCredentials());
-        apiSlice.util.resetApiState();
-        window.location.replace("/login");
-        toast.info("Your session has expired. Please login again to continue.");
-
-        // Remove user from Sentry.
-        Sentry.setUser(null);
+        await forceLogout(api);
       } finally {
         logger.info({ endpoint: api.endpoint }, "Releasing mutex.");
 
@@ -314,3 +301,22 @@ export const apiSlice = createApi({
   tagTypes: ["Messages"],
   endpoints: () => ({}),
 });
+
+const forceLogout = async (api: BaseQueryApi): Promise<void> => {
+  try {
+    await api.dispatch(authApiSlice.endpoints.logoutUser.initiate());
+  } catch (error) {
+    logger.error({ error }, "Unexpected error during logout mutation call.");
+
+    // Clears redux state, RTK Query Cache and remove user from Sentry.
+    api.dispatch(clearCredentials());
+    apiSlice.util.resetApiState();
+    Sentry.setUser(null);
+  }
+  // Redirect to login page and show toast.
+  window.location.replace("/login");
+  toast.info("Your session has expired. Please login again to continue.", {
+    position: "top-center",
+    closeButton: true,
+  });
+};
