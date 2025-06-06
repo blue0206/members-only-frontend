@@ -4,6 +4,7 @@ import {
   isAuthenticated,
   getUserAvatar,
   getUser,
+  clearCredentials,
 } from "@/features/auth/authSlice";
 import {
   DropdownMenu,
@@ -28,16 +29,29 @@ import {
 import { useLogoutUserMutation } from "@/app/services/authApi";
 import { getTheme, setTheme } from "@/features/ui/uiSlice";
 import { getRoleBadge } from "@/utils/getRoleBadge";
+import { useEffect } from "react";
+import { logger } from "@/utils/logger";
+import * as Sentry from "@sentry/react";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
   const user = useAppSelector(getUser);
   const avatar = useAppSelector(getUserAvatar);
-  const [logoutUser] = useLogoutUserMutation();
+  const [logoutUser, { isError, error, reset }] = useLogoutUserMutation();
   const dispatch = useAppDispatch();
   const currentTheme = useAppSelector(getTheme);
 
   const navigate = useNavigate();
+
+  // Logout error handling
+  useEffect(() => {
+    if (isError) {
+      logger.error({ error }, "Unexpected error during logout mutation call.");
+      dispatch(clearCredentials());
+      reset();
+      Sentry.setUser(null);
+    }
+  }, [dispatch, error, isError, reset]);
 
   const logoutHandler = async (): Promise<void> => {
     await logoutUser();
