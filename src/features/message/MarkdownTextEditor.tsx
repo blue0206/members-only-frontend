@@ -10,19 +10,21 @@ import { Edit3, Eye, Send } from "lucide-react";
 import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
-import { useNavigate } from "react-router";
-import { ErrorPageDetailsType } from "@/types";
-import { toast } from "sonner";
+import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 
 export default function MarkdownTextEditor() {
   const [text, setText] = useState<string>("");
-
-  const navigate = useNavigate();
 
   const [createMessage, { isLoading, isSuccess, reset, error, isError }] =
     useCreateMessageMutation();
 
   const errorDetails = useApiErrorHandler(error);
+  // Handle message send errors.
+  useUiErrorHandler({
+    errorDetails,
+    isError,
+    reset,
+  });
 
   // Handle message send success.
   useEffect(() => {
@@ -31,38 +33,6 @@ export default function MarkdownTextEditor() {
       reset();
     }
   }, [isSuccess, reset]);
-
-  // Handle message send errors.
-  useEffect(() => {
-    if (isError) {
-      if (errorDetails.isApiError) {
-        // Navigate to error page for server errors, else show toast.
-        if (errorDetails.statusCode && errorDetails.statusCode >= 500) {
-          void navigate("/error", {
-            state: {
-              statusCode: errorDetails.statusCode,
-              message: errorDetails.message,
-            } satisfies ErrorPageDetailsType,
-          });
-        } else {
-          toast.error(errorDetails.message);
-        }
-        reset();
-      } else if (errorDetails.isValidationError) {
-        toast.error(errorDetails.message);
-        reset();
-      } else {
-        // Navigate to error page for all other errors.
-        void navigate("/error", {
-          state: {
-            statusCode: errorDetails.statusCode ?? 500,
-            message: errorDetails.message,
-          } satisfies ErrorPageDetailsType,
-        });
-        reset();
-      }
-    }
-  }, [errorDetails, isError, navigate, reset]);
 
   const sendHandler = async () => {
     if (!text.trim()) return;
