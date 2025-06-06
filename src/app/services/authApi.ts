@@ -194,21 +194,31 @@ export const authApiSlice = apiSlice.injectEndpoints({
             },
           });
 
-          // Reset RTK Query cache.
-          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+          // Logout user.
+          try {
+            await mutationLifeCycleApi.dispatch(
+              authApiSlice.endpoints.logoutUser.initiate()
+            );
+          } catch (error) {
+            logger.error(
+              { error },
+              "Unexpected error during logout mutation call."
+            );
+            // Reset RTK Query cache.
+            mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+            // Dispatch action to clear auth state.
+            mutationLifeCycleApi.dispatch(clearCredentials());
+            // Remove user from Sentry.
+            Sentry.setUser(null);
+          }
 
-          // Dispatch action to clear auth state.
-          mutationLifeCycleApi.dispatch(clearCredentials());
-
-          // Remove user from Sentry.
-          Sentry.setUser(null);
-
-          // Navigate to login page.
           window.location.replace("/login");
-
-          // Notify user via toast.
           toast.info(
-            "Your session has expired. Please login again to continue."
+            "Your session has expired. Please login again to continue.",
+            {
+              position: "top-center",
+              closeButton: true,
+            }
           );
         }
       },
