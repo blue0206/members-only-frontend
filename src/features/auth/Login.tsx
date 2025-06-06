@@ -76,46 +76,46 @@ export function Login() {
               message: errorDetails.message,
             } satisfies ErrorPageDetailsType,
           });
-        }
-
-        // Conditionally filter out errors specific to Login page
-        // and handle them separately, see the api documentation link:
-        // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#login-user)
-        // Show a generic toast for other errors.
-        switch (errorDetails.code) {
-          case ErrorCodes.UNAUTHORIZED: {
-            // Show error via toast.
-            toast.error(errorDetails.message, {
-              position: "top-center",
-              closeButton: true,
-            });
-
-            // Reset the form fields.
-            form.resetField("username");
-            form.resetField("password");
-            break;
-          }
-          case ErrorCodes.VALUE_TOO_LONG: {
-            // Show error in field if field name is known.
-            if (errorDetails.message.includes("username")) {
-              form.setError("username", {
-                message: errorDetails.message,
-              });
-            } else if (errorDetails.message.includes("password")) {
-              form.setError("password", {
-                message: errorDetails.message,
-              });
-            } else {
-              // Show a toast message if field not known.
+        } else {
+          // Conditionally filter out errors specific to Login page
+          // and handle them separately, see the api documentation link:
+          // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#login-user)
+          // Show a generic toast for other errors.
+          switch (errorDetails.code) {
+            case ErrorCodes.UNAUTHORIZED: {
+              // Show error via toast.
               toast.error(errorDetails.message, {
                 position: "top-center",
                 closeButton: true,
               });
+
+              // Reset the form fields.
+              form.resetField("username");
+              form.resetField("password");
+              break;
             }
-            break;
-          }
-          default: {
-            toast.error(errorDetails.message); // Displayed on bottom-right by default.
+            case ErrorCodes.VALUE_TOO_LONG: {
+              // Show error in field if field name is known.
+              if (errorDetails.message.includes("username")) {
+                form.setError("username", {
+                  message: errorDetails.message,
+                });
+              } else if (errorDetails.message.includes("password")) {
+                form.setError("password", {
+                  message: errorDetails.message,
+                });
+              } else {
+                // Show a toast message if field not known.
+                toast.error(errorDetails.message, {
+                  position: "top-center",
+                  closeButton: true,
+                });
+              }
+              break;
+            }
+            default: {
+              toast.error(errorDetails.message); // Displayed on bottom-right by default.
+            }
           }
         }
 

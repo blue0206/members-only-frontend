@@ -94,52 +94,52 @@ export function Register() {
               message: errorDetails.message,
             } satisfies ErrorPageDetailsType,
           });
-        }
-
-        // Conditionally filter out errors specific to Register page
-        // and handle them separately, see the api documentation link:
-        // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#register-user)
-        // Show a generic toast for other errors.
-        switch (errorDetails.code) {
-          case ErrorCodes.VALUE_TOO_LONG: {
-            // Show error in field if field name is known.
-            if (errorDetails.message.includes("username")) {
-              form.setError("username", {
-                message: errorDetails.message,
-              });
-            } else {
-              // Show a toast message if field not known.
-              toast.error(errorDetails.message, {
-                position: "top-center",
-                closeButton: true,
-              });
-
-              // Reset all form fields.
-              form.reset();
-            }
-            break;
-          }
-          case ErrorCodes.UNIQUE_CONSTRAINT_VIOLATION: {
-            if (errorDetails.message.includes("username")) {
+        } else {
+          // Conditionally filter out errors specific to Register page
+          // and handle them separately, see the api documentation link:
+          // (https://github.com/blue0206/members-only-shared-types/tree/main?tab=readme-ov-file#register-user)
+          // Show a generic toast for other errors.
+          switch (errorDetails.code) {
+            case ErrorCodes.VALUE_TOO_LONG: {
               // Show error in field if field name is known.
-              form.setError("username", {
-                message: errorDetails.message,
-              });
-            } else {
-              // Show a toast message if field not known.
-              toast.error(errorDetails.message, {
-                position: "top-center",
-                closeButton: true,
-              });
+              if (errorDetails.message.includes("username")) {
+                form.setError("username", {
+                  message: errorDetails.message,
+                });
+              } else {
+                // Show a toast message if field not known.
+                toast.error(errorDetails.message, {
+                  position: "top-center",
+                  closeButton: true,
+                });
 
-              // Reset all form fields.
-              form.reset();
+                // Reset all form fields.
+                form.reset();
+              }
+              break;
             }
-            break;
-          }
-          default: {
-            // Show a generic toast for other errors.
-            toast.error(errorDetails.message); // Displayed on bottom-right by default.
+            case ErrorCodes.UNIQUE_CONSTRAINT_VIOLATION: {
+              if (errorDetails.message.includes("username")) {
+                // Show error in field if field name is known.
+                form.setError("username", {
+                  message: errorDetails.message,
+                });
+              } else {
+                // Show a toast message if field not known.
+                toast.error(errorDetails.message, {
+                  position: "top-center",
+                  closeButton: true,
+                });
+
+                // Reset all form fields.
+                form.reset();
+              }
+              break;
+            }
+            default: {
+              // Show a generic toast for other errors.
+              toast.error(errorDetails.message); // Displayed on bottom-right by default.
+            }
           }
         }
       } else if (errorDetails.isValidationError) {
