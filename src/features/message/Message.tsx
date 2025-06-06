@@ -37,6 +37,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
 import EditMessage from "./EditMessage";
+import DeleteMessage from "./DeleteMessage";
 
 type MessagePropsType =
   | {
@@ -56,6 +57,7 @@ function Message(props: MessagePropsType) {
   const authUser = useAppSelector(getUser);
 
   const [editMessageContent, setEditMessageContent] = useState<string>("");
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
 
   // Initialize like fill to blue if user has liked the message, or else default to white.
   const [likeFill, setLikeFill] = useState<string>(
@@ -115,66 +117,216 @@ function Message(props: MessagePropsType) {
     }
 
     return (
-      <Card className="p-5 hover:shadow-md transition-shadow">
-        <div className="space-y-4">
-          {/* We edit message if:
-              1. The user is member and the message is their own message. OR
-              2. The user is admin (and hence, can edit any message).
-          */}
-          {props.editMessageId === messageData.messageId &&
-          accessControlFlags.edit ? (
-            <EditMessage
-              setEditMessageId={props.setEditMessageId}
-              currentMessageId={messageData.messageId}
-              editMessageContent={editMessageContent}
-              setEditMessageContent={setEditMessageContent}
-            />
-          ) : (
-            <>
-              {/* Message Header (Author Details + Options) */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 dark:ring-blue-950">
-                    <AvatarImage
-                      src={user ? user.avatar ?? "" : ""}
-                      loading={"lazy"}
-                      alt="User Avatar"
-                    />
-                    <AvatarFallback>
-                      <User />
-                    </AvatarFallback>
-                  </Avatar>
+      <>
+        <Card className="p-5 hover:shadow-md transition-shadow">
+          <div className="space-y-4">
+            {/* We edit message if:
+                1. The user is member and the message is their own message. OR
+                2. The user is admin (and hence, can edit any message).
+            */}
+            {props.editMessageId === messageData.messageId &&
+            accessControlFlags.edit ? (
+              <EditMessage
+                setEditMessageId={props.setEditMessageId}
+                currentMessageId={messageData.messageId}
+                editMessageContent={editMessageContent}
+                setEditMessageContent={setEditMessageContent}
+              />
+            ) : (
+              <>
+                {/* Message Header (Author Details + Options) */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 dark:ring-blue-950">
+                      <AvatarImage
+                        src={user ? user.avatar ?? "" : ""}
+                        loading={"lazy"}
+                        alt="User Avatar"
+                      />
+                      <AvatarFallback>
+                        <User />
+                      </AvatarFallback>
+                    </Avatar>
 
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      {user ? (
-                        <>
-                          <p className="font-medium">
-                            {user.firstname} {user.middlename} {user.lastname}
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        {user ? (
+                          <>
+                            <p className="font-medium">
+                              {user.firstname} {user.middlename} {user.lastname}
+                            </p>
+                            {getRoleBadge(user.role)}
+                          </>
+                        ) : (
+                          <p className="italic font-medium text-muted-foreground">
+                            Deleted User
                           </p>
-                          {getRoleBadge(user.role)}
-                        </>
-                      ) : (
-                        <p className="italic font-medium text-muted-foreground">
-                          Deleted User
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>{getTimeElapsed(messageData.timestamp)}</span>
+                        )}
                       </div>
-                      {messageData.edited && (
-                        <span className="italic text-xs">(edited)</span>
-                      )}
+
+                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>{getTimeElapsed(messageData.timestamp)}</span>
+                        </div>
+                        {messageData.edited && (
+                          <span className="italic text-xs">(edited)</span>
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Message Options */}
+                  {Object.values(accessControlFlags).some((val) => val) && (
+                    <TooltipProvider>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size={"sm"}
+                            variant={"ghost"}
+                            className="cursor-pointer"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {accessControlFlags.edit && (
+                            <DropdownMenuItem onClick={handleEditOption}>
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Edit Message
+                            </DropdownMenuItem>
+                          )}
+
+                          {accessControlFlags.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+
+                              <DropdownMenuItem
+                                variant={"destructive"}
+                                onClick={() => {
+                                  setDeleteDialog(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Message
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TooltipProvider>
+                  )}
                 </div>
 
-                {/* Message Options */}
-                {Object.values(accessControlFlags).some((val) => val) && (
+                {/* Message Content */}
+                <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
+                  <Markdown remarkPlugins={[remarkGfm]}>
+                    {messageData.message}
+                  </Markdown>
+                </div>
+
+                {/* Message Footer (Like and Bookmark) */}
+                <div className="flex items-center justify-between border-t pt-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={"ghost"}
+                          size={"sm"}
+                          className="flex items-center space-x-1 cursor-pointer"
+                          onClick={handleLikeClick}
+                        >
+                          <ThumbsUp
+                            className={`h-5 w-5 ${
+                              // If the likeFill is not white (i.e., message IS liked), then set text color for icon outline.
+                              likeFill !== "#ffffff" ? "text-blue-500" : ""
+                            } transition-colors duration-200 ease-in-out`}
+                            fill={likeFill}
+                          />
+                          <span>{messageData.likes}</span>
+                        </Button>
+                      </TooltipTrigger>
+
+                      <TooltipContent>
+                        <p className="dark:text-foreground">
+                          Like this message
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={"ghost"}
+                          size={"sm"}
+                          className="cursor-pointer flex items-center space-x-1"
+                          onClick={handleBookmarkClick}
+                        >
+                          <Bookmark
+                            className={`h-5 w-5 transition-colors duration-200 ease-in-out ${
+                              // If the bookmarkFill is not white (i.e., message IS bookmarked), then set text color for icon outline.
+                              bookmarkFill !== "#ffffff" ? "text-amber-500" : ""
+                            }`}
+                            fill={bookmarkFill}
+                          />
+                          <span>{messageData.bookmarks}</span>
+                        </Button>
+                      </TooltipTrigger>
+
+                      <TooltipContent>
+                        <p className="dark:text-foreground">
+                          Bookmark this message
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+
+        {/* Delete Message Modal */}
+        <DeleteMessage
+          setDeleteDialog={setDeleteDialog}
+          deleteDialog={deleteDialog}
+        />
+      </>
+    );
+  } else {
+    const messageData = props.messageData;
+
+    // For Unregistered Users or USER role.
+    return (
+      <>
+        <Card className="p-5 hover:shadow-md transition-shadow">
+          <div className="space-y-4">
+            {/* Message Header (Author Details + Options) */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 dark:ring-blue-950">
+                  <AvatarImage src={undefined} />
+                  <AvatarFallback>?</AvatarFallback>
+                </Avatar>
+
+                <div>
+                  <p className="font-medium text-muted-foreground">
+                    Anonymous Member
+                  </p>
+
+                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{getTimeElapsed(messageData.timestamp)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Options (USER only) */}
+              {authUser?.role === Role.USER &&
+                messageData.userId &&
+                authUser.id === messageData.userId && (
                   <TooltipProvider>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -187,213 +339,93 @@ function Message(props: MessagePropsType) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {accessControlFlags.edit && (
-                          <DropdownMenuItem onClick={handleEditOption}>
-                            <Edit2 className="h-4 w-4 mr-2" />
-                            Edit Message
-                          </DropdownMenuItem>
-                        )}
-
-                        {accessControlFlags.delete && (
-                          <>
-                            <DropdownMenuSeparator />
-
-                            <DropdownMenuItem variant={"destructive"}>
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Message
-                            </DropdownMenuItem>
-                          </>
-                        )}
+                        <DropdownMenuItem
+                          variant={"destructive"}
+                          onClick={() => {
+                            setDeleteDialog(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Message
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TooltipProvider>
                 )}
-              </div>
-
-              {/* Message Content */}
-              <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
-                <Markdown remarkPlugins={[remarkGfm]}>
-                  {messageData.message}
-                </Markdown>
-              </div>
-
-              {/* Message Footer (Like and Bookmark) */}
-              <div className="flex items-center justify-between border-t pt-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={"ghost"}
-                        size={"sm"}
-                        className="flex items-center space-x-1 cursor-pointer"
-                        onClick={handleLikeClick}
-                      >
-                        <ThumbsUp
-                          className={`h-5 w-5 ${
-                            // If the likeFill is not white (i.e., message IS liked), then set text color for icon outline.
-                            likeFill !== "#ffffff" ? "text-blue-500" : ""
-                          } transition-colors duration-200 ease-in-out`}
-                          fill={likeFill}
-                        />
-                        <span>{messageData.likes}</span>
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>
-                      <p className="dark:text-foreground">Like this message</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={"ghost"}
-                        size={"sm"}
-                        className="cursor-pointer flex items-center space-x-1"
-                        onClick={handleBookmarkClick}
-                      >
-                        <Bookmark
-                          className={`h-5 w-5 transition-colors duration-200 ease-in-out ${
-                            // If the bookmarkFill is not white (i.e., message IS bookmarked), then set text color for icon outline.
-                            bookmarkFill !== "#ffffff" ? "text-amber-500" : ""
-                          }`}
-                          fill={bookmarkFill}
-                        />
-                        <span>{messageData.bookmarks}</span>
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>
-                      <p className="dark:text-foreground">
-                        Bookmark this message
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </>
-          )}
-        </div>
-      </Card>
-    );
-  } else {
-    const messageData = props.messageData;
-
-    // For Unregistered Users or USER role.
-    return (
-      <Card className="p-5 hover:shadow-md transition-shadow">
-        <div className="space-y-4">
-          {/* Message Header (Author Details + Options) */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 dark:ring-blue-950">
-                <AvatarImage src={undefined} />
-                <AvatarFallback>?</AvatarFallback>
-              </Avatar>
-
-              <div>
-                <p className="font-medium text-muted-foreground">
-                  Anonymous Member
-                </p>
-
-                <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>{getTimeElapsed(messageData.timestamp)}</span>
-                </div>
-              </div>
             </div>
 
-            {/* Message Options (USER only) */}
-            {authUser?.role === Role.USER &&
-              messageData.userId &&
-              authUser.id === messageData.userId && (
-                <TooltipProvider>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size={"sm"}
-                        variant={"ghost"}
-                        className="cursor-pointer"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem variant={"destructive"}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Message
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TooltipProvider>
-              )}
+            {/* Message Content */}
+            <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
+              <Markdown remarkPlugins={[remarkGfm]}>
+                {messageData.message}
+              </Markdown>
+            </div>
+
+            {/* Message Footer (Like and Bookmark) */}
+            <div className="flex items-center justify-between border-t pt-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      size={"sm"}
+                      className="flex items-center space-x-1 cursor-pointer"
+                      onClick={() => {
+                        if (authUser) {
+                          // Show the modal to become a member.
+                        } else {
+                          toast.warning("Please login to like messages.");
+                        }
+                      }}
+                    >
+                      <ThumbsUp className="h-5 w-5" />
+                      <span>{messageData.likes}</span>
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p className="dark:text-foreground">Like this message</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      size={"sm"}
+                      className="cursor-pointer flex items-center space-x-1"
+                      onClick={() => {
+                        if (authUser) {
+                          // Show the modal to become a member.
+                        } else {
+                          toast.warning("Please login to bookmark messages.");
+                        }
+                      }}
+                    >
+                      <Bookmark className="h-5 w-5" />
+                      <span>{messageData.bookmarks}</span>
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p className="dark:text-foreground">
+                      Bookmark this message
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
+        </Card>
 
-          {/* Message Content */}
-          <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
-            <Markdown remarkPlugins={[remarkGfm]}>
-              {messageData.message}
-            </Markdown>
-          </div>
-
-          {/* Message Footer (Like and Bookmark) */}
-          <div className="flex items-center justify-between border-t pt-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    size={"sm"}
-                    className="flex items-center space-x-1 cursor-pointer"
-                    onClick={() => {
-                      if (authUser) {
-                        // Show the modal to become a member.
-                      } else {
-                        toast.warning("Please login to like messages.");
-                      }
-                    }}
-                  >
-                    <ThumbsUp className="h-5 w-5" />
-                    <span>{messageData.likes}</span>
-                  </Button>
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  <p className="dark:text-foreground">Like this message</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    size={"sm"}
-                    className="cursor-pointer flex items-center space-x-1"
-                    onClick={() => {
-                      if (authUser) {
-                        // Show the modal to become a member.
-                      } else {
-                        toast.warning("Please login to bookmark messages.");
-                      }
-                    }}
-                  >
-                    <Bookmark className="h-5 w-5" />
-                    <span>{messageData.bookmarks}</span>
-                  </Button>
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  <p className="dark:text-foreground">Bookmark this message</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-      </Card>
+        {/* Delete Message Modal */}
+        <DeleteMessage
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+        />
+      </>
     );
   }
 }
