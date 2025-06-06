@@ -8,7 +8,7 @@ import { isApiErrorPayload, isSerializedError } from "@/utils/errorUtils";
 type ErrorType = CustomBaseQueryError | SerializedError | null | undefined;
 
 // Define error details type.
-interface ErrorDetailsType {
+export interface ErrorDetailsType {
   isApiError: boolean;
   isNetworkError: boolean;
   isValidationError: boolean;
@@ -67,11 +67,12 @@ export function useApiErrorHandler(error: ErrorType): ErrorDetailsType {
         case ErrorCodes.VALIDATION_ERROR: {
           if (
             error.message.includes("parameter") ||
-            error.message.includes("query")
+            error.message.includes("query") ||
+            error.message.includes("body")
           ) {
             initialError.isValidationError = true;
-            initialError.message = "Invalid request.";
             initialError.details = error.details;
+            initialError.message = "Invalid request.";
           } else {
             initialError.isValidationError = true;
             initialError.details = error.details;
