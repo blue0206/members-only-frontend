@@ -1,3 +1,4 @@
+import { SortOptions, SortOptionsType } from "@/lib/constants";
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
@@ -39,11 +40,3 @@ export default function sortMessages<
 
   return sortedData as MessageListType;
 }
-
-export const SortOptions = {
-  newest: "newest",
-  oldest: "oldest",
-  mostLikes: "most-likes",
-  mostBookmarks: "most-bookmarks",
-} as const;
-export type SortOptionsType = (typeof SortOptions)[keyof typeof SortOptions];

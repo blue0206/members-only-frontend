@@ -21,10 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowUpDown } from "lucide-react";
-import sortMessages, {
-  SortOptions,
-  SortOptionsType,
-} from "@/utils/messageSort";
+import sortMessages from "@/utils/messageSort";
+import { SortOptions, SortOptionsType } from "@/lib/constants";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
@@ -91,7 +89,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-8">
           <div className="space-y-4">
-            <div className="flex items-center justify-end-safe">
+            <div className="flex items-center justify-end">
               <Select
                 value={sortOption as string}
                 onValueChange={(value) => {
