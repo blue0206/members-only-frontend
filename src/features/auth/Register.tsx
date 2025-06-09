@@ -25,12 +25,15 @@ import { UserPlus, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { logger } from "@/utils/logger";
 import { useRegisterUserMutation } from "@/app/services/authApi";
-import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { ErrorPageDetailsType } from "@/types";
+import { useAppDispatch } from "@/app/hooks";
+import { addNotification } from "../notification/notificationSlice";
 
 export function Register() {
+  const dispatch = useAppDispatch();
+
   // Avatar state.
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
@@ -63,30 +66,31 @@ export function Register() {
   // Handle user registration success.
   useEffect(() => {
     if (isSuccess) {
-      // Navigate to home page.
+      dispatch(
+        addNotification({
+          type: "success",
+          message: (
+            <>
+              <div>Registration successful!</div>
+              <div>
+                <span>Welcome to the club, </span>
+                <span className="font-bold">{data.user?.username}!</span>
+              </div>
+            </>
+          ),
+        })
+      );
+
       void navigate("/", {
         replace: true,
       });
-      // Show success toast.
-      toast.success(
-        <>
-          <div>Registration successful!</div>
-          <div>
-            <span>Welcome to the club, </span>
-            <span className="font-bold">{data.user?.username}!</span>
-          </div>
-        </>
-      );
     }
-  }, [isSuccess, data?.user?.username, navigate]);
+  }, [isSuccess, data?.user?.username, navigate, dispatch]);
 
   // Handle form submission errors.
   useEffect(() => {
-    // Check if error is present.
     if (isError) {
-      // Check if error is an API error.
       if (errorDetails.isApiError) {
-        // Navigate to error page for server errors.
         if (errorDetails.statusCode && errorDetails.statusCode >= 500) {
           void navigate("/error", {
             state: {
@@ -108,12 +112,17 @@ export function Register() {
                 });
               } else {
                 // Show a toast message if field not known.
-                toast.error(errorDetails.message, {
-                  position: "top-center",
-                  closeButton: true,
-                });
+                dispatch(
+                  addNotification({
+                    type: "error",
+                    message: errorDetails.message,
+                    toastOptions: {
+                      position: "top-center",
+                      closeButton: true,
+                    },
+                  })
+                );
 
-                // Reset all form fields.
                 form.reset();
               }
               break;
@@ -126,25 +135,40 @@ export function Register() {
                 });
               } else {
                 // Show a toast message if field not known.
-                toast.error(errorDetails.message, {
-                  position: "top-center",
-                  closeButton: true,
-                });
+                dispatch(
+                  addNotification({
+                    type: "error",
+                    message: errorDetails.message,
+                    toastOptions: {
+                      position: "top-center",
+                      closeButton: true,
+                    },
+                  })
+                );
 
-                // Reset all form fields.
                 form.reset();
               }
               break;
             }
             default: {
               // Show a generic toast for other errors.
-              toast.error(errorDetails.message); // Displayed on bottom-right by default.
+              dispatch(
+                addNotification({
+                  type: "error",
+                  message: errorDetails.message,
+                })
+              );
             }
           }
         }
       } else if (errorDetails.isValidationError) {
         // Show a generic toast for validation errors. They are unlikely as handled by RHF anyways.
-        toast.error(errorDetails.message); // Displayed on bottom-right by default.
+        dispatch(
+          addNotification({
+            type: "error",
+            message: errorDetails.message,
+          })
+        );
 
         // Just to be safe, we also trigger the validation of all fields to show validation errors
         // if they are present.
@@ -167,7 +191,7 @@ export function Register() {
         });
       }
     }
-  }, [errorDetails, isError, navigate, form]);
+  }, [errorDetails, isError, navigate, form, dispatch]);
 
   // Submit the form data by calling the register user mutation.
   const submitHandler = async (data: RegisterRequestDto) => {

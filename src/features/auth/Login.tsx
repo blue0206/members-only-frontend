@@ -28,7 +28,6 @@ import { Button } from "@/components/ui/button";
 import { useLoginUserMutation } from "@/app/services/authApi";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
-import { toast } from "sonner";
 import { useEffect } from "react";
 import { ErrorPageDetailsType } from "@/types";
 import { sessionExpiredQuery } from "@/lib/constants";
@@ -98,12 +97,17 @@ export function Login() {
   // Handle form submission success.
   useEffect(() => {
     if (isSuccess) {
+      dispatch(
+        addNotification({
+          type: "success",
+          message: "Login successful!",
+        })
+      );
       void navigate("/", {
         replace: true,
       });
-      toast.success("Login successful!");
     }
-  }, [isSuccess, navigate]);
+  }, [isSuccess, navigate, dispatch]);
 
   // Handle form submission errors.
   useEffect(() => {
@@ -126,13 +130,17 @@ export function Login() {
           // Show a generic toast for other errors.
           switch (errorDetails.code) {
             case ErrorCodes.UNAUTHORIZED: {
-              // Show error via toast.
-              toast.error(errorDetails.message, {
-                position: "top-center",
-                closeButton: true,
-              });
+              dispatch(
+                addNotification({
+                  type: "error",
+                  message: errorDetails.message,
+                  toastOptions: {
+                    position: "top-center",
+                    closeButton: true,
+                  },
+                })
+              );
 
-              // Reset the form fields.
               form.resetField("username");
               form.resetField("password");
               break;
@@ -149,23 +157,37 @@ export function Login() {
                 });
               } else {
                 // Show a toast message if field not known.
-                toast.error(errorDetails.message, {
-                  position: "top-center",
-                  closeButton: true,
-                });
+                dispatch(
+                  addNotification({
+                    type: "error",
+                    message: errorDetails.message,
+                    toastOptions: {
+                      position: "top-center",
+                      closeButton: true,
+                    },
+                  })
+                );
               }
               break;
             }
             default: {
-              toast.error(errorDetails.message); // Displayed on bottom-right by default.
+              dispatch(
+                addNotification({
+                  type: "error",
+                  message: errorDetails.message,
+                })
+              );
             }
           }
         }
-
-        // Check if error is from failed Validation.
       } else if (errorDetails.isValidationError) {
         // Show a generic toast for validation errors. They are unlikely as handled by RHF anyways.
-        toast.error(errorDetails.message); // Displayed on bottom-right by default.
+        dispatch(
+          addNotification({
+            type: "error",
+            message: errorDetails.message,
+          })
+        );
 
         // Just to be safe, we also trigger the validation of all fields to show validation errors
         // if they are present.
@@ -182,7 +204,7 @@ export function Login() {
         });
       }
     }
-  }, [errorDetails, isError, form, navigate]);
+  }, [errorDetails, isError, form, navigate, dispatch]);
 
   // Submit the form data by calling the login user mutation.
   const submitHandler = async (data: LoginRequestDto): Promise<void> => {
