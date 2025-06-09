@@ -35,11 +35,11 @@ export default function EditMessage({
   useEffect(() => {
     if (isSuccess) {
       reset();
+      props.setEditMessageId(null);
     }
-  }, [isSuccess, reset]);
+  }, [isSuccess, reset, props]);
 
   const handleMessageEdit = async () => {
-    props.setEditMessageId(null);
     await editMessage({
       messageId: props.currentMessageId,
       messageBody: {
