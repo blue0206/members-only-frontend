@@ -2,7 +2,7 @@ import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
 import { ToastT } from "sonner";
 
 interface NotificationType {
-  message: string;
+  message: (() => React.ReactNode) | React.ReactNode;
   type: ToastT["type"];
   id?: string; // If not provided, then set inside addNotification action.
   toastOptions?: Omit<ToastT, "id">;
