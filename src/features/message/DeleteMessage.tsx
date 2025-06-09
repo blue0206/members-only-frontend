@@ -1,3 +1,5 @@
+import { useAppDispatch } from "@/app/hooks";
+import { useDeleteMessageMutation } from "@/app/services/messageApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,10 +18,16 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { GetUserMessagesResponseDto } from "@blue0206/members-only-shared-types";
 import { AlertTriangle, MessageSquareX, X } from "lucide-react";
 import { useMediaQuery } from "react-responsive";
+import { addNotification } from "../notification/notificationSlice";
+import { useNavigate } from "react-router";
+import { isApiErrorPayload, isSerializedError } from "@/utils/errorUtils";
+import { ErrorPageDetailsType } from "@/types";
 
 interface DeleteMessagePropsType {
+  deleteMessageId: GetUserMessagesResponseDto[number]["messageId"];
   deleteDialog: boolean;
   setDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -28,6 +36,56 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
   const isDesktop = useMediaQuery({
     query: "(min-width: 768px)",
   });
+
+  const [deleteMessage, { reset }] = useDeleteMessageMutation();
+  const dispatch = useAppDispatch();
+
+  const navigate = useNavigate();
+
+  // Message delete handler.
+  // Note that the entire error handling is manually performed here because
+  // the message is optimistically deleted and hence, the component is removed
+  // immediately from DOM, hence making all hooks ineffective.
+  const handleMessageDelete = async () => {
+    await deleteMessage(props.deleteMessageId)
+      .unwrap()
+      .then(() => {
+        dispatch(
+          addNotification({
+            type: "success",
+            message: "The message was deleted.",
+            toastOptions: {},
+          })
+        );
+      })
+      .catch((error: unknown) => {
+        if (
+          isSerializedError(error) ||
+          (isApiErrorPayload(error) && error.statusCode < 500)
+        ) {
+          dispatch(
+            addNotification({
+              type: "error",
+              message:
+                "The message could not be deleted. Please try again later.",
+              toastOptions: {},
+            })
+          );
+        } else {
+          void navigate("/error", {
+            state: {
+              statusCode: 500,
+              message:
+                "An error occurred on the server. Please try again later.",
+            } satisfies ErrorPageDetailsType,
+          });
+        }
+      })
+      .finally(() => {
+        reset();
+        props.setDeleteDialog(false);
+      });
+  };
 
   if (isDesktop) {
     return (
@@ -59,7 +117,13 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
               Cancel
             </Button>
 
-            <Button variant={"destructive"} className="cursor-pointer">
+            <Button
+              variant={"destructive"}
+              className="cursor-pointer"
+              onClick={() => {
+                void handleMessageDelete();
+              }}
+            >
               <MessageSquareX className="h-4 w-4 mr-2" />
               Delete Message
             </Button>
@@ -99,7 +163,11 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
               Cancel
             </Button>
           </DrawerClose>
-          <Button variant={"destructive"} className="cursor-pointer">
+          <Button
+            variant={"destructive"}
+            className="cursor-pointer"
+            onClick={() => void handleMessageDelete()}
+          >
             <MessageSquareX className="h-4 w-4 mr-2" />
             Delete Message
           </Button>
