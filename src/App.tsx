@@ -4,6 +4,7 @@ import { Toaster } from "./components/ui/sonner";
 import { useAppSelector } from "./app/hooks";
 import { getTheme } from "./features/ui/uiSlice";
 import { useMediaQuery } from "react-responsive";
+import NotificationsHandler from "./features/notification/NotificationsHandler";
 
 function App() {
   const isDesktop = useMediaQuery({
@@ -19,6 +20,7 @@ function App() {
         position={isDesktop ? "bottom-right" : "top-center"}
         theme={currentTheme}
       />
+      <NotificationsHandler />
     </>
   );
 }
