@@ -292,6 +292,7 @@ function Message(props: MessagePropsType) {
         <DeleteMessage
           setDeleteDialog={setDeleteDialog}
           deleteDialog={deleteDialog}
+          deleteMessageId={messageData.messageId}
         />
       </>
     );
@@ -424,6 +425,7 @@ function Message(props: MessagePropsType) {
         <DeleteMessage
           deleteDialog={deleteDialog}
           setDeleteDialog={setDeleteDialog}
+          deleteMessageId={messageData.messageId}
         />
       </>
     );
