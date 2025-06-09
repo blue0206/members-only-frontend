@@ -5,7 +5,7 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { Header } from "@/components/layout";
 import {
   Card,
@@ -31,8 +31,21 @@ import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { ErrorPageDetailsType } from "@/types";
+import { sessionExpiredQuery } from "@/lib/constants";
+import { useAppDispatch } from "@/app/hooks";
+import {
+  addNotification,
+  removeNotification,
+} from "../notification/notificationSlice";
+import { nanoid } from "@reduxjs/toolkit";
 
 export function Login() {
+  const [searchParams] = useSearchParams();
+  const dispatch = useAppDispatch();
+
+  // Initialize navigation.
+  const navigate = useNavigate();
+
   // Initialize form.
   const form = useForm<LoginRequestDto>({
     resolver: zodResolver(LoginRequestSchema),
@@ -42,15 +55,45 @@ export function Login() {
     },
   });
 
-  // Initialize navigation.
-  const navigate = useNavigate();
-
   // Initialize login user mutation.
   const [loginUser, { isLoading, isSuccess, isError, error }] =
     useLoginUserMutation();
 
   // Get error details from custom hook.
   const errorDetails = useApiErrorHandler(error);
+
+  // Show notification when user logged out as a result of session expiry.
+  useEffect(() => {
+    const redirectReason = searchParams.get("reason");
+    let notificationId = "";
+
+    if (redirectReason && redirectReason === sessionExpiredQuery) {
+      notificationId = nanoid();
+
+      dispatch(
+        addNotification({
+          id: notificationId,
+          message: "Your session has expired. Please login again to continue.",
+          type: "warning",
+          toastOptions: {
+            position: "top-center",
+            closeButton: true,
+            duration: 11000,
+          },
+        })
+      );
+
+      // Replace the current URL with the login page
+      // to get rid of session expiry query param.
+      void navigate("/login", { replace: true });
+    }
+
+    return () => {
+      if (redirectReason && redirectReason === sessionExpiredQuery) {
+        dispatch(removeNotification(notificationId));
+      }
+    };
+  }, [dispatch, navigate, searchParams]);
 
   // Handle form submission success.
   useEffect(() => {
