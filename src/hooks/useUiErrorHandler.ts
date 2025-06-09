@@ -2,7 +2,8 @@ import { useNavigate } from "react-router";
 import { ErrorDetailsType } from "./useApiErrorHandler";
 import { useEffect } from "react";
 import { ErrorPageDetailsType } from "@/types";
-import { toast } from "sonner";
+import { useAppDispatch } from "@/app/hooks";
+import { addNotification } from "@/features/notification/notificationSlice";
 
 interface UiErrorHandlerHookParamsType {
   errorDetails: ErrorDetailsType;
@@ -29,6 +30,7 @@ export default function useUiErrorHandler({
   reset,
 }: UiErrorHandlerHookParamsType) {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (isError) {
@@ -42,11 +44,23 @@ export default function useUiErrorHandler({
             } satisfies ErrorPageDetailsType,
           });
         } else {
-          toast.error(errorDetails.message);
+          dispatch(
+            addNotification({
+              type: "error",
+              message: errorDetails.message,
+              toastOptions: {},
+            })
+          );
         }
         reset();
       } else if (errorDetails.isValidationError) {
-        toast.error(errorDetails.message);
+        dispatch(
+          addNotification({
+            type: "error",
+            message: errorDetails.message,
+            toastOptions: {},
+          })
+        );
         reset();
       } else {
         // Navigate to error page for all other errors.
@@ -59,5 +73,5 @@ export default function useUiErrorHandler({
         reset();
       }
     }
-  }, [errorDetails, isError, navigate, reset]);
+  }, [dispatch, errorDetails, isError, navigate, reset]);
 }
