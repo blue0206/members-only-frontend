@@ -19,7 +19,7 @@ import { isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
-import { toast } from "sonner";
+import { sessionExpiredQuery } from "../../lib/constants";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -306,10 +306,11 @@ const forceLogout = (api: BaseQueryApi): void => {
   api.dispatch(clearCredentials());
   apiSlice.util.resetApiState();
   Sentry.setUser(null);
-  // Redirect to login page and show toast.
-  window.location.replace("/login");
-  toast.info("Your session has expired. Please login again to continue.", {
-    position: "top-center",
-    closeButton: true,
-  });
+
+  logger.warn(
+    "Token refresh failed. Redirecting to login page with reason query param to indicate session expiry."
+  );
+  // Redirect to login page with reason set to session expiry.
+  // The reason will be used to display toast notification.
+  window.location.replace(`/login?reason=${sessionExpiredQuery}`);
 };

@@ -26,7 +26,7 @@ import * as Sentry from "@sentry/react";
 import convertToFormData from "@/utils/convertToFormData";
 import { logger } from "@/utils/logger";
 import { RootState } from "../store";
-import { toast } from "sonner";
+import { sessionExpiredQuery } from "@/lib/constants";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -200,14 +200,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
           mutationLifeCycleApi.dispatch(clearCredentials());
           // Remove user from Sentry.
           Sentry.setUser(null);
-          window.location.replace("/login");
-          toast.info(
-            "Your session has expired. Please login again to continue.",
-            {
-              position: "top-center",
-              closeButton: true,
-            }
+
+          logger.warn(
+            "Token refresh failed. Redirecting to login page with reason query param to indicate session expiry."
           );
+          // Redirect to login page with reason set to session expiry.
+          // The reason will be used to display toast notification.
+          window.location.replace(`/login?reason=${sessionExpiredQuery}`);
         }
       },
     }),

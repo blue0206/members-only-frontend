@@ -13,7 +13,7 @@ import { RootState } from "../store";
 import { ErrorCodes } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "../services/api";
 import { clearCredentials } from "@/features/auth/authSlice";
-import { toast } from "sonner";
+import { sessionExpiredQuery } from "@/lib/constants";
 
 // Initialize the listener middleware.
 const authErrorListenerMiddleware = createListenerMiddleware();
@@ -28,7 +28,7 @@ authErrorListenerMiddleware.startListening({
       Sentry.captureException(
         {
           error: action.payload,
-          message: "An error occurred while processing your request.",
+          message: "An error occurred while processing the request.",
         },
         {
           extra: {
@@ -72,15 +72,13 @@ authErrorListenerMiddleware.startListening({
         listenerApi.dispatch(clearCredentials());
         // Remove user from Sentry.
         Sentry.setUser(null);
-        // Notify user to login again to continue.
-        window.location.replace("/login");
-        toast.info(
-          "Your session has expired. Please login again to continue.",
-          {
-            position: "top-center",
-            closeButton: true,
-          }
+
+        logger.warn(
+          "Error caught in authErrorListenerMiddleware. Redirecting to login page with reason query param to indicate session expiry."
         );
+        // Redirect to login page with reason set to session expiry.
+        // The reason will be used to display toast notification.
+        window.location.replace(`/login?reason=${sessionExpiredQuery}`);
       }
     }
   },
