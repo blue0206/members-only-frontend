@@ -48,7 +48,6 @@ export default function useUiErrorHandler({
             addNotification({
               type: "error",
               message: errorDetails.message,
-              toastOptions: {},
             })
           );
         }
@@ -58,7 +57,6 @@ export default function useUiErrorHandler({
           addNotification({
             type: "error",
             message: errorDetails.message,
-            toastOptions: {},
           })
         );
         reset();

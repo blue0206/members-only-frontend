@@ -5,7 +5,7 @@ interface NotificationType {
   message: string;
   type: ToastT["type"];
   id?: string; // If not provided, then set inside addNotification action.
-  toastOptions: Omit<ToastT, "id">;
+  toastOptions?: Omit<ToastT, "id">;
 }
 
 interface NotificationState {

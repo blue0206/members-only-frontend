@@ -54,7 +54,6 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
           addNotification({
             type: "success",
             message: "The message was deleted.",
-            toastOptions: {},
           })
         );
       })
@@ -68,7 +67,6 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
               type: "error",
               message:
                 "The message could not be deleted. Please try again later.",
-              toastOptions: {},
             })
           );
         } else {
