@@ -1,5 +1,6 @@
 import authSlice from "@/features/auth/authSlice";
 import uiSlice from "@/features/ui/uiSlice";
+import notificationSlice from "@/features/notification/notificationSlice";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { apiSlice } from "./services/api";
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   auth: authSlice,
   ui: uiSlice,
+  notifications: notificationSlice,
 });
 
 // redux-persist config
