@@ -12,9 +12,16 @@ import {
   Role,
 } from "@blue0206/members-only-shared-types";
 import { Bookmark } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getUser } from "../auth/authSlice";
 import { addNotification } from "../notification/notificationSlice";
+import {
+  useAddBookmarkMutation,
+  useRemoveBookmarkMutation,
+} from "@/app/services/userApi";
+import { useNavigate } from "react-router";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import { ErrorPageDetailsType } from "@/types";
 
 interface BookmarkMessagePropsType {
   messageData:
@@ -25,6 +32,31 @@ interface BookmarkMessagePropsType {
 export default function BookmarkMessage(props: BookmarkMessagePropsType) {
   const authUser = useAppSelector(getUser);
   const dispatch = useAppDispatch();
+
+  const [
+    addBookmark,
+    {
+      isSuccess: addBookmarkIsSuccess,
+      isError: addBookmarkIsError,
+      error: addBookmarkError,
+      reset: addBookmarkReset,
+    },
+  ] = useAddBookmarkMutation();
+
+  const [
+    removeBookmark,
+    {
+      isSuccess: removeBookmarkIsSuccess,
+      isError: removeBookmarkIsError,
+      error: removeBookmarkError,
+      reset: removeBookmarkReset,
+    },
+  ] = useRemoveBookmarkMutation();
+
+  const addBookmarkErrorDetails = useApiErrorHandler(addBookmarkError);
+  const removeBookmarkErrorDetails = useApiErrorHandler(removeBookmarkError);
+
+  const navigate = useNavigate();
 
   const [bookmark, setBookmark] = useState<boolean>(
     "bookmarked" in props.messageData && props.messageData.bookmarked
@@ -37,7 +69,87 @@ export default function BookmarkMessage(props: BookmarkMessagePropsType) {
       ? "#ffc107" // Amber if bookmarked, else white.
       : "#ffffff"
   );
-  const handleBookmarkClick = () => {
+
+  // Handle api success.
+  useEffect(() => {
+    if (addBookmarkIsSuccess) {
+      addBookmarkReset();
+    }
+
+    if (removeBookmarkIsSuccess) {
+      removeBookmarkReset();
+    }
+  }, [
+    addBookmarkIsSuccess,
+    removeBookmarkIsSuccess,
+    addBookmarkReset,
+    removeBookmarkReset,
+  ]);
+
+  // Handle api errors.
+  useEffect(() => {
+    // Api error while adding bookmark.
+    if (addBookmarkIsError) {
+      if (
+        addBookmarkErrorDetails.isNetworkError ||
+        (addBookmarkErrorDetails.isApiError &&
+          addBookmarkErrorDetails.statusCode &&
+          addBookmarkErrorDetails.statusCode >= 500)
+      ) {
+        void navigate("/error", {
+          state: {
+            message: addBookmarkErrorDetails.message,
+            statusCode: addBookmarkErrorDetails.statusCode ?? 500,
+          } satisfies ErrorPageDetailsType,
+        });
+      } else {
+        dispatch(
+          addNotification({
+            type: "error",
+            message:
+              "This action could not be completed. Please try again later.",
+          })
+        );
+      }
+      addBookmarkReset();
+    }
+
+    if (removeBookmarkIsError) {
+      if (
+        removeBookmarkErrorDetails.isNetworkError ||
+        (removeBookmarkErrorDetails.isApiError &&
+          removeBookmarkErrorDetails.statusCode &&
+          removeBookmarkErrorDetails.statusCode >= 500)
+      ) {
+        void navigate("/error", {
+          state: {
+            message: removeBookmarkErrorDetails.message,
+            statusCode: removeBookmarkErrorDetails.statusCode ?? 500,
+          } satisfies ErrorPageDetailsType,
+        });
+      } else {
+        dispatch(
+          addNotification({
+            type: "error",
+            message:
+              "This action could not be completed. Please try again later.",
+          })
+        );
+      }
+      removeBookmarkReset();
+    }
+  }, [
+    addBookmarkIsError,
+    removeBookmarkIsError,
+    addBookmarkErrorDetails,
+    removeBookmarkErrorDetails,
+    addBookmarkReset,
+    removeBookmarkReset,
+    dispatch,
+    navigate,
+  ]);
+
+  const bookmarkMessageHandler = async () => {
     // Unregistered Users and USER role cannot bookmark messages.
     if (!authUser) {
       dispatch(
@@ -63,9 +175,25 @@ export default function BookmarkMessage(props: BookmarkMessagePropsType) {
     if (!bookmark) {
       setBookmarkFill("#ffc107");
       setBookmark(true);
+
+      await addBookmark(props.messageData.messageId)
+        .unwrap()
+        .catch(() => {
+          // Reverse UI changes if action fails.
+          setBookmarkFill("#ffffff");
+          setBookmark(false);
+        });
     } else {
       setBookmarkFill("#ffffff");
       setBookmark(false);
+
+      await removeBookmark(props.messageData.messageId)
+        .unwrap()
+        .catch(() => {
+          // Reverse UI changes if action fails.
+          setBookmarkFill("#ffc107");
+          setBookmark(true);
+        });
     }
   };
 
@@ -77,7 +205,9 @@ export default function BookmarkMessage(props: BookmarkMessagePropsType) {
             variant={"ghost"}
             size={"sm"}
             className="cursor-pointer flex items-center space-x-1"
-            onClick={handleBookmarkClick}
+            onClick={() => {
+              void bookmarkMessageHandler();
+            }}
           >
             <Bookmark
               className={`h-5 w-5 transition-colors duration-200 ease-in-out ${
