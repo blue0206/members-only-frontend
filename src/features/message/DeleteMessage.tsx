@@ -134,10 +134,10 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
   return (
     <Drawer open={props.deleteDialog} onOpenChange={props.setDeleteDialog}>
       <DrawerContent className="px-4 py-4">
-        <div className="mx-auto bg-destructive/15 h-12 w-12 rounded-full flex items-center justify-center mb-4">
-          <AlertTriangle className="h-6.5 w-6.5 text-destructive" />
-        </div>
         <DrawerHeader>
+          <div className="mx-auto bg-destructive/15 h-12 w-12 rounded-full flex items-center justify-center mb-4">
+            <AlertTriangle className="h-6.5 w-6.5 text-destructive" />
+          </div>
           <DrawerTitle className="text-center">Delete Message</DrawerTitle>
           <DrawerDescription className="text-center">
             Are you sure you want to delete this message?
