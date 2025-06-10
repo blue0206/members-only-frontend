@@ -7,22 +7,9 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  User,
-  Clock,
-  MoreHorizontal,
-  Edit2,
-  Trash2,
-  ThumbsUp,
-  Bookmark,
-} from "lucide-react";
+import { User, Clock, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
 import { getRoleBadge } from "@/utils/getRoleBadge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,9 +22,10 @@ import { useAppSelector } from "@/app/hooks";
 import { getUser } from "../auth/authSlice";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { toast } from "sonner";
 import EditMessage from "./EditMessage";
 import DeleteMessage from "./DeleteMessage";
+import LikeMessage from "./LikeMessage";
+import BookmarkMessage from "./BookmarkMessage";
 
 type MessagePropsType =
   | {
@@ -59,39 +47,10 @@ function Message(props: MessagePropsType) {
   const [editMessageContent, setEditMessageContent] = useState<string>("");
   const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
 
-  // Initialize like fill to blue if user has liked the message, or else default to white.
-  const [likeFill, setLikeFill] = useState<string>(
-    "liked" in props.messageData && props.messageData.liked
-      ? "#1e90ff"
-      : "#ffffff"
-  );
-  // Initialize bookmark fill to amber if user has bookmarked the message, or else default to white.
-  const [bookmarkFill, setBookmarkFill] = useState<string>(
-    "bookmarked" in props.messageData && props.messageData.bookmarked
-      ? "#ffc107"
-      : "#ffffff"
-  );
-
   const handleEditOption = () => {
     if (props.setEditMessageId) {
       props.setEditMessageId(props.messageData.messageId);
       setEditMessageContent(props.messageData.message);
-    }
-  };
-
-  const handleLikeClick = () => {
-    if (likeFill === "#ffffff") {
-      setLikeFill("#1e90ff");
-    } else {
-      setLikeFill("#ffffff");
-    }
-  };
-
-  const handleBookmarkClick = () => {
-    if (bookmarkFill === "#ffffff") {
-      setBookmarkFill("#ffc107");
-    } else {
-      setBookmarkFill("#ffffff");
     }
   };
 
@@ -227,61 +186,9 @@ function Message(props: MessagePropsType) {
 
                 {/* Message Footer (Like and Bookmark) */}
                 <div className="flex items-center justify-between border-t pt-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={"ghost"}
-                          size={"sm"}
-                          className="flex items-center space-x-1 cursor-pointer"
-                          onClick={handleLikeClick}
-                        >
-                          <ThumbsUp
-                            className={`h-5 w-5 ${
-                              // If the likeFill is not white (i.e., message IS liked), then set text color for icon outline.
-                              likeFill !== "#ffffff" ? "text-blue-500" : ""
-                            } transition-colors duration-200 ease-in-out`}
-                            fill={likeFill}
-                          />
-                          <span>{messageData.likes}</span>
-                        </Button>
-                      </TooltipTrigger>
+                  <LikeMessage messageData={messageData} />
 
-                      <TooltipContent>
-                        <p className="dark:text-foreground">
-                          Like this message
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={"ghost"}
-                          size={"sm"}
-                          className="cursor-pointer flex items-center space-x-1"
-                          onClick={handleBookmarkClick}
-                        >
-                          <Bookmark
-                            className={`h-5 w-5 transition-colors duration-200 ease-in-out ${
-                              // If the bookmarkFill is not white (i.e., message IS bookmarked), then set text color for icon outline.
-                              bookmarkFill !== "#ffffff" ? "text-amber-500" : ""
-                            }`}
-                            fill={bookmarkFill}
-                          />
-                          <span>{messageData.bookmarks}</span>
-                        </Button>
-                      </TooltipTrigger>
-
-                      <TooltipContent>
-                        <p className="dark:text-foreground">
-                          Bookmark this message
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <BookmarkMessage messageData={messageData} />
                 </div>
               </>
             )}
@@ -364,59 +271,9 @@ function Message(props: MessagePropsType) {
 
             {/* Message Footer (Like and Bookmark) */}
             <div className="flex items-center justify-between border-t pt-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={"ghost"}
-                      size={"sm"}
-                      className="flex items-center space-x-1 cursor-pointer"
-                      onClick={() => {
-                        if (authUser) {
-                          // Show the modal to become a member.
-                        } else {
-                          toast.warning("Please login to like messages.");
-                        }
-                      }}
-                    >
-                      <ThumbsUp className="h-5 w-5" />
-                      <span>{messageData.likes}</span>
-                    </Button>
-                  </TooltipTrigger>
+              <LikeMessage messageData={messageData} />
 
-                  <TooltipContent>
-                    <p className="dark:text-foreground">Like this message</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={"ghost"}
-                      size={"sm"}
-                      className="cursor-pointer flex items-center space-x-1"
-                      onClick={() => {
-                        if (authUser) {
-                          // Show the modal to become a member.
-                        } else {
-                          toast.warning("Please login to bookmark messages.");
-                        }
-                      }}
-                    >
-                      <Bookmark className="h-5 w-5" />
-                      <span>{messageData.bookmarks}</span>
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p className="dark:text-foreground">
-                      Bookmark this message
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <BookmarkMessage messageData={messageData} />
             </div>
           </div>
         </Card>
