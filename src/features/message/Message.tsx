@@ -215,8 +215,23 @@ function Message(props: MessagePropsType) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-blue-100 dark:ring-blue-950">
-                  <AvatarImage src={undefined} />
-                  <AvatarFallback>?</AvatarFallback>
+                  {authUser && authUser.id === messageData.userId ? (
+                    <>
+                      <AvatarImage
+                        src={authUser.avatar ?? ""}
+                        loading={"lazy"}
+                        alt="User Avatar"
+                      />
+                      <AvatarFallback>
+                        <User />
+                      </AvatarFallback>
+                    </>
+                  ) : (
+                    <>
+                      <AvatarImage src={undefined} />
+                      <AvatarFallback>?</AvatarFallback>
+                    </>
+                  )}
                 </Avatar>
 
                 <div>
