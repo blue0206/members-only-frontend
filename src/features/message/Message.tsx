@@ -220,10 +220,17 @@ function Message(props: MessagePropsType) {
                 </Avatar>
 
                 <div>
-                  <p className="font-medium text-muted-foreground">
-                    Anonymous Member
-                  </p>
-
+                  {authUser && authUser.id === messageData.userId ? (
+                    <p className="font-medium text-muted-foreground">
+                      {authUser.firstname} {authUser.middlename}{" "}
+                      {authUser.lastname}
+                      {getRoleBadge(authUser.role)}
+                    </p>
+                  ) : (
+                    <p className="font-medium text-muted-foreground">
+                      Anonymous Member
+                    </p>
+                  )}
                   <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     <span>{getTimeElapsed(messageData.timestamp)}</span>
