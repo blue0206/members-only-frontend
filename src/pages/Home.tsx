@@ -25,6 +25,7 @@ import sortMessages from "@/utils/messageSort";
 import { SortOptions, SortOptionsType } from "@/lib/constants";
 import LoginBanner from "@/components/layout/LoginBanner";
 import { useMediaQuery } from "react-responsive";
+import MembershipBanner from "@/components/layout/MembershipBanner";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
@@ -95,6 +96,8 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-8">
           {!isAuth && loginBannerWidthLimit && <LoginBanner />}
+
+          {role === Role.USER && <MembershipBanner />}
 
           <div className="space-y-4">
             <div className="flex items-center justify-end">
