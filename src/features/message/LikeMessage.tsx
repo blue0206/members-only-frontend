@@ -103,6 +103,7 @@ export default function LikeMessage(props: LikeMessagePropsType) {
           })
         );
       }
+      likeReset();
     }
 
     // Api errors while unliking the message.
@@ -128,6 +129,7 @@ export default function LikeMessage(props: LikeMessagePropsType) {
           })
         );
       }
+      unlikeReset();
     }
   }, [
     likeIsError,
@@ -136,6 +138,8 @@ export default function LikeMessage(props: LikeMessagePropsType) {
     unlikeErrorDetails,
     navigate,
     dispatch,
+    likeReset,
+    unlikeReset,
   ]);
 
   const likeMessageHandler = async () => {
