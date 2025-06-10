@@ -7,6 +7,8 @@ import {
   EditUserRequestDto,
   EditUserResponseDto,
   EditUserResponseSchema,
+  GetUserBookmarksResponseDto,
+  GetUserBookmarksResponseSchema,
   GetUserMessagesResponseDto,
   GetUserMessagesResponseSchema,
   MemberRoleUpdateRequestDto,
@@ -218,6 +220,30 @@ export const userApiSlice = apiSlice.injectEndpoints({
           // Roll back the optimistic update.
           mutationLifeCycleApi.dispatch(setUserAvatar(deletedAvatar));
         }
+      },
+    }),
+    getBookmarks: builder.query<GetUserBookmarksResponseDto, void>({
+      query: () => ({
+        url: "/users/bookmarks",
+        method: HttpMethod.GET,
+      }),
+      transformResponse: (
+        result: ApiResponseSuccess<GetUserBookmarksResponseDto>
+      ) => {
+        const parsedResult = GetUserBookmarksResponseSchema.safeParse(
+          result.payload
+        );
+
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+
+        logger.info("Fetched user bookmarks successfully.");
+
+        return parsedResult.data;
       },
     }),
   }),

@@ -50,6 +50,7 @@ const baseQuery = fetchBaseQuery({
       ...commonEndpoints,
       "getMessagesWithAuthor",
       "getUserMessages",
+      "getBookmarks",
     ];
 
     // Add access token to headers if the current endpoint
@@ -299,7 +300,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: customizedBaseQueryWithReauth,
-  tagTypes: ["Messages"],
+  tagTypes: ["Messages", "Bookmarks"],
   endpoints: () => ({}),
 });
 
