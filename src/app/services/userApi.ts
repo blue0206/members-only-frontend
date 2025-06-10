@@ -12,6 +12,7 @@ import {
   GetUserMessagesResponseDto,
   GetUserMessagesResponseSchema,
   MemberRoleUpdateRequestDto,
+  MessageParamsDto,
   ResetPasswordRequestDto,
   Role,
 } from "@blue0206/members-only-shared-types";
@@ -34,6 +35,7 @@ import {
 } from "@/types/api.types";
 import { RootState } from "../store";
 import { toast } from "sonner";
+import { messageApiSlice } from "./messageApi";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -252,6 +254,78 @@ export const userApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: ["Bookmarks"],
     }),
+    addBookmark: builder.mutation<null, MessageParamsDto["messageId"]>({
+      query: (messageId: MessageParamsDto["messageId"]) => ({
+        url: `/users/bookmarks/${messageId.toString()}`,
+        method: HttpMethod.POST,
+        credentials: "include",
+      }),
+      transformResponse: (result: ApiResponseSuccess<null>) => {
+        return result.payload;
+      },
+      onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
+        //-----------------------------OPTIMISTIC UPDATE---------------------------
+
+        // First we check user role to ascertain which endpoint to update (with/without author).
+        const userRole = (mutationLifeCycleApi.getState() as RootState).auth
+          .user?.role;
+        const isMember = userRole === Role.MEMBER || userRole === Role.ADMIN;
+
+        const patchResult = mutationLifeCycleApi.dispatch(
+          messageApiSlice.util.updateQueryData(
+            isMember ? "getMessagesWithAuthor" : "getMessagesWithoutAuthor",
+            undefined,
+            (draft) => {
+              logger.debug(
+                "Running updateQueryData for optimistic update of addBookmark endpoint"
+              );
+
+              if (Array.isArray(draft)) {
+                const messageIndex = draft.findIndex(
+                  (draftMessage) => draftMessage.messageId === queryArgument
+                );
+
+                if (messageIndex === -1) {
+                  logger.warn(
+                    `Message with id ${queryArgument.toString()} not found in cache.`
+                  );
+                } else {
+                  draft[messageIndex].bookmarks += 1;
+
+                  if ("bookmarked" in draft[messageIndex]) {
+                    draft[messageIndex].bookmarked = true;
+                  }
+
+                  logger.info("Optimistically updated the message in cache.");
+                }
+              } else {
+                logger.debug(
+                  "Cache entry for messages not found or not an array."
+                );
+              }
+            }
+          )
+        );
+
+        try {
+          await mutationLifeCycleApi.queryFulfilled;
+
+          logger.info(
+            {
+              user: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+              role: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.role,
+            },
+            "Optimistic update successful, message bookmarked."
+          );
+        } catch (error) {
+          logger.error({ error }, "Optimistic update failed, rolling back...");
+          patchResult.undo();
+        }
+      },
+      invalidatesTags: ["Messages", "Bookmarks"],
+    }),
   }),
 });
 
@@ -264,4 +338,5 @@ export const {
   useSetRoleMutation,
   useDeleteAvatarMutation,
   useGetBookmarksQuery,
+  useAddBookmarkMutation,
 } = userApiSlice;
