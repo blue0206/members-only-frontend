@@ -23,6 +23,7 @@ import {
 import { ArrowUpDown } from "lucide-react";
 import sortMessages from "@/utils/messageSort";
 import { SortOptions, SortOptionsType } from "@/lib/constants";
+import LoginBanner from "@/components/layout/LoginBanner";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
@@ -88,6 +89,8 @@ export default function Home() {
       <Header />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-8">
+          {!isAuth && <LoginBanner />}
+
           <div className="space-y-4">
             <div className="flex items-center justify-end">
               <Select
