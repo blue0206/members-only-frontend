@@ -64,6 +64,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         // Return the response payload conforming to the DTO.
         return parsedResult.data;
       },
+      providesTags: ["Messages"],
     }),
     editUserDetails: builder.mutation<EditUserResponseDto, EditUserRequestDto>({
       query: (body: EditUserRequestDto) => ({
@@ -107,6 +108,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
           authApiSlice.endpoints.tokenRefresh.initiate()
         );
       },
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     // This endpoint serves either of the two use cases:
     // 1. User deleting their own account.
@@ -150,6 +152,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
           toast.success("The user was deleted successfully.");
         }
       },
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     resetPassword: builder.mutation<void, ResetPasswordRequestDto>({
       query: (body: ResetPasswordRequestDto) => ({
@@ -187,7 +190,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         );
       },
       // Invalidate messages endpoint to fetch the new list with author names instead.
-      invalidatesTags: ["Messages"],
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     setRole: builder.mutation<void, SetRoleEndpointQueryType>({
       query: (queryArg: SetRoleEndpointQueryType) => ({
@@ -195,6 +198,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.PATCH,
         credentials: "include",
       }),
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     deleteAvatar: builder.mutation<void, void>({
       query: () => ({
@@ -221,6 +225,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
           mutationLifeCycleApi.dispatch(setUserAvatar(deletedAvatar));
         }
       },
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     getBookmarks: builder.query<GetUserBookmarksResponseDto, void>({
       query: () => ({
@@ -245,6 +250,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
 
         return parsedResult.data;
       },
+      providesTags: ["Bookmarks"],
     }),
   }),
 });
@@ -257,4 +263,5 @@ export const {
   useMemberRoleUpdateMutation,
   useSetRoleMutation,
   useDeleteAvatarMutation,
+  useGetBookmarksQuery,
 } = userApiSlice;

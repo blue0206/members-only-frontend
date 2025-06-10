@@ -270,7 +270,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
           patchResult.undo();
         }
       },
-      invalidatesTags: ["Messages"],
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     deleteMessage: builder.mutation<void, MessageParamsDto["messageId"]>({
       query: (messageId: MessageParamsDto["messageId"]) => ({
@@ -346,7 +346,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
           patchResult.undo();
         }
       },
-      invalidatesTags: ["Messages"],
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     likeMessage: builder.mutation<null, MessageParamsDto["messageId"]>({
       query: (messageId: MessageParamsDto["messageId"]) => ({
@@ -418,7 +418,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
           patchResult.undo();
         }
       },
-      invalidatesTags: ["Messages"],
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
     unlikeMessage: builder.mutation<void, MessageParamsDto["messageId"]>({
       query: (messageId: MessageParamsDto["messageId"]) => ({
@@ -487,7 +487,7 @@ export const messageApiSlice = apiSlice.injectEndpoints({
           patchResult.undo();
         }
       },
-      invalidatesTags: ["Messages"],
+      invalidatesTags: ["Messages", "Bookmarks"],
     }),
   }),
 });
