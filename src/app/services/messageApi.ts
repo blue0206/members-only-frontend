@@ -453,7 +453,10 @@ export const messageApiSlice = apiSlice.injectEndpoints({
                     `Message with id ${queryArgument.toString()} not found in cache.`
                   );
                 } else {
-                  draft[messageIndex].likes -= 1;
+                  draft[messageIndex].likes = Math.max(
+                    0,
+                    draft[messageIndex].likes - 1
+                  );
 
                   if ("liked" in draft[messageIndex]) {
                     draft[messageIndex].liked = false;

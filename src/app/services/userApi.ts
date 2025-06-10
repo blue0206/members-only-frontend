@@ -359,7 +359,10 @@ export const userApiSlice = apiSlice.injectEndpoints({
                     `Message with id ${queryArgument.toString()} not found in cache.`
                   );
                 } else {
-                  draft[messageIndex].bookmarks -= 1;
+                  draft[messageIndex].bookmarks = Math.max(
+                    0,
+                    draft[messageIndex].bookmarks - 1
+                  );
 
                   if ("bookmarked" in draft[messageIndex]) {
                     draft[messageIndex].bookmarked = false;
