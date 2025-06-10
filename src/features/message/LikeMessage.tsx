@@ -71,8 +71,6 @@ export default function LikeMessage(props: LikeMessagePropsType) {
   // Handle api success.
   useEffect(() => {
     if (likeIsSuccess) {
-      setLikeFill("#1e90ff");
-      setLike(true);
       likeReset();
     }
     if (unlikeIsSuccess) {
