@@ -115,8 +115,8 @@ export default function LikeMessage(props: LikeMessagePropsType) {
       ) {
         void navigate("/error", {
           state: {
-            message: likeErrorDetails.message,
-            statusCode: likeErrorDetails.statusCode ?? 500,
+            message: unlikeErrorDetails.message,
+            statusCode: unlikeErrorDetails.statusCode ?? 500,
           } satisfies ErrorPageDetailsType,
         });
       } else {
