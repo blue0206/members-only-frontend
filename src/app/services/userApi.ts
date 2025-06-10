@@ -326,6 +326,75 @@ export const userApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Messages", "Bookmarks"],
     }),
+    removeBookmark: builder.mutation<void, MessageParamsDto["messageId"]>({
+      query: (messageId: MessageParamsDto["messageId"]) => ({
+        url: `/users/bookmarks/${messageId.toString()}`,
+        method: HttpMethod.DELETE,
+        credentials: "include",
+      }),
+      onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
+        //-----------------------------OPTIMISTIC UPDATE---------------------------
+
+        // First we check user role to ascertain which endpoint to update (with/without author).
+        const userRole = (mutationLifeCycleApi.getState() as RootState).auth
+          .user?.role;
+        const isMember = userRole === Role.MEMBER || userRole === Role.ADMIN;
+
+        const patchResult = mutationLifeCycleApi.dispatch(
+          messageApiSlice.util.updateQueryData(
+            isMember ? "getMessagesWithAuthor" : "getMessagesWithoutAuthor",
+            undefined,
+            (draft) => {
+              logger.debug(
+                "Running updateQueryData for optimistic update of removeBookmark endpoint"
+              );
+
+              if (Array.isArray(draft)) {
+                const messageIndex = draft.findIndex(
+                  (draftMessage) => draftMessage.messageId === queryArgument
+                );
+
+                if (messageIndex === -1) {
+                  logger.warn(
+                    `Message with id ${queryArgument.toString()} not found in cache.`
+                  );
+                } else {
+                  draft[messageIndex].bookmarks -= 1;
+
+                  if ("bookmarked" in draft[messageIndex]) {
+                    draft[messageIndex].bookmarked = false;
+                  }
+
+                  logger.info("Optimistically updated the message in cache.");
+                }
+              } else {
+                logger.debug(
+                  "Cache entry for messages not found or not an array."
+                );
+              }
+            }
+          )
+        );
+
+        try {
+          await mutationLifeCycleApi.queryFulfilled;
+
+          logger.info(
+            {
+              user: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+              role: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.role,
+            },
+            "Optimistic update successful, message has been removed from bookmarks."
+          );
+        } catch (error) {
+          logger.error({ error }, "Optimistic update failed, rolling back...");
+          patchResult.undo();
+        }
+      },
+      invalidatesTags: ["Messages", "Bookmarks"],
+    }),
   }),
 });
 
@@ -339,4 +408,5 @@ export const {
   useDeleteAvatarMutation,
   useGetBookmarksQuery,
   useAddBookmarkMutation,
+  useRemoveBookmarkMutation,
 } = userApiSlice;
