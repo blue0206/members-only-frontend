@@ -348,6 +348,77 @@ export const messageApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Messages"],
     }),
+    likeMessage: builder.mutation<null, MessageParamsDto["messageId"]>({
+      query: (messageId: MessageParamsDto["messageId"]) => ({
+        url: `/messages/${messageId.toString()}/like`,
+        method: HttpMethod.POST,
+        credentials: "include",
+      }),
+      transformResponse: (result: ApiResponseSuccess<null>) => {
+        return result.payload;
+      },
+      onQueryStarted: async (queryArgument, mutationLifeCycleApi) => {
+        //-----------------------------OPTIMISTIC UPDATE---------------------------
+
+        // First we check user role to ascertain which endpoint to update (with/without author).
+        const userRole = (mutationLifeCycleApi.getState() as RootState).auth
+          .user?.role;
+        const isMember = userRole === Role.MEMBER || userRole === Role.ADMIN;
+
+        const patchResult = mutationLifeCycleApi.dispatch(
+          messageApiSlice.util.updateQueryData(
+            isMember ? "getMessagesWithAuthor" : "getMessagesWithoutAuthor",
+            undefined,
+            (draft) => {
+              logger.debug(
+                "Running updateQueryData for optimistic update of likeMessage endpoint"
+              );
+
+              if (Array.isArray(draft)) {
+                const messageIndex = draft.findIndex(
+                  (draftMessage) => draftMessage.messageId === queryArgument
+                );
+
+                if (messageIndex === -1) {
+                  logger.warn(
+                    `Message with id ${queryArgument.toString()} not found in cache.`
+                  );
+                } else {
+                  draft[messageIndex].likes += 1;
+                  if ("liked" in draft[messageIndex]) {
+                    draft[messageIndex].liked = true;
+                  }
+
+                  logger.info("Optimistically updated the message in cache.");
+                }
+              } else {
+                logger.debug(
+                  "Cache entry for messages not found or not an array."
+                );
+              }
+            }
+          )
+        );
+
+        try {
+          await mutationLifeCycleApi.queryFulfilled;
+
+          logger.info(
+            {
+              user: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.username,
+              role: (mutationLifeCycleApi.getState() as RootState).auth.user
+                ?.role,
+            },
+            "Optimistic update successful, message liked."
+          );
+        } catch (error) {
+          logger.error({ error }, "Optimistic update failed, rolling back...");
+          patchResult.undo();
+        }
+      },
+      invalidatesTags: ["Messages"],
+    }),
   }),
 });
 
@@ -357,4 +428,5 @@ export const {
   useCreateMessageMutation,
   useEditMessageMutation,
   useDeleteMessageMutation,
+  useLikeMessageMutation,
 } = messageApiSlice;
