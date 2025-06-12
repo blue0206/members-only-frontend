@@ -304,7 +304,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: customizedBaseQueryWithReauth,
-  tagTypes: ["Messages", "Bookmarks"],
+  tagTypes: ["Messages", "Bookmarks", "Users"],
   endpoints: () => ({}),
 });
 

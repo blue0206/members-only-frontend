@@ -9,8 +9,8 @@ import {
   EditUserResponseSchema,
   GetUserBookmarksResponseDto,
   GetUserBookmarksResponseSchema,
-  GetUserMessagesResponseDto,
-  GetUserMessagesResponseSchema,
+  GetUsersResponseSchema,
+  GetUsersResponseDto,
   MemberRoleUpdateRequestDto,
   MessageParamsDto,
   ResetPasswordRequestDto,
@@ -39,18 +39,14 @@ import { messageApiSlice } from "./messageApi";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getUserMessages: builder.query<GetUserMessagesResponseDto, void>({
+    getUsers: builder.query<GetUsersResponseDto, void>({
       query: () => ({
-        url: "/users/messages",
+        url: "/users",
         method: HttpMethod.GET,
       }),
-      transformResponse: (
-        result: ApiResponseSuccess<GetUserMessagesResponseDto>
-      ) => {
+      transformResponse: (result: ApiResponseSuccess<GetUsersResponseDto>) => {
         // Validate the result against schema.
-        const parsedResult = GetUserMessagesResponseSchema.safeParse(
-          result.payload
-        );
+        const parsedResult = GetUsersResponseSchema.safeParse(result.payload);
 
         // Throw error if validation fails.
         if (!parsedResult.success) {
@@ -66,7 +62,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         // Return the response payload conforming to the DTO.
         return parsedResult.data;
       },
-      providesTags: ["Messages"],
+      providesTags: ["Users"],
     }),
     editUserDetails: builder.mutation<EditUserResponseDto, EditUserRequestDto>({
       query: (body: EditUserRequestDto) => ({
@@ -154,7 +150,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
           toast.success("The user was deleted successfully.");
         }
       },
-      invalidatesTags: ["Messages", "Bookmarks"],
+      invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
     resetPassword: builder.mutation<void, ResetPasswordRequestDto>({
       query: (body: ResetPasswordRequestDto) => ({
@@ -200,7 +196,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.PATCH,
         credentials: "include",
       }),
-      invalidatesTags: ["Messages", "Bookmarks"],
+      invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
     deleteAvatar: builder.mutation<void, void>({
       query: () => ({
@@ -402,7 +398,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetUserMessagesQuery,
+  useGetUsersQuery,
   useEditUserDetailsMutation,
   useDeleteUserMutation,
   useResetPasswordMutation,
