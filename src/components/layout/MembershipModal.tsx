@@ -19,7 +19,14 @@ import {
 import { Bookmark, Crown, Edit, Key, Lock, ThumbsUp, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "@/app/hooks";
+import { useMemberRoleUpdateMutation } from "@/app/services/userApi";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import { addNotification } from "@/features/notification/notificationSlice";
+import { useNavigate } from "react-router";
+import { ErrorPageDetailsType } from "@/types";
+import { ErrorCodes } from "@blue0206/members-only-shared-types";
 
 interface MembershipModalPropsType {
   openModal: boolean;
@@ -32,6 +39,85 @@ export default function MembershipModal(props: MembershipModalPropsType) {
   });
 
   const [secretKey, setSecretKey] = useState<string>("");
+  const [formError, setFormError] = useState<string>("");
+
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const [memberRoleUpdate, { isSuccess, isError, error, reset }] =
+    useMemberRoleUpdateMutation();
+  const errorDetails = useApiErrorHandler(error);
+
+  // Handle api success.
+  useEffect(() => {
+    if (isSuccess) {
+      reset();
+      dispatch(
+        addNotification({
+          type: "success",
+          message: "Congratulations! You are now a member.",
+        })
+      );
+      props.setOpenModal(false);
+    }
+  }, [isSuccess, dispatch, props, reset]);
+
+  // Handle api errors.
+  useEffect(() => {
+    if (isError) {
+      if (errorDetails.isApiError) {
+        if (
+          errorDetails.statusCode &&
+          (errorDetails.statusCode >= 500 || errorDetails.statusCode === 404)
+        ) {
+          void navigate("/error", {
+            state: {
+              statusCode: errorDetails.statusCode,
+              message: errorDetails.message,
+            } satisfies ErrorPageDetailsType,
+          });
+        } else {
+          switch (errorDetails.code) {
+            case ErrorCodes.INCORRECT_SECRET_KEY: {
+              setSecretKey("");
+              setFormError(errorDetails.message);
+              break;
+            }
+            default: {
+              dispatch(
+                addNotification({
+                  type: "error",
+                  message: errorDetails.message,
+                })
+              );
+            }
+          }
+        }
+      } else if (errorDetails.isValidationError) {
+        dispatch(
+          addNotification({
+            type: "error",
+            message: errorDetails.message,
+          })
+        );
+      } else {
+        void navigate("/error", {
+          state: {
+            statusCode: errorDetails.statusCode ?? 500,
+            message: errorDetails.message,
+          } satisfies ErrorPageDetailsType,
+        });
+      }
+      reset();
+    }
+  }, [isError, errorDetails, dispatch, navigate, reset]);
+
+  const upgradeHandler = async () => {
+    if (secretKey) {
+      setFormError("");
+      await memberRoleUpdate({ secretKey });
+    }
+  };
 
   if (isDesktop) {
     return (
@@ -104,11 +190,12 @@ export default function MembershipModal(props: MembershipModalPropsType) {
                   value={secretKey}
                   onChange={(e) => {
                     setSecretKey(e.target.value);
+                    if (formError) setFormError("");
                   }}
                 />
                 <Key className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground" />
               </div>
-              <p className="text-destructive text-sm"></p>
+              <p className="text-destructive text-sm">{formError}</p>
             </div>
           </div>
 
@@ -124,7 +211,13 @@ export default function MembershipModal(props: MembershipModalPropsType) {
               Cancel
             </Button>
 
-            <Button className="cursor-pointer" disabled={!secretKey}>
+            <Button
+              className="cursor-pointer"
+              onClick={() => {
+                void upgradeHandler();
+              }}
+              disabled={!secretKey}
+            >
               <Crown className="h-4 w-4 mr-2" />
               Upgrade
             </Button>
@@ -186,11 +279,12 @@ export default function MembershipModal(props: MembershipModalPropsType) {
                 value={secretKey}
                 onChange={(e) => {
                   setSecretKey(e.target.value);
+                  if (formError) setFormError("");
                 }}
               />
               <Key className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground" />
             </div>
-            <p className="text-destructive text-sm"></p>
+            <p className="text-destructive text-sm">{formError}</p>
           </div>
         </div>
 
@@ -208,7 +302,13 @@ export default function MembershipModal(props: MembershipModalPropsType) {
             </Button>
           </DrawerClose>
 
-          <Button className="cursor-pointer" disabled={!secretKey}>
+          <Button
+            className="cursor-pointer"
+            onClick={() => {
+              void upgradeHandler();
+            }}
+            disabled={!secretKey}
+          >
             <Crown className="h-4 w-4 mr-2" />
             Upgrade
           </Button>
