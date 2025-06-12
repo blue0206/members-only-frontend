@@ -120,7 +120,9 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
     result.error.status === 401 &&
     "data" in result.error &&
     isApiResponseError(result.error.data) &&
-    result.error.data.errorPayload.code === ErrorCodes.EXPIRED_TOKEN
+    (result.error.data.errorPayload.code === ErrorCodes.EXPIRED_TOKEN ||
+      result.error.data.errorPayload.code ===
+        ErrorCodes.AUTHENTICATION_REQUIRED)
   ) {
     logger.warn(
       { endpoint: api.endpoint },
