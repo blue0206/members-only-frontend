@@ -60,7 +60,8 @@ authErrorListenerMiddleware.startListening({
         action.payload.code === ErrorCodes.CSRF_TOKEN_MISMATCH ||
         action.payload.code === ErrorCodes.MISSING_CSRF_COOKIE ||
         action.payload.code === ErrorCodes.MISSING_CSRF_HEADER ||
-        action.payload.code === ErrorCodes.INVALID_TOKEN
+        action.payload.code === ErrorCodes.INVALID_TOKEN ||
+        action.payload.code === ErrorCodes.MISSING_REFRESH_TOKEN
       ) {
         // Log the error for development.
         logger.error({ error: action.payload }, action.payload.message);
