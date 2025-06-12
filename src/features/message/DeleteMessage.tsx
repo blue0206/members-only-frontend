@@ -18,7 +18,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { GetUserMessagesResponseDto } from "@blue0206/members-only-shared-types";
+import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types";
 import { AlertTriangle, MessageSquareX, X } from "lucide-react";
 import { useMediaQuery } from "react-responsive";
 import { addNotification } from "../notification/notificationSlice";
@@ -27,7 +27,7 @@ import { isApiErrorPayload, isSerializedError } from "@/utils/errorUtils";
 import { ErrorPageDetailsType } from "@/types";
 
 interface DeleteMessagePropsType {
-  deleteMessageId: GetUserMessagesResponseDto[number]["messageId"];
+  deleteMessageId: GetMessagesResponseDto[number]["messageId"];
   deleteDialog: boolean;
   setDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
