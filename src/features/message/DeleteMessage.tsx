@@ -60,7 +60,9 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
       .catch((error: unknown) => {
         if (
           isSerializedError(error) ||
-          (isApiErrorPayload(error) && error.statusCode < 500)
+          (isApiErrorPayload(error) &&
+            error.statusCode < 500 &&
+            error.statusCode !== 404)
         ) {
           dispatch(
             addNotification({

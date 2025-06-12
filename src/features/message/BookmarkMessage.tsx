@@ -94,7 +94,8 @@ export default function BookmarkMessage(props: BookmarkMessagePropsType) {
         addBookmarkErrorDetails.isNetworkError ||
         (addBookmarkErrorDetails.isApiError &&
           addBookmarkErrorDetails.statusCode &&
-          addBookmarkErrorDetails.statusCode >= 500)
+          (addBookmarkErrorDetails.statusCode >= 500 ||
+            addBookmarkErrorDetails.statusCode === 404))
       ) {
         void navigate("/error", {
           state: {
@@ -119,7 +120,8 @@ export default function BookmarkMessage(props: BookmarkMessagePropsType) {
         removeBookmarkErrorDetails.isNetworkError ||
         (removeBookmarkErrorDetails.isApiError &&
           removeBookmarkErrorDetails.statusCode &&
-          removeBookmarkErrorDetails.statusCode >= 500)
+          (removeBookmarkErrorDetails.statusCode >= 500 ||
+            removeBookmarkErrorDetails.statusCode === 404))
       ) {
         void navigate("/error", {
           state: {

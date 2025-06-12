@@ -91,7 +91,10 @@ export function Register() {
   useEffect(() => {
     if (isError) {
       if (errorDetails.isApiError) {
-        if (errorDetails.statusCode && errorDetails.statusCode >= 500) {
+        if (
+          errorDetails.statusCode &&
+          (errorDetails.statusCode >= 500 || errorDetails.statusCode === 404)
+        ) {
           void navigate("/error", {
             state: {
               statusCode: errorDetails.statusCode,

@@ -86,7 +86,8 @@ export default function LikeMessage(props: LikeMessagePropsType) {
         likeErrorDetails.isNetworkError ||
         (likeErrorDetails.isApiError &&
           likeErrorDetails.statusCode &&
-          likeErrorDetails.statusCode >= 500)
+          (likeErrorDetails.statusCode >= 500 ||
+            likeErrorDetails.statusCode === 404))
       ) {
         void navigate("/error", {
           state: {
@@ -112,7 +113,8 @@ export default function LikeMessage(props: LikeMessagePropsType) {
         unlikeErrorDetails.isNetworkError ||
         (unlikeErrorDetails.isApiError &&
           unlikeErrorDetails.statusCode &&
-          unlikeErrorDetails.statusCode >= 500)
+          (unlikeErrorDetails.statusCode >= 500 ||
+            unlikeErrorDetails.statusCode === 404))
       ) {
         void navigate("/error", {
           state: {
