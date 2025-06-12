@@ -1,6 +1,6 @@
 import { Crown, Star } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useMediaQuery } from "react-responsive";
 import MembershipModal from "./MembershipModal";
 import { useState } from "react";

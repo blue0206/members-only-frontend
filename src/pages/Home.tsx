@@ -25,7 +25,7 @@ import sortMessages from "@/utils/messageSort";
 import { SortOptions, SortOptionsType } from "@/lib/constants";
 import LoginBanner from "@/components/layout/LoginBanner";
 import { useMediaQuery } from "react-responsive";
-import MembershipBanner from "@/components/layout/MembershipBanner";
+import MembershipBanner from "@/features/user/MembershipBanner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 
