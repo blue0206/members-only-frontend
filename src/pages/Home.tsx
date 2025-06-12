@@ -26,11 +26,20 @@ import { SortOptions, SortOptionsType } from "@/lib/constants";
 import LoginBanner from "@/components/layout/LoginBanner";
 import { useMediaQuery } from "react-responsive";
 import MembershipBanner from "@/components/layout/MembershipBanner";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
-  const { data, isSuccess } = useGetMessagesWithAuthorQuery();
+  const { data, isSuccess, isError, error } = useGetMessagesWithAuthorQuery();
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
+
+  const errorDetails = useApiErrorHandler(error);
+  useUiErrorHandler({
+    errorDetails,
+    isError,
+    reset: () => null,
+  });
 
   const sortedData: GetMessagesResponseDto = useMemo(() => {
     return data ? sortMessages<GetMessagesResponseDto>(data, sortOption) : [];
@@ -48,6 +57,11 @@ function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
             editMessageId={editMessageId}
           />
         ))}
+      {(isError || sortedData.length === 0) && (
+        <div className="text-center text-muted-foreground">
+          There are no messages to show.
+        </div>
+      )}
     </>
   );
 }
@@ -58,7 +72,15 @@ function MessagesWithoutAuthor({
 }: {
   sortOption: SortOptionsType;
 }) {
-  const { data, isSuccess } = useGetMessagesWithoutAuthorQuery();
+  const { data, isSuccess, isError, error } =
+    useGetMessagesWithoutAuthorQuery();
+
+  const errorDetails = useApiErrorHandler(error);
+  useUiErrorHandler({
+    errorDetails,
+    isError,
+    reset: () => null,
+  });
 
   const sortedData: GetMessagesWithoutAuthorResponseDto = useMemo(() => {
     return data
@@ -76,6 +98,11 @@ function MessagesWithoutAuthor({
             withAuthor={false}
           />
         ))}
+      {(isError || sortedData.length === 0) && (
+        <div className="text-center text-muted-foreground">
+          There are no messages to show.
+        </div>
+      )}
     </>
   );
 }
