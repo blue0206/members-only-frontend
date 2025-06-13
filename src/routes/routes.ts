@@ -4,7 +4,7 @@ import Error from "@/components/shared/Error";
 import { Login, Register } from "@/features/auth";
 import ProtectedRoute from "./ProtectedRoute";
 import { Role } from "@blue0206/members-only-shared-types";
-import UserManagement from "@/features/user/UserManagement";
+import UserManagement from "@/features/user/manage/UserManagement";
 
 const router = createBrowserRouter([
   {

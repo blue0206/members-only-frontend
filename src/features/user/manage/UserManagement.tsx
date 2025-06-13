@@ -43,7 +43,7 @@ import {
   UserX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getUser } from "../auth/authSlice";
+import { getUser } from "@/features/auth/authSlice";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { useNavigate } from "react-router";
 import { ErrorPageDetailsType } from "@/types";
