@@ -49,3 +49,13 @@ export const getTimeElapsed = (timestamp: string | Date): string => {
   }
   return `${yearsElapsed.toString()} years ago`;
 };
+
+export const getDateFromTimestamp = (timestamp: string | Date): string => {
+  const timestampDate = new Date(timestamp);
+  // DD-MM-YYYY
+  const day = timestampDate.getDate().toString().padStart(2, "0");
+  const month = (timestampDate.getMonth() + 1).toString().padStart(2, "0");
+  const year = timestampDate.getFullYear().toString();
+
+  return `${day}-${month}-${year}`;
+};
