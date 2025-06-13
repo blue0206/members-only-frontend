@@ -28,6 +28,7 @@ import { useMediaQuery } from "react-responsive";
 import MembershipBanner from "@/features/user/MembershipBanner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
+import ScrollButtons from "@/components/shared/ScrollButtons";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
@@ -169,6 +170,7 @@ export default function Home() {
           {isAuth && <MarkdownTextEditor />}
         </div>
       </main>
+      <ScrollButtons />
     </div>
   );
 }
