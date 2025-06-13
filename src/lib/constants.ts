@@ -7,3 +7,4 @@ export const SortOptions = {
 export type SortOptionsType = (typeof SortOptions)[keyof typeof SortOptions];
 
 export const sessionExpiredQuery = "SESSION_EXPIRED";
+export const unauthorizedRedirectionQuery = "UNAUTHORIZED";
