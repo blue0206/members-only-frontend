@@ -25,6 +25,7 @@ import {
   Moon,
   Server,
   Check,
+  ShieldUser,
 } from "lucide-react";
 import { useLogoutUserMutation } from "@/app/services/authApi";
 import { getTheme, setTheme } from "@/features/ui/uiSlice";
@@ -32,6 +33,7 @@ import { getRoleBadge } from "@/utils/getRoleBadge";
 import { useEffect } from "react";
 import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
+import { Role } from "@blue0206/members-only-shared-types";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
@@ -125,14 +127,27 @@ export function Header() {
                     Bookmarks
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
-
                   <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
+
+                  {user?.role === Role.ADMIN && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          void navigate("/admin/user-management");
+                        }}
+                      >
+                        <ShieldUser className="mr-2 h-4 w-4" />
+                        User Management
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
 
                   <DropdownMenuItem
                     variant="destructive"
