@@ -20,7 +20,7 @@ import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { logger } from "@/utils/logger";
-import { EditMessageEndpointQueryType } from "@/types/api.types";
+import { EditMessageEndpointQueryType } from "@/types/";
 import { RootState } from "../store";
 
 export const messageApiSlice = apiSlice.injectEndpoints({

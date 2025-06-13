@@ -32,7 +32,7 @@ import { authApiSlice } from "./authApi";
 import {
   DeleteUserEndpointQueryType,
   SetRoleEndpointQueryType,
-} from "@/types/api.types";
+} from "@/types/";
 import { RootState } from "../store";
 import { toast } from "sonner";
 import { messageApiSlice } from "./messageApi";
