@@ -5,7 +5,7 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { Header } from "@/components/layout";
 import {
   Card,
@@ -30,17 +30,27 @@ import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { useEffect } from "react";
 import { ErrorPageDetailsType } from "@/types";
-import { sessionExpiredQuery } from "@/lib/constants";
+import {
+  sessionExpiredQuery,
+  unauthorizedRedirectionQuery,
+} from "@/lib/constants";
 import { useAppDispatch } from "@/app/hooks";
 import {
   addNotification,
   removeNotification,
 } from "../notification/notificationSlice";
 import { nanoid } from "@reduxjs/toolkit";
+import { UnauthorizedRedirectionStateType } from "@/types/route.types";
 
 export function Login() {
   const [searchParams] = useSearchParams();
   const dispatch = useAppDispatch();
+
+  const location = useLocation();
+  const redirectedFrom: UnauthorizedRedirectionStateType | undefined =
+    location.state
+      ? (location.state as UnauthorizedRedirectionStateType)
+      : undefined;
 
   // Initialize navigation.
   const navigate = useNavigate();
@@ -61,7 +71,8 @@ export function Login() {
   // Get error details from custom hook.
   const errorDetails = useApiErrorHandler(error);
 
-  // Show notification when user logged out as a result of session expiry.
+  // Show notification when user logged out as a result of session expiry
+  // or if the user is redirected for authentication.
   useEffect(() => {
     const redirectReason = searchParams.get("reason");
     let notificationId = "";
@@ -87,12 +98,39 @@ export function Login() {
       void navigate("/login", { replace: true });
     }
 
+    if (redirectReason && redirectReason === unauthorizedRedirectionQuery) {
+      notificationId = nanoid();
+
+      dispatch(
+        addNotification({
+          id: notificationId,
+          message: "Please login to continue.",
+          type: "info",
+          toastOptions: {
+            position: "top-center",
+            closeButton: true,
+            duration: 11000,
+          },
+        })
+      );
+
+      // We persist the state to navigate the user on successful login.
+      void navigate("/login", {
+        replace: true,
+        state: redirectedFrom,
+      });
+    }
+
     return () => {
-      if (redirectReason && redirectReason === sessionExpiredQuery) {
+      if (
+        redirectReason &&
+        (redirectReason === sessionExpiredQuery ||
+          redirectReason === unauthorizedRedirectionQuery)
+      ) {
         dispatch(removeNotification(notificationId));
       }
     };
-  }, [dispatch, navigate, searchParams]);
+  }, [dispatch, navigate, searchParams, redirectedFrom]);
 
   // Handle form submission success.
   useEffect(() => {
@@ -103,11 +141,17 @@ export function Login() {
           message: "Login successful!",
         })
       );
-      void navigate("/", {
-        replace: true,
-      });
+      if (redirectedFrom) {
+        void navigate(redirectedFrom.from.pathname, {
+          replace: true,
+        });
+      } else {
+        void navigate("/", {
+          replace: true,
+        });
+      }
     }
-  }, [isSuccess, navigate, dispatch]);
+  }, [isSuccess, navigate, dispatch, redirectedFrom]);
 
   // Handle form submission errors.
   useEffect(() => {
