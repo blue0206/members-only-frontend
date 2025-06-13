@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getDateFromTimestamp, getTimeElapsed } from "@/utils/timestampFormat";
-import { Role } from "@blue0206/members-only-shared-types";
+import { GetUsersResponseDto, Role } from "@blue0206/members-only-shared-types";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import {
   Calendar,
@@ -54,6 +54,7 @@ import {
   UserStatusFilterOptionsType,
 } from "@/lib/constants";
 import userFilter, { getUserStatus } from "@/utils/userFilter";
+import DeleteUser from "./DeleteUser";
 
 const getRoleIcon = (role: Role) => {
   switch (role) {
@@ -106,6 +107,11 @@ export default function UserManagement() {
   const [statusFilter, setStatusFilter] = useState<UserStatusFilterOptionsType>(
     UserStatusFilterOptions.all
   );
+
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
+  const [deleteUser, setDeleteUser] = useState<
+    GetUsersResponseDto[number] | null
+  >(null);
 
   const authUser = useAppSelector(getUser);
 
@@ -325,7 +331,13 @@ export default function UserManagement() {
                             <Crown className="h-4 w-4 mr-2" />
                             Change Role
                           </DropdownMenuItem>
-                          <DropdownMenuItem variant={"destructive"}>
+                          <DropdownMenuItem
+                            variant={"destructive"}
+                            onClick={() => {
+                              setDeleteDialog(true);
+                              setDeleteUser(user);
+                            }}
+                          >
                             <UserX className="h-4 w-4 mr-2" />
                             Delete User
                           </DropdownMenuItem>
@@ -356,6 +368,12 @@ export default function UserManagement() {
             </Table>
           </div>
         </Card>
+
+        <DeleteUser
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          user={deleteUser}
+        />
       </main>
     </div>
   );
