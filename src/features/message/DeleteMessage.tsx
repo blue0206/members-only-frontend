@@ -100,7 +100,7 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
               Are you sure you want to delete this message?
             </DialogDescription>
           </DialogHeader>
-          <div className="p-4 border rounded-md text-sm bg-destructive/15 text-red-800 dark:text-destructive">
+          <div className="p-4 border rounded-md text-sm bg-destructive/15 text-red-800 dark:text-red-200">
             <p>
               <strong>Warning:</strong> This action cannot be undone.
             </p>
