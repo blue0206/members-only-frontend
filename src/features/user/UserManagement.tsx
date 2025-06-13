@@ -55,6 +55,7 @@ import {
 } from "@/lib/constants";
 import userFilter, { getUserStatus } from "@/utils/userFilter";
 import DeleteUser from "./DeleteUser";
+import ChangeRole from "./ChangeRole";
 
 const getRoleIcon = (role: Role) => {
   switch (role) {
@@ -110,6 +111,11 @@ export default function UserManagement() {
 
   const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
   const [deleteUser, setDeleteUser] = useState<
+    GetUsersResponseDto[number] | null
+  >(null);
+
+  const [changeRoleDialog, setChangeRoleDialog] = useState<boolean>(false);
+  const [changeRoleUser, setChangeRoleUser] = useState<
     GetUsersResponseDto[number] | null
   >(null);
 
@@ -327,7 +333,12 @@ export default function UserManagement() {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setChangeRoleDialog(true);
+                              setChangeRoleUser(user);
+                            }}
+                          >
                             <Crown className="h-4 w-4 mr-2" />
                             Change Role
                           </DropdownMenuItem>
@@ -373,6 +384,12 @@ export default function UserManagement() {
           deleteDialog={deleteDialog}
           setDeleteDialog={setDeleteDialog}
           user={deleteUser}
+        />
+
+        <ChangeRole
+          changeRoleDialog={changeRoleDialog}
+          setChangeRoleDialog={setChangeRoleDialog}
+          user={changeRoleUser}
         />
       </main>
     </div>
