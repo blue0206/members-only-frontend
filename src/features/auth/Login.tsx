@@ -29,7 +29,10 @@ import { useLoginUserMutation } from "@/app/services/authApi";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { useEffect } from "react";
-import { ErrorPageDetailsType } from "@/types";
+import {
+  ErrorPageDetailsType,
+  UnauthorizedRedirectionStateType,
+} from "@/types";
 import {
   sessionExpiredQuery,
   unauthorizedRedirectionQuery,
@@ -40,7 +43,6 @@ import {
   removeNotification,
 } from "../notification/notificationSlice";
 import { nanoid } from "@reduxjs/toolkit";
-import { UnauthorizedRedirectionStateType } from "@/types/route.types";
 
 export function Login() {
   const [searchParams] = useSearchParams();

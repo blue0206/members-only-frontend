@@ -1,8 +1,10 @@
 import { useAppSelector } from "@/app/hooks";
 import { getUserRole, isAuthenticated } from "@/features/auth/authSlice";
 import { unauthorizedRedirectionQuery } from "@/lib/constants";
-import { ErrorPageDetailsType } from "@/types";
-import { UnauthorizedRedirectionStateType } from "@/types/route.types";
+import {
+  ErrorPageDetailsType,
+  UnauthorizedRedirectionStateType,
+} from "@/types";
 import { Role } from "@blue0206/members-only-shared-types";
 import { Navigate, Outlet, useLocation } from "react-router";
 
