@@ -51,7 +51,7 @@ const baseQuery = fetchBaseQuery({
     const accessTokenEndpoints = [
       ...commonEndpoints,
       "getMessagesWithAuthor",
-      "getUserMessages",
+      "getUsers",
       "getBookmarks",
     ];
 
