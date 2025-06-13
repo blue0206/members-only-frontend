@@ -26,7 +26,7 @@ import {
 import { getRoleBadge } from "@/utils/getRoleBadge";
 import { GetUsersResponseDto, Role } from "@blue0206/members-only-shared-types";
 import { Check, Crown, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
 interface ChangeRolePropsType {
@@ -43,6 +43,12 @@ export default function ChangeRole(props: ChangeRolePropsType) {
   const [role, setRole] = useState<Role>(
     props.user ? props.user.role : Role.USER
   );
+
+  useEffect(() => {
+    if (props.user && props.changeRoleDialog) {
+      setRole(props.user.role);
+    }
+  }, [props.user, props.changeRoleDialog]);
 
   if (isDesktop) {
     return (
@@ -72,7 +78,7 @@ export default function ChangeRole(props: ChangeRolePropsType) {
               </div>
             </div>
 
-            <div className="space-y-2 w-full">
+            <div className="space-y-2">
               <p className="text-sm font-medium">New Role</p>
               <Select
                 value={role as string}
@@ -90,6 +96,47 @@ export default function ChangeRole(props: ChangeRolePropsType) {
                   <SelectItem value={Role.USER}>USER</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              {role === Role.ADMIN && (
+                <div className="p-3.5 rounded-md border bg-red-100 text-red-800 dark:bg-destructive/15 dark:text-red-100 border-red-200">
+                  <p className="font-medium">
+                    Administrator permissions include:
+                  </p>
+                  <ul className="list-disc list-inside mt-1">
+                    <li>Delete user messages</li>
+                    <li>Edit user messages</li>
+                    <li>Delete user accounts</li>
+                    <li>Manage user roles</li>
+                    <li>All member permissions</li>
+                  </ul>
+                </div>
+              )}
+              {role === Role.MEMBER && (
+                <div className="p-3.5 rounded-md border bg-blue-100 text-blue-800 border-blue-200 dark:bg-primary/25 dark:text-blue-100">
+                  <p className="font-medium">Member permissions include:</p>
+                  <ul className="list-disc list-inside mt-1">
+                    <li>See message authors</li>
+                    <li>Edit own messages</li>
+                    <li>Bookmark and like messages</li>
+                    <li>Know edited messages</li>
+                    <li>All user permissions</li>
+                  </ul>
+                </div>
+              )}
+              {role === Role.USER && (
+                <div className="p-3.5 rounded-md border bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-100">
+                  <p className="font-medium">User permissions include:</p>
+                  <ul className="list-disc list-inside mt-1">
+                    <li>Post and delete messages</li>
+                    <li>View messages (without authors)</li>
+                    <li>Session management</li>
+                    <li>Update profile</li>
+                    <li>Delete own account</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -140,7 +187,7 @@ export default function ChangeRole(props: ChangeRolePropsType) {
             </div>
           </div>
 
-          <div className="space-y-2 w-full">
+          <div className="space-y-2">
             <p className="text-sm font-medium">New Role</p>
             <Select
               value={role as string}
