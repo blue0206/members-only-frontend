@@ -69,7 +69,13 @@ const baseQuery = fetchBaseQuery({
       // Extract CSRF token from cookie.
       const csrfToken = getCsrfTokenFromCookie();
       // If present, populate header.
-      if (csrfToken) headers.append("x-csrf-token", csrfToken.trim());
+      if (csrfToken) {
+        if (headers.get("x-csrf-token")) {
+          headers.set("x-csrf-token", csrfToken);
+        } else {
+          headers.append("x-csrf-token", csrfToken);
+        }
+      }
     }
 
     return headers;

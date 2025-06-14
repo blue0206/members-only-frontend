@@ -15,7 +15,13 @@ export const setCsrfHeader = (): Headers => {
   // Get CSRF token from cookie.
   const csrfToken = getCsrfTokenFromCookie();
   // Append to headers if present.
-  if (csrfToken) headers.append("x-csrf-token", csrfToken);
+  if (csrfToken) {
+    if (headers.get("x-csrf-token")) {
+      headers.set("x-csrf-token", csrfToken);
+    } else {
+      headers.append("x-csrf-token", csrfToken);
+    }
+  }
   // Return headers.
   return headers;
 };
