@@ -17,12 +17,28 @@ export default function Error() {
   // Set error name based on status code.
   let errorName = "Not Found";
 
-  if (errorDetails.statusCode === 404) {
-    errorName = "Not Found";
-  } else if (errorDetails.statusCode === 403) {
-    errorName = "Forbidden";
-  } else if (errorDetails.statusCode >= 500) {
-    errorName = "Internal Server Error";
+  switch (errorDetails.statusCode) {
+    case 400:
+      errorName = "Bad Request";
+      break;
+    case 401:
+      errorName = "Unauthorized";
+      break;
+    case 403:
+      errorName = "Forbidden";
+      break;
+    case 404:
+      errorName = "Not Found";
+      break;
+    case 409:
+      errorName = "Conflict";
+      break;
+    case 422:
+      errorName = "Unprocessable Entity";
+      break;
+    default:
+      errorName = "Internal Server Error";
+      break;
   }
 
   return (
