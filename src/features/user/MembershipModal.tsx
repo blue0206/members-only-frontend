@@ -27,6 +27,7 @@ import { addNotification } from "@/features/notification/notificationSlice";
 import { useNavigate } from "react-router";
 import { ErrorPageDetailsType } from "@/types";
 import { ErrorCodes } from "@blue0206/members-only-shared-types";
+import { Spinner } from "@/components/ui/spinner";
 
 interface MembershipModalPropsType {
   openModal: boolean;
@@ -44,20 +45,20 @@ export default function MembershipModal(props: MembershipModalPropsType) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const [memberRoleUpdate, { isSuccess, isError, error, reset }] =
+  const [memberRoleUpdate, { isSuccess, isError, error, reset, isLoading }] =
     useMemberRoleUpdateMutation();
   const errorDetails = useApiErrorHandler(error);
 
   // Handle api success.
   useEffect(() => {
     if (isSuccess) {
-      reset();
       dispatch(
         addNotification({
           type: "success",
           message: "Congratulations! You are now a member.",
         })
       );
+      reset();
       props.setOpenModal(false);
     }
   }, [isSuccess, dispatch, props, reset]);
@@ -93,6 +94,7 @@ export default function MembershipModal(props: MembershipModalPropsType) {
             }
           }
         }
+        reset();
       } else if (errorDetails.isValidationError) {
         dispatch(
           addNotification({
@@ -100,6 +102,7 @@ export default function MembershipModal(props: MembershipModalPropsType) {
             message: errorDetails.message,
           })
         );
+        reset();
       } else {
         void navigate("/error", {
           state: {
@@ -107,8 +110,8 @@ export default function MembershipModal(props: MembershipModalPropsType) {
             message: errorDetails.message,
           } satisfies ErrorPageDetailsType,
         });
+        reset();
       }
-      reset();
     }
   }, [isError, errorDetails, dispatch, navigate, reset]);
 
@@ -212,14 +215,20 @@ export default function MembershipModal(props: MembershipModalPropsType) {
             </Button>
 
             <Button
-              className="cursor-pointer"
+              className="cursor-pointer w-[15ch] space-x-2"
               onClick={() => {
                 void upgradeHandler();
               }}
-              disabled={!secretKey}
+              disabled={!secretKey || isLoading}
             >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade
+              {isLoading ? (
+                <Spinner size={"small"} className="text-white" />
+              ) : (
+                <>
+                  <Crown className="h-4 w-4 mr-2" />
+                  <span>Upgrade</span>
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -241,7 +250,7 @@ export default function MembershipModal(props: MembershipModalPropsType) {
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="space-y-6 p-4">
+        <div className="space-y-6 p-4 pb-0">
           <div className="space-y-2">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div className="flex flex-col items-center p-5 rounded-lg bg-blue-50">
@@ -303,14 +312,20 @@ export default function MembershipModal(props: MembershipModalPropsType) {
           </DrawerClose>
 
           <Button
-            className="cursor-pointer"
+            className="cursor-pointer flex items-center justify-center"
             onClick={() => {
               void upgradeHandler();
             }}
-            disabled={!secretKey}
+            disabled={!secretKey || isLoading}
           >
-            <Crown className="h-4 w-4 mr-2" />
-            Upgrade
+            {isLoading ? (
+              <Spinner size={"small"} className="text-white ml-3.5" />
+            ) : (
+              <>
+                <Crown className="h-4 w-4 mr-2" />
+                <span>Upgrade</span>
+              </>
+            )}
           </Button>
         </DrawerFooter>
       </DrawerContent>
