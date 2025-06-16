@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   isAuthenticated,
@@ -34,6 +34,7 @@ import { useEffect } from "react";
 import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { Role } from "@blue0206/members-only-shared-types";
+import { useMediaQuery } from "react-responsive";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
@@ -42,6 +43,10 @@ export function Header() {
   const [logoutUser, { isError, error, reset }] = useLogoutUserMutation();
   const dispatch = useAppDispatch();
   const currentTheme = useAppSelector(getTheme);
+
+  const isDesktop = useMediaQuery({
+    query: "(min-width: 611px)",
+  });
 
   const navigate = useNavigate();
 
@@ -70,7 +75,9 @@ export function Header() {
           <div className="space-x-5 flex items-center">
             <div className="flex items-center space-x-2">
               <Users className="text-primary" />
-              <span className="font-semibold text-lg">Members Only</span>
+              <Link to="/" className="font-semibold text-lg">
+                Members Only
+              </Link>
             </div>
 
             <nav className="hidden md:flex items-center space-x-1">
@@ -162,7 +169,7 @@ export function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
+            ) : isDesktop ? (
               <div className="space-x-4">
                 <Button
                   className="cursor-pointer"
@@ -182,7 +189,7 @@ export function Header() {
                   Register
                 </Button>
               </div>
-            )}
+            ) : null}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
