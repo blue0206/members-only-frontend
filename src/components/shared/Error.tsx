@@ -26,12 +26,14 @@ export default function Error() {
   }
 
   return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center bg-accent">
-      <h1 className="text-5xl mb-5 font-semibold">
+    <div className="w-screen h-screen flex flex-col items-center justify-center bg-accent px-4">
+      <h1 className="text-5xl mb-5 font-semibold text-center">
         {errorDetails.statusCode}: {errorName}
       </h1>
       <div className="flex flex-col items-center gap-5">
-        <p className="text-xl text-gray-500">{errorDetails.message}</p>
+        <p className="text-xl text-gray-500 text-center">
+          {errorDetails.message}
+        </p>
         <Button
           variant={"outline"}
           className="cursor-pointer"
