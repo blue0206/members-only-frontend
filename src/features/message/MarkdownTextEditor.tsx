@@ -115,13 +115,13 @@ export default function MarkdownTextEditor() {
         <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">Supports Markdown</p>
           <Button
-            className="cursor-pointer flex items-center justify-center space-x-2"
+            className="cursor-pointer w-[16ch] sm:w-[18ch] flex items-center justify-center space-x-2"
             disabled={!text.trim() || isLoading}
             onClick={() => void sendHandler()}
           >
             {isLoading ? (
               <Spinner
-                className="text-background dark:text-foreground w-30"
+                className="text-background dark:text-foreground"
                 size={"small"}
               />
             ) : (
