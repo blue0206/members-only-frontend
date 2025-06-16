@@ -56,7 +56,11 @@ export function Header() {
   }, [dispatch, error, isError, reset]);
 
   const logoutHandler = async (): Promise<void> => {
-    await logoutUser();
+    await logoutUser()
+      .unwrap()
+      .then(() => {
+        void navigate("/");
+      });
   };
 
   return (
