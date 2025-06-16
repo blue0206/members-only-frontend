@@ -20,6 +20,10 @@ import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
 import { sessionExpiredQuery } from "../../lib/constants";
+import {
+  transformNonAuthErrorResponse,
+  transformRetryQueryError,
+} from "../utils/transformApiError";
 
 // Instantiate mutex.
 const mutex = new Mutex();
@@ -180,6 +184,13 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 
           // Retry the original request and return result.
           result = await baseQuery(args, api, extraOptions);
+          if (result.error) {
+            return {
+              error: transformRetryQueryError(result.error, api),
+              data: result.data,
+              meta: result.meta,
+            };
+          }
           return result;
         }
       } catch (error) {
@@ -226,81 +237,25 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
       );
 
       result = await baseQuery(args, api, extraOptions);
+      if (result.error) {
+        return {
+          error: transformRetryQueryError(result.error, api),
+          data: result.data,
+          meta: result.meta,
+        };
+      }
+      return result;
     }
   } else if (result.error) {
     // If error is present and is not a Token Expiry error, we
     // transform the error payload here itself instead of having
     // to do the same in transformErrorResponse of every single
     // RTK endpoint.
-    // The error result can have error from either the API itself or
-    // from RTK Query. In case of former, we extract the actual error
-    // payload and return it as part of result, else, we return the
-    // result without any mutation.
-
-    // If the status property is a number and the data property is
-    // an ApiResponseError object, the error is from the API.
-    if (
-      typeof result.error.status === "number" &&
-      typeof result.error.data === "object" &&
-      isApiResponseError(result.error.data)
-    ) {
-      // Since the result structure is confusing, here's a rough layout for its error:
-      // result/
-      // ├──error
-      // |  ├──data
-      // |  |  └──ApiResponseError
-      // │  └──status
-
-      // Capture the error in Sentry.
-      Sentry.captureException(result.error.data.errorPayload, {
-        extra: {
-          endpoint: api.endpoint,
-          requestId: result.error.data.requestId,
-          code: result.error.data.errorPayload.code,
-          statusCode: result.meta?.response?.status,
-        },
-        tags: {
-          errorType: "API",
-          apiCode: result.error.data.errorPayload.code,
-        },
-        user: {
-          id: (api.getState() as RootState).auth.user?.id,
-          username: (api.getState() as RootState).auth.user?.username,
-        },
-      });
-      logger.error({ error: result.error.data.errorPayload }, "API Error");
-
-      // Extract actual error payload and return as part of error
-      // property of result.
-      return {
-        error: result.error.data.errorPayload,
-        data: result.data,
-        meta: result.meta,
-      };
-    } else {
-      // Capture the error in Sentry.
-      Sentry.captureException(result.error, {
-        extra: {
-          endpoint: api.endpoint,
-          status: result.error.status,
-          data: result.error.data,
-        },
-        tags: {
-          errorType: "RTK_QUERY",
-          code: result.error.status,
-        },
-        user: {
-          id: (api.getState() as RootState).auth.user?.id,
-          username: (api.getState() as RootState).auth.user?.username,
-        },
-      });
-
-      logger.error({ error: result.error.data }, "RTK Query Error");
-
-      // Return the result without any mutation since the
-      // error is from RTK Query.
-      return result;
-    }
+    return {
+      error: transformNonAuthErrorResponse(result.error, api),
+      data: result.data,
+      meta: result.meta,
+    };
   }
 
   // If the result is not an error and is not for auto-refresh, return.
