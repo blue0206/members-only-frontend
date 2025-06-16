@@ -1,3 +1,5 @@
+import { useAppDispatch } from "@/app/hooks";
+import { useSetRoleMutation } from "@/app/services/userApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,11 +25,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { addNotification } from "@/features/notification/notificationSlice";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import { ErrorPageDetailsType } from "@/types";
 import { getRoleBadge } from "@/utils/getRoleBadge";
 import { GetUsersResponseDto, Role } from "@blue0206/members-only-shared-types";
 import { Check, Crown, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { useNavigate } from "react-router";
 
 interface ChangeRolePropsType {
   changeRoleDialog: boolean;
@@ -44,11 +51,64 @@ export default function ChangeRole(props: ChangeRolePropsType) {
     props.user ? props.user.role : Role.USER
   );
 
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const [setRoleMutation, { isSuccess, isError, error, reset, isLoading }] =
+    useSetRoleMutation();
+  const errorDetails = useApiErrorHandler(error);
+
+  // Reset the role state when the dialog opens or the user prop changes.
   useEffect(() => {
     if (props.user && props.changeRoleDialog) {
       setRole(props.user.role);
     }
   }, [props.user, props.changeRoleDialog]);
+
+  // Handle api call errors.
+  useEffect(() => {
+    if (isError) {
+      if (errorDetails.isValidationError) {
+        dispatch(
+          addNotification({
+            type: "error",
+            message: errorDetails.message,
+          })
+        );
+      } else {
+        void navigate("/error", {
+          state: {
+            message: errorDetails.message,
+            statusCode: errorDetails.statusCode ?? 500,
+          } satisfies ErrorPageDetailsType,
+        });
+      }
+      reset();
+    }
+  }, [isError, errorDetails, dispatch, navigate, reset]);
+
+  // Handle api call success.
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(
+        addNotification({
+          type: "success",
+          message: "User role updated successfully.",
+        })
+      );
+      reset();
+      props.setChangeRoleDialog(false);
+    }
+  }, [isSuccess, dispatch, props.user, reset, role, props]);
+
+  const updateRoleHandler = async () => {
+    if (props.user) {
+      await setRoleMutation({
+        username: props.user.username,
+        role,
+      });
+    }
+  };
 
   if (isDesktop) {
     return (
@@ -150,9 +210,21 @@ export default function ChangeRole(props: ChangeRolePropsType) {
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <Button className="cursor-pointer">
-              <Check className="h-4 w-4 mr-2" />
-              Update Role
+            <Button
+              className="cursor-pointer w-[15ch] space-x-2"
+              disabled={isLoading}
+              onClick={() => {
+                void updateRoleHandler();
+              }}
+            >
+              {isLoading ? (
+                <Spinner size={"small"} className="text-white" />
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Update Role</span>
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -221,9 +293,21 @@ export default function ChangeRole(props: ChangeRolePropsType) {
               Cancel
             </Button>
           </DrawerClose>
-          <Button className="cursor-pointer">
-            <Check className="h-4 w-4 mr-2" />
-            Update Role
+          <Button
+            className="cursor-pointer flex items-center justify-center"
+            disabled={isLoading}
+            onClick={() => {
+              void updateRoleHandler();
+            }}
+          >
+            {isLoading ? (
+              <Spinner size={"small"} className="text-white" />
+            ) : (
+              <>
+                <Check className="h-4 w-4 mr-2" />
+                <span>Update Role</span>
+              </>
+            )}
           </Button>
         </DrawerFooter>
       </DrawerContent>
