@@ -11,8 +11,25 @@ import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
+import { useMediaQuery } from "react-responsive";
+
+const placeholderTextDesktop = `Write your message in Markdown...
+
+**Bold text**, *italic text*, ~~strikethrough text~~, # headings, and [links](https://example.com) are supported!
+
+You can also use:
+- Lists
+- > Blockquotes
+- \`code snippets\`
+- And much more!`;
+
+const placeholderTextMobile = "Write your message...";
 
 export default function MarkdownTextEditor() {
+  const isDesktop = useMediaQuery({
+    query: "(min-width: 611px)",
+  });
+
   const [text, setText] = useState<string>("");
 
   const [createMessage, { isLoading, isSuccess, reset, error, isError }] =
@@ -71,16 +88,10 @@ export default function MarkdownTextEditor() {
 
           <TabsContent value="edit" className="w-full space-y-4">
             <Textarea
-              className="resize-none min-h-[200px]"
-              placeholder="Write your message in Markdown...
-
-**Bold text**, *italic text*, ~~strikethrough text~~, # headings, and [links](https://example.com) are supported!
-
-You can also use:
-- Lists
-- > Blockquotes
-- `code snippets`
-- And much more!"
+              className="resize-none sm:min-h-[200px] min-h-[100px] overflow-auto max-h-[200px]"
+              placeholder={
+                isDesktop ? placeholderTextDesktop : placeholderTextMobile
+              }
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
@@ -88,7 +99,7 @@ You can also use:
             />
           </TabsContent>
           <TabsContent value="preview">
-            <div className="min-w-full w-full border-input min-h-[200px] dark:bg-input/30 px-3 py-2 rounded-md border bg-transparent shadow-xs prose prose-blue dark:prose-invert lg:prose-lg">
+            <div className="min-w-full w-full border-input sm:min-h-[200px] min-h-[100px] dark:bg-input/30 px-3 py-2 rounded-md border bg-transparent shadow-xs prose prose-blue dark:prose-invert lg:prose-lg">
               {text.trim() ? (
                 <Markdown remarkPlugins={[remarkGfm]}>{text}</Markdown>
               ) : (
