@@ -68,24 +68,15 @@ export default function ChangeRole(props: ChangeRolePropsType) {
   // Handle api call errors.
   useEffect(() => {
     if (isError) {
-      if (errorDetails.isValidationError) {
-        dispatch(
-          addNotification({
-            type: "error",
-            message: errorDetails.message,
-          })
-        );
-      } else {
-        void navigate("/error", {
-          state: {
-            message: errorDetails.message,
-            statusCode: errorDetails.statusCode ?? 500,
-          } satisfies ErrorPageDetailsType,
-        });
-      }
+      void navigate("/error", {
+        state: {
+          message: errorDetails.message,
+          statusCode: errorDetails.statusCode ?? 500,
+        } satisfies ErrorPageDetailsType,
+      });
       reset();
     }
-  }, [isError, errorDetails, dispatch, navigate, reset]);
+  }, [isError, errorDetails, navigate, reset]);
 
   // Handle api call success.
   useEffect(() => {
