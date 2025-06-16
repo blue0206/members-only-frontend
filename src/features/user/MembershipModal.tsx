@@ -26,8 +26,10 @@ import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { addNotification } from "@/features/notification/notificationSlice";
 import { useNavigate } from "react-router";
 import { ErrorPageDetailsType } from "@/types";
-import { ErrorCodes } from "@blue0206/members-only-shared-types";
+import { ErrorCodes, Role } from "@blue0206/members-only-shared-types";
 import { Spinner } from "@/components/ui/spinner";
+import { useTokenRefreshMutation } from "@/app/services/authApi";
+import { updateUserRole } from "../auth/authSlice";
 
 interface MembershipModalPropsType {
   openModal: boolean;
@@ -47,6 +49,7 @@ export default function MembershipModal(props: MembershipModalPropsType) {
 
   const [memberRoleUpdate, { isSuccess, isError, error, reset, isLoading }] =
     useMemberRoleUpdateMutation();
+  const [tokenRefresh] = useTokenRefreshMutation();
   const errorDetails = useApiErrorHandler(error);
 
   // Handle api success.
@@ -58,10 +61,19 @@ export default function MembershipModal(props: MembershipModalPropsType) {
           message: "Congratulations! You are now a member.",
         })
       );
-      reset();
-      props.setOpenModal(false);
+
+      // Refresh access token to get new token with fresh payload.
+      void tokenRefresh()
+        .then(() => {
+          // On successful refresh, close modal and update user's new role in auth state.
+          props.setOpenModal(false);
+          dispatch(updateUserRole(Role.MEMBER));
+        })
+        .finally(() => {
+          reset();
+        });
     }
-  }, [isSuccess, dispatch, props, reset]);
+  }, [isSuccess, dispatch, props, reset, tokenRefresh]);
 
   // Handle api errors.
   useEffect(() => {
