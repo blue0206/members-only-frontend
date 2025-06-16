@@ -212,7 +212,7 @@ export default function ChangeRole(props: ChangeRolePropsType) {
             </Button>
             <Button
               className="cursor-pointer w-[15ch] space-x-2"
-              disabled={isLoading}
+              disabled={isLoading || role === props.user?.role}
               onClick={() => {
                 void updateRoleHandler();
               }}
@@ -251,7 +251,7 @@ export default function ChangeRole(props: ChangeRolePropsType) {
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="space-y-4 p-4">
+        <div className="space-y-4 p-4 pb-0">
           <div className="space-y-2">
             <p className="text-sm font-medium text-center">Current Role</p>
             <div className="flex items-center justify-center">
@@ -295,13 +295,13 @@ export default function ChangeRole(props: ChangeRolePropsType) {
           </DrawerClose>
           <Button
             className="cursor-pointer flex items-center justify-center"
-            disabled={isLoading}
+            disabled={isLoading || role === props.user?.role}
             onClick={() => {
               void updateRoleHandler();
             }}
           >
             {isLoading ? (
-              <Spinner size={"small"} className="text-white" />
+              <Spinner size={"small"} className="text-white ml-3.5" />
             ) : (
               <>
                 <Check className="h-4 w-4 mr-2" />
