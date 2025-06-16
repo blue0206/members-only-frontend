@@ -1,3 +1,5 @@
+import { useAppDispatch } from "@/app/hooks";
+import { useDeleteUserMutation } from "@/app/services/userApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,9 +18,15 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { Spinner } from "@/components/ui/spinner";
+import { addNotification } from "@/features/notification/notificationSlice";
+import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
+import { ErrorPageDetailsType } from "@/types";
 import { GetUsersResponseDto } from "@blue0206/members-only-shared-types";
 import { AlertTriangle, UserX, X } from "lucide-react";
+import { useEffect } from "react";
 import { useMediaQuery } from "react-responsive";
+import { useNavigate } from "react-router";
 
 interface DeleteUserPropsType {
   deleteDialog: boolean;
@@ -30,6 +38,49 @@ export default function DeleteUser(props: DeleteUserPropsType) {
   const isDesktop = useMediaQuery({
     query: "(min-width: 768px)",
   });
+
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const [deleteUser, { isSuccess, isError, error, reset, isLoading }] =
+    useDeleteUserMutation();
+
+  const errorDetails = useApiErrorHandler(error);
+
+  // Handle api call success.
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(
+        addNotification({
+          type: "success",
+          message: "User account deleted successfully.",
+        })
+      );
+      reset();
+      props.setDeleteDialog(false);
+    }
+  }, [isSuccess, dispatch, reset, props]);
+
+  // Handle api call errors.
+  useEffect(() => {
+    if (isError) {
+      void navigate("/error", {
+        state: {
+          message: errorDetails.message,
+          statusCode: errorDetails.statusCode ?? 500,
+        } satisfies ErrorPageDetailsType,
+      });
+      reset();
+    }
+  }, [isError, errorDetails, reset, navigate]);
+
+  const deleteUserHandler = async () => {
+    if (props.user) {
+      await deleteUser({
+        username: props.user.username,
+      });
+    }
+  };
 
   if (isDesktop) {
     return (
@@ -69,9 +120,22 @@ export default function DeleteUser(props: DeleteUserPropsType) {
               Cancel
             </Button>
 
-            <Button variant={"destructive"} className="cursor-pointer">
-              <UserX className="h-4 w-4 mr-2" />
-              Delete User
+            <Button
+              variant={"destructive"}
+              className="cursor-pointer w-[16ch] space-x-2"
+              disabled={isLoading}
+              onClick={() => {
+                void deleteUserHandler();
+              }}
+            >
+              {isLoading ? (
+                <Spinner size={"small"} className="text-white" />
+              ) : (
+                <>
+                  <UserX className="h-4 w-4" />
+                  <span>Delete User</span>
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -120,9 +184,22 @@ export default function DeleteUser(props: DeleteUserPropsType) {
             </Button>
           </DrawerClose>
 
-          <Button variant={"destructive"} className="cursor-pointer">
-            <UserX className="h-4 w-4 mr-2" />
-            Delete User
+          <Button
+            variant={"destructive"}
+            className="cursor-pointer flex items-center justify-center"
+            disabled={isLoading}
+            onClick={() => {
+              void deleteUserHandler();
+            }}
+          >
+            {isLoading ? (
+              <Spinner size={"small"} className="text-white ml-3.5" />
+            ) : (
+              <>
+                <UserX className="h-4 w-4 mr-2" />
+                <span>Delete User</span>
+              </>
+            )}
           </Button>
         </DrawerFooter>
       </DrawerContent>

@@ -34,7 +34,6 @@ import {
   SetRoleEndpointQueryType,
 } from "@/types/";
 import { RootState } from "../store";
-import { toast } from "sonner";
 import { messageApiSlice } from "./messageApi";
 
 export const userApiSlice = apiSlice.injectEndpoints({
@@ -145,9 +144,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
           Sentry.setUser(null);
           // Navigate to login page.
           window.location.replace("/login");
-        } else {
-          // Notify ADMIN that the user has been deleted successfully.
-          toast.success("The user was deleted successfully.");
         }
       },
       invalidatesTags: ["Messages", "Bookmarks", "Users"],
