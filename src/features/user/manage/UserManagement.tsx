@@ -317,43 +317,44 @@ export default function UserManagement() {
                       </Badge>
                     </TableCell>
 
-                    <TableCell
-                      className="text-right"
-                      hidden={user.id === authUser?.id}
-                    >
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant={"ghost"}
-                            size={"sm"}
-                            className="h-8 w-8 p-0"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                    <TableCell className="text-right">
+                      {user.id === authUser?.id ? (
+                        <></>
+                      ) : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant={"ghost"}
+                              size={"sm"}
+                              className="h-8 w-8 p-0"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setChangeRoleDialog(true);
-                              setChangeRoleUser(user);
-                            }}
-                          >
-                            <Crown className="h-4 w-4 mr-2" />
-                            Change Role
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant={"destructive"}
-                            onClick={() => {
-                              setDeleteDialog(true);
-                              setDeleteUser(user);
-                            }}
-                          >
-                            <UserX className="h-4 w-4 mr-2" />
-                            Delete User
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setChangeRoleDialog(true);
+                                setChangeRoleUser(user);
+                              }}
+                            >
+                              <Crown className="h-4 w-4 mr-2" />
+                              Change Role
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant={"destructive"}
+                              onClick={() => {
+                                setDeleteDialog(true);
+                                setDeleteUser(user);
+                              }}
+                            >
+                              <UserX className="h-4 w-4 mr-2" />
+                              Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
