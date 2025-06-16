@@ -69,15 +69,9 @@ export function Register() {
       dispatch(
         addNotification({
           type: "success",
-          message: (
-            <>
-              <div>Registration successful!</div>
-              <div>
-                <span>Welcome to the club, </span>
-                <span className="font-bold">{data.user?.username}!</span>
-              </div>
-            </>
-          ),
+          message: `Registration successful! Welcome to the club${
+            data.user ? `, @${data.user.username}` : "!"
+          }`,
         })
       );
 
@@ -85,7 +79,7 @@ export function Register() {
         replace: true,
       });
     }
-  }, [isSuccess, data?.user?.username, navigate, dispatch]);
+  }, [isSuccess, data?.user, navigate, dispatch]);
 
   // Handle form submission errors.
   useEffect(() => {
