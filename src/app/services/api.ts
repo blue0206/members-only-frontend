@@ -13,7 +13,7 @@ import {
   RefreshResponseDto,
   RefreshResponseSchema,
 } from "@blue0206/members-only-shared-types";
-import { clearCredentials, updateAccessToken } from "@/features/auth/authSlice";
+import { clearCredentials, setCredentials } from "@/features/auth/authSlice";
 import { CustomBaseQueryError, HttpMethod } from "@/types";
 import { isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
@@ -180,7 +180,15 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
           );
 
           // Refresh was successful, dispatch the access token.
-          api.dispatch(updateAccessToken(parsedResult.accessToken));
+          api.dispatch(
+            setCredentials({
+              accessToken: parsedResult.accessToken,
+              authStatus: true,
+              user: {
+                ...parsedResult,
+              },
+            })
+          );
 
           // Retry the original request and return result.
           result = await baseQuery(args, api, extraOptions);

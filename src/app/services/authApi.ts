@@ -20,7 +20,6 @@ import {
   AuthState,
   clearCredentials,
   setCredentials,
-  updateAccessToken,
 } from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import convertToFormData from "@/utils/convertToFormData";
@@ -164,7 +163,15 @@ export const authApiSlice = apiSlice.injectEndpoints({
           );
 
           // Dispatch action to update the access token in auth state.
-          mutationLifeCycleApi.dispatch(updateAccessToken(data.accessToken));
+          mutationLifeCycleApi.dispatch(
+            setCredentials({
+              accessToken: data.accessToken,
+              authStatus: true,
+              user: {
+                ...data,
+              },
+            })
+          );
 
           // Set user in Sentry.
           Sentry.setUser({
