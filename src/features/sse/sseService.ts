@@ -141,6 +141,7 @@ class SseService {
               UserEventPayloadSchema.parse(parsedData);
             logger.info("SSE: USER_EVENT Payload received.", payload);
 
+            this.handleUserEvent(state, dispatch);
             break;
           }
           case SseEventNames.MESSAGE_EVENT: {
@@ -276,6 +277,15 @@ class SseService {
           apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
         );
       }
+    }
+  }
+
+  private handleUserEvent(state: RootState, dispatch: AppDispatch) {
+    // Currently, there is only one event concerned with the User list: User Registration.
+    // Hence we just check if the user receiving this event is admin and update their
+    // Users list by invalidating tags.
+    if (state.auth.user?.role === Role.ADMIN) {
+      dispatch(apiSlice.util.invalidateTags(["Users"]));
     }
   }
 }
