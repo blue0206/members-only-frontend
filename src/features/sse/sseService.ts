@@ -280,6 +280,14 @@ class SseService {
         );
         break;
       }
+      case EventReason.USER_DELETED: {
+        // In this case, the user has deleted their account.
+        // All we need to do is refresh the cache of all users.
+        dispatch(
+          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+        );
+        break;
+      }
       default: {
         logger.warn("SSE: Unhandled event reason: ", payload.reason);
       }
