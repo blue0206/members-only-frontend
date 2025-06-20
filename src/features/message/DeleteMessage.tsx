@@ -25,6 +25,7 @@ import { addNotification } from "../notification/notificationSlice";
 import { useNavigate } from "react-router";
 import { isApiErrorPayload, isSerializedError } from "@/utils/errorUtils";
 import { ErrorPageDetailsType } from "@/types";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DeleteMessagePropsType {
   deleteMessageId: GetMessagesResponseDto[number]["messageId"];
@@ -37,7 +38,7 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
     query: "(min-width: 768px)",
   });
 
-  const [deleteMessage, { reset }] = useDeleteMessageMutation();
+  const [deleteMessage, { reset, isLoading }] = useDeleteMessageMutation();
   const dispatch = useAppDispatch();
 
   const navigate = useNavigate();
@@ -119,13 +120,20 @@ export default function DeleteMessage(props: DeleteMessagePropsType) {
 
             <Button
               variant={"destructive"}
-              className="cursor-pointer"
+              className="cursor-pointer w-[18ch] space-x-2"
+              disabled={isLoading}
               onClick={() => {
                 void handleMessageDelete();
               }}
             >
-              <MessageSquareX className="h-4 w-4 mr-2" />
-              Delete Message
+              {isLoading ? (
+                <Spinner size={"small"} className="text-white" />
+              ) : (
+                <>
+                  <MessageSquareX className="h-4 w-4 mr-2" />
+                  <span>Delete Message</span>
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,6 @@
 import { useEditMessageMutation } from "@/app/services/messageApi";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
@@ -20,7 +21,7 @@ export default function EditMessage({
   ...props
 }: EditMessagePropsType) {
   // Message Edit Mutation
-  const [editMessage, { isSuccess, reset, isError, error }] =
+  const [editMessage, { isSuccess, reset, isError, error, isLoading }] =
     useEditMessageMutation();
   const errorDetails = useApiErrorHandler(error);
 
@@ -72,11 +73,18 @@ export default function EditMessage({
 
         <Button
           size={"sm"}
-          className="cursor-pointer"
+          className="cursor-pointer w-[15ch] space-x-2"
           onClick={() => void handleMessageEdit()}
+          disabled={isLoading}
         >
-          <Check className="h-4 w-4 mr-1" />
-          Save Changes
+          {isLoading ? (
+            <Spinner size={"small"} className="text-white" />
+          ) : (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              <span>Save Changes</span>
+            </>
+          )}
         </Button>
       </div>
     </>
