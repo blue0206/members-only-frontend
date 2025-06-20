@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import { Role } from "@blue0206/members-only-shared-types";
 import UserManagement from "@/features/user/manage/UserManagement";
 import Bookmarks from "@/features/user/bookmarks/Bookmarks";
+import ProfileSettings from "@/features/user/profile/ProfileSettings";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,16 @@ const router = createBrowserRouter([
   {
     path: "/error",
     Component: Error,
+  },
+  {
+    Component: () =>
+      ProtectedRoute({ allowedRoles: [Role.USER, Role.MEMBER, Role.ADMIN] }),
+    children: [
+      {
+        path: "/profile-settings",
+        Component: ProfileSettings,
+      },
+    ],
   },
   {
     Component: () =>
