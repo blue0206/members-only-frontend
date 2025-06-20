@@ -251,17 +251,6 @@ class SseService {
 
         break;
       }
-      case EventReason.USER_UPDATED: {
-        // This event refers to 2 possible reasons:
-        // 1. The user has updated their profile.
-        // 2. The user has deleted their avatar.
-        // In both cases, we need to invalidate the RTK cache for
-        // all users receiving this event.
-        dispatch(
-          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
-        );
-        break;
-      }
       case EventReason.USER_DELETED_BY_ADMIN: {
         // In this case, the ADMIN has deleted a user.
         // There are two main tasks to perform:
@@ -280,24 +269,12 @@ class SseService {
         );
         break;
       }
-      case EventReason.USER_DELETED: {
-        // In this case, the user has deleted their account.
-        // All we need to do is refresh the cache of all users.
-        dispatch(
-          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
-        );
-        break;
-      }
-      case EventReason.MEMBER_UPDATE: {
-        // In this case, the user has become a member.
-        // We refresh the cache of all users.
-        dispatch(
-          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
-        );
-        break;
-      }
       default: {
-        logger.warn("SSE: Unhandled event reason: ", payload.reason);
+        // For all other cases, we need only invalidate tags to refresh the
+        // cache of users so that they can see the updated data.
+        dispatch(
+          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+        );
       }
     }
   }
