@@ -1,14 +1,18 @@
-import { AppStore, RootState } from "@/app/store";
+import { apiSlice } from "@/app/services/api";
+import { AppDispatch, AppStore, RootState } from "@/app/store";
 import { logger } from "@/utils/logger";
 import {
+  EventReason,
   MessageEventPayloadDto,
   MessageEventPayloadSchema,
   MultiEventPayloadDto,
   MultiEventPayloadSchema,
+  Role,
   SseEventNames,
   UserEventPayloadDto,
   UserEventPayloadSchema,
 } from "@blue0206/members-only-shared-types";
+import { addNotification } from "../notification/notificationSlice";
 import { authApiSlice } from "@/app/services/authApi";
 import * as Sentry from "@sentry/react";
 
@@ -120,11 +124,15 @@ class SseService {
       try {
         const parsedData: unknown = JSON.parse(rawEvent.data);
 
+        const dispatch: AppDispatch = this.storeRef.dispatch;
+
         switch (eventName) {
           case SseEventNames.MULTI_EVENT: {
             const payload: MultiEventPayloadDto =
               MultiEventPayloadSchema.parse(parsedData);
             logger.info("SSE: MULTI_EVENT Payload received.", payload);
+
+            this.handleMultiEvent(payload, state, dispatch);
             break;
           }
           case SseEventNames.USER_EVENT: {
@@ -188,6 +196,63 @@ class SseService {
       this.eventSource.close();
       this.eventSource = null;
       this.currentToken = null;
+    }
+  }
+
+  private handleMultiEvent(
+    payload: MultiEventPayloadDto,
+    state: RootState,
+    dispatch: AppDispatch
+  ) {
+    switch (payload.reason) {
+      case EventReason.ROLE_CHANGE: {
+        // In this case, the ADMIN has set the role of another user.
+        // There are two main tasks to perform:
+        // 1. Invalidate affected RTK caches for all users receiving
+        //    this event to ensure their data is fresh.
+        // 2. If the user receiving this event is the affected user,
+        //    then we notify the user with a toast.
+        if (payload.targetId === state.auth.user?.id) {
+          if (state.auth.user?.role === Role.USER) {
+            // If the affected user has USER role, then we'd need to manually refresh
+            // their token so that they can access and fetch MEMBER/ADMIN data.
+            // MEMBER/ADMIN data can access all data (and hence the fetching is automatic)
+            // but the reverse is not true for USER and hence we give a little 'push' with a refresh.
+            dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
+              .then(() => {
+                dispatch(
+                  addNotification({
+                    type: "info",
+                    message: `Your role has been changed to ${
+                      payload.targetUserRole ?? ""
+                    } by @${payload.originUsername ?? ""}`,
+                  })
+                );
+              })
+              .catch((e: unknown) => {
+                logger.error("SSE MULTI_EVENT: Error refreshing token.", e);
+              });
+          } else {
+            dispatch(
+              addNotification({
+                type: "info",
+                message: `Your role has been changed to ${
+                  payload.targetUserRole ?? ""
+                } by @${payload.originUsername ?? ""}`,
+              })
+            );
+          }
+        }
+
+        dispatch(
+          apiSlice.util.invalidateTags(["Messages", "Users", "Bookmarks"])
+        );
+
+        break;
+      }
+      default: {
+        logger.warn("SSE: Unhandled event reason: ", payload.reason);
+      }
     }
   }
 }
