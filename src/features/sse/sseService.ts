@@ -10,6 +10,7 @@ import {
   UserEventPayloadSchema,
 } from "@blue0206/members-only-shared-types";
 import { authApiSlice } from "@/app/services/authApi";
+import * as Sentry from "@sentry/react";
 
 class SseService {
   private eventSource: EventSource | null = null;
@@ -78,32 +79,26 @@ class SseService {
 
       if (this.REAUTH_TRIES < this.MAX_REAUTH_TRIES && this.storeRef) {
         // We only attempt refresh if we have not reached the maximum number of reauth tries.
-        try {
-          logger.info("SSE: Attempting refresh.");
+        logger.info("SSE: Attempting refresh.");
 
-          this.storeRef
-            .dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
-            .then(() => {
-              logger.info("SSE: Refresh successful.");
-            })
-            .catch((e: unknown) => {
-              logger.error(
-                `SSE: Refresh unsuccessful. ${(
-                  this.MAX_REAUTH_TRIES -
-                  this.REAUTH_TRIES -
-                  1
-                ).toString()} attempts left`,
-                e
-              );
-            });
-        } catch (error) {
-          logger.error(
-            "SSE: Reauth failed. Cannot start SSE connection.",
-            error
-          );
-        } finally {
-          this.REAUTH_TRIES++;
-        }
+        this.storeRef
+          .dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
+          .then(() => {
+            logger.info("SSE: Refresh successful.");
+          })
+          .catch((e: unknown) => {
+            logger.error(
+              `SSE: Refresh unsuccessful. ${(
+                this.MAX_REAUTH_TRIES -
+                this.REAUTH_TRIES -
+                1
+              ).toString()} attempts left`,
+              e
+            );
+          })
+          .finally(() => {
+            this.REAUTH_TRIES++;
+          });
       } else {
         logger.error(
           "SSE: Max reauth attempts reached or store not initialized. Cannot start SSE connection."
@@ -112,7 +107,7 @@ class SseService {
       }
     };
 
-    //
+    // Handles incoming SSE events.
     const sseEventHandler = (
       eventName: string,
       rawEvent: MessageEvent<string>
@@ -154,6 +149,13 @@ class SseService {
         logger.error("SSE: Error processing event data: ", error, {
           eventName,
           data: rawEvent.data,
+        });
+
+        Sentry.captureException(error, {
+          extra: {
+            eventName,
+            data: rawEvent.data,
+          },
         });
       }
     };
