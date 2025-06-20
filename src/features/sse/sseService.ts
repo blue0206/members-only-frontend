@@ -1,4 +1,4 @@
-import { AppStore, RootState, store } from "@/app/store";
+import { AppStore, RootState } from "@/app/store";
 import { logger } from "@/utils/logger";
 import {
   MessageEventPayloadDto,
@@ -40,7 +40,7 @@ class SseService {
       return;
     }
 
-    const state: RootState = store.getState();
+    const state: RootState = this.storeRef.getState();
     const newToken = state.auth.accessToken;
 
     if (!state.auth.authStatus || !newToken) {
@@ -76,12 +76,12 @@ class SseService {
     this.eventSource.onerror = (errorEvent) => {
       logger.error("SSE: EventSource error occurred.", errorEvent);
 
-      if (this.REAUTH_TRIES < this.MAX_REAUTH_TRIES) {
+      if (this.REAUTH_TRIES < this.MAX_REAUTH_TRIES && this.storeRef) {
         // We only attempt refresh if we have not reached the maximum number of reauth tries.
         try {
           logger.info("SSE: Attempting refresh.");
 
-          store
+          this.storeRef
             .dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
             .then(() => {
               logger.info("SSE: Refresh successful.");
@@ -106,7 +106,7 @@ class SseService {
         }
       } else {
         logger.error(
-          "SSE: Max reauth attempts reached. Cannot start SSE connection."
+          "SSE: Max reauth attempts reached or store not initialized. Cannot start SSE connection."
         );
         this.stopSseConnection();
       }
@@ -130,7 +130,6 @@ class SseService {
             const payload: MultiEventPayloadDto =
               MultiEventPayloadSchema.parse(parsedData);
             logger.info("SSE: MULTI_EVENT Payload received.", payload);
-
             break;
           }
           case SseEventNames.USER_EVENT: {
@@ -163,6 +162,20 @@ class SseService {
       SseEventNames.MULTI_EVENT,
       (e: MessageEvent<string>) => {
         sseEventHandler(SseEventNames.MULTI_EVENT, e);
+      }
+    );
+
+    this.eventSource.addEventListener(
+      SseEventNames.USER_EVENT,
+      (e: MessageEvent<string>) => {
+        sseEventHandler(SseEventNames.USER_EVENT, e);
+      }
+    );
+
+    this.eventSource.addEventListener(
+      SseEventNames.MESSAGE_EVENT,
+      (e: MessageEvent<string>) => {
+        sseEventHandler(SseEventNames.MESSAGE_EVENT, e);
       }
     );
   }
