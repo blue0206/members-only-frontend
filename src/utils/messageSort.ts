@@ -2,22 +2,24 @@ import { SortOptions, SortOptionsType } from "@/lib/constants";
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
+  GetUserBookmarksResponseDto,
 } from "@blue0206/members-only-shared-types";
 
 /**
  * Sorts an array of messages according to the given sort option.
  *
- * @param {GetMessagesResponseDto | GetMessagesWithoutAuthorResponseDto} data
+ * @param {GetMessagesResponseDto | GetMessagesWithoutAuthorResponseDto | GetUserBookmarksResponseDto} data
  * The array of messages to sort.
  * @param {SortOptionsType} sortOption
  * The method to sort the messages by.
- * @returns {GetMessagesResponseDto | GetMessagesWithoutAuthorResponseDto}
+ * @returns {GetMessagesResponseDto | GetMessagesWithoutAuthorResponseDto | GetUserBookmarksResponseDto}
  * The sorted array of messages.
  */
 export default function sortMessages<
   MessageListType extends
     | GetMessagesResponseDto
     | GetMessagesWithoutAuthorResponseDto
+    | GetUserBookmarksResponseDto
 >(data: MessageListType, sortOption: SortOptionsType): MessageListType {
   const sortedData = [...data].sort((a, b) => {
     switch (sortOption) {
