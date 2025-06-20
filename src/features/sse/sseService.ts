@@ -250,6 +250,17 @@ class SseService {
 
         break;
       }
+      case EventReason.USER_UPDATED: {
+        // This event refers to 2 possible reasons:
+        // 1. The user has updated their profile.
+        // 2. The user has deleted their avatar.
+        // In both cases, we need to invalidate the RTK cache for
+        // all users receiving this event.
+        dispatch(
+          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+        );
+        break;
+      }
       default: {
         logger.warn("SSE: Unhandled event reason: ", payload.reason);
       }
