@@ -15,6 +15,7 @@ import {
 import { addNotification } from "../notification/notificationSlice";
 import { authApiSlice } from "@/app/services/authApi";
 import * as Sentry from "@sentry/react";
+import { clearCredentials } from "../auth/authSlice";
 
 class SseService {
   private eventSource: EventSource | null = null;
@@ -256,6 +257,24 @@ class SseService {
         // 2. The user has deleted their avatar.
         // In both cases, we need to invalidate the RTK cache for
         // all users receiving this event.
+        dispatch(
+          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+        );
+        break;
+      }
+      case EventReason.USER_DELETED_BY_ADMIN: {
+        // In this case, the ADMIN has deleted a user.
+        // There are two main tasks to perform:
+        // 1. Invalidate affected RTK caches for all users receiving
+        //    this event to ensure their data is fresh.
+        // 2. If the user receiving this event is the affected user,
+        //    then we cleanly log them out from the client-side.
+        if (payload.targetId === state.auth.user?.id) {
+          dispatch(clearCredentials());
+          Sentry.setUser(null);
+          window.location.replace("/");
+        }
+
         dispatch(
           apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
         );
