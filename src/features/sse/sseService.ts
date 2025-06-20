@@ -288,6 +288,14 @@ class SseService {
         );
         break;
       }
+      case EventReason.MEMBER_UPDATE: {
+        // In this case, the user has become a member.
+        // We refresh the cache of all users.
+        dispatch(
+          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+        );
+        break;
+      }
       default: {
         logger.warn("SSE: Unhandled event reason: ", payload.reason);
       }
