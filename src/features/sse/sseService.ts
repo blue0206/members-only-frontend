@@ -149,6 +149,7 @@ class SseService {
               MessageEventPayloadSchema.parse(parsedData);
             logger.info("SSE: MESSAGE_EVENT Payload received.", payload);
 
+            this.handleMessageEvent(payload, state, dispatch);
             break;
           }
           default: {
@@ -286,6 +287,32 @@ class SseService {
     // Users list by invalidating tags.
     if (state.auth.user?.role === Role.ADMIN) {
       dispatch(apiSlice.util.invalidateTags(["Users"]));
+    }
+  }
+
+  private handleMessageEvent(
+    payload: MessageEventPayloadDto,
+    state: RootState,
+    dispatch: AppDispatch
+  ) {
+    switch (payload.reason) {
+      case EventReason.MESSAGE_CREATED: {
+        // A new message has been posted. We simply
+        // invalidate tags for all users to get real-time updates.
+        dispatch(apiSlice.util.invalidateTags(["Messages"]));
+        break;
+      }
+      default: {
+        // This represents two other message-related events: Message edit and Message delete.
+        // In this case, a message may even be bookmarked. Hence, we invalidate Bookmarks tag
+        // as well. However, if the user has USER role, then we only invalidate Messages tag
+        // as they don't can't bookmark messages.
+        if (state.auth.user?.role === Role.USER) {
+          dispatch(apiSlice.util.invalidateTags(["Messages"]));
+        } else {
+          dispatch(apiSlice.util.invalidateTags(["Messages", "Bookmarks"]));
+        }
+      }
     }
   }
 }
