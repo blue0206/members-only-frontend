@@ -133,10 +133,17 @@ export function Header() {
 
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem>
-                    <Bookmark className="mr-2 h-4 w-4" />
-                    Bookmarks
-                  </DropdownMenuItem>
+                  {(user?.role === Role.MEMBER ||
+                    user?.role === Role.ADMIN) && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        void navigate("/bookmarks");
+                      }}
+                    >
+                      <Bookmark className="mr-2 h-4 w-4" />
+                      Bookmarks
+                    </DropdownMenuItem>
+                  )}
 
                   <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
