@@ -15,11 +15,11 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { clearCredentials, setCredentials } from "@/features/auth/authSlice";
 import { CustomBaseQueryError, HttpMethod } from "@/types";
-import { isApiResponseError } from "@/utils/errorUtils";
+import { isApiErrorPayload, isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react";
 import { getCsrfTokenFromCookie, setCsrfHeader } from "../utils/csrfUtil";
-import { sessionExpiredQuery } from "../../lib/constants";
+import { serverErrorQuery, sessionExpiredQuery } from "../../lib/constants";
 import {
   transformNonAuthErrorResponse,
   transformRetryQueryError,
@@ -160,13 +160,35 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
         );
 
         // If refresh failed, logout & notify the user and reset RTKQ cache.
+        // Only if the error is 401. If not 401, it is a network or server error
+        // and hence no reauth is required.
         if (refreshResult.error) {
           logger.error(
             { error: refreshResult.error },
             "Token refresh failed, logging out...."
           );
 
-          forceLogout(api);
+          const transformedError = transformNonAuthErrorResponse(
+            refreshResult.error,
+            api
+          );
+          if (
+            isApiErrorPayload(transformedError) &&
+            transformedError.statusCode === 401
+          ) {
+            forceLogout(api);
+          } else {
+            logger.warn(
+              "Token refresh failed with non-auth error. Redirecting to error page with reason query param to indicate server error."
+            );
+
+            if (
+              window.location.pathname !== "/error" &&
+              window.location.pathname !== `/error?reason=${serverErrorQuery}`
+            ) {
+              window.location.replace(`/error?reason=${serverErrorQuery}`);
+            }
+          }
         } else {
           // Validate the result against schema.
           const parsedResult: RefreshResponseDto = RefreshResponseSchema.parse(

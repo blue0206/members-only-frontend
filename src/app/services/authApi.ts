@@ -25,7 +25,8 @@ import * as Sentry from "@sentry/react";
 import convertToFormData from "@/utils/convertToFormData";
 import { logger } from "@/utils/logger";
 import { RootState } from "../store";
-import { sessionExpiredQuery } from "@/lib/constants";
+import { serverErrorQuery, sessionExpiredQuery } from "@/lib/constants";
+import { isApiErrorPayload } from "@/utils/errorUtils";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -179,12 +180,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
             username: (mutationLifeCycleApi.getState() as RootState).auth.user
               ?.username,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           // Log the error.
-          logger.error(
-            { error },
-            "Unexpected error during token refresh. Logging out the user...."
-          );
+          logger.error({ error }, "Unexpected error during token refresh.");
 
           // Capture the error in Sentry.
           Sentry.captureException(error, {
@@ -201,19 +199,37 @@ export const authApiSlice = apiSlice.injectEndpoints({
             },
           });
 
-          // Reset RTK Query cache.
-          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
-          // Dispatch action to clear auth state.
-          mutationLifeCycleApi.dispatch(clearCredentials());
-          // Remove user from Sentry.
-          Sentry.setUser(null);
+          // ONLY LOGOUT FOR UNAUTHORIZED ERRORS
+          if (isApiErrorPayload(error) && error.statusCode === 401) {
+            // Reset RTK Query cache.
+            mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+            // Dispatch action to clear auth state.
+            mutationLifeCycleApi.dispatch(clearCredentials());
+            // Remove user from Sentry.
+            Sentry.setUser(null);
 
-          logger.warn(
-            "Token refresh failed. Redirecting to login page with reason query param to indicate session expiry."
-          );
-          // Redirect to login page with reason set to session expiry.
-          // The reason will be used to display toast notification.
-          window.location.replace(`/login?reason=${sessionExpiredQuery}`);
+            logger.warn(
+              "Token refresh failed. Redirecting to login page with reason query param to indicate session expiry."
+            );
+            // Redirect to login page with reason set to session expiry.
+            // The reason will be used to display toast notification.
+            window.location.replace(`/login?reason=${sessionExpiredQuery}`);
+          } else {
+            logger.warn(
+              "Token refresh failed with non-auth error. Redirecting to error page with reason query param to indicate server error."
+            );
+
+            // Redirect to error page with reason set to server error.
+            // The reason will be used to set error page message.
+            // The logic is placed inside if statement to prevent
+            // multiple re-renders.
+            if (
+              window.location.pathname !== "/error" &&
+              window.location.pathname !== `/error?reason=${serverErrorQuery}`
+            ) {
+              window.location.replace(`/error?reason=${serverErrorQuery}`);
+            }
+          }
         }
       },
     }),

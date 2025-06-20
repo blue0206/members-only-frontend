@@ -27,3 +27,4 @@ export type UserStatusFilterOptionsType =
 
 export const sessionExpiredQuery = "SESSION_EXPIRED";
 export const unauthorizedRedirectionQuery = "UNAUTHORIZED";
+export const serverErrorQuery = "SERVER_ERROR";
