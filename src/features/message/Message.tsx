@@ -26,6 +26,7 @@ import EditMessage from "./EditMessage";
 import DeleteMessage from "./DeleteMessage";
 import LikeMessage from "./LikeMessage";
 import BookmarkMessage from "./BookmarkMessage";
+import { Badge } from "@/components/ui/badge";
 
 type MessagePropsType =
   | {
@@ -33,6 +34,7 @@ type MessagePropsType =
       withAuthor: true;
       editMessageId: number | null;
       setEditMessageId: React.Dispatch<React.SetStateAction<number | null>>;
+      bookmarkTimestamp?: string | Date;
     }
   | {
       messageData: GetMessagesWithoutAuthorResponseDto[number];
@@ -136,45 +138,56 @@ function Message(props: MessagePropsType) {
                   </div>
 
                   {/* Message Options */}
-                  {Object.values(accessControlFlags).some((val) => val) && (
-                    <TooltipProvider>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            size={"sm"}
-                            variant={"ghost"}
-                            className="cursor-pointer"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {accessControlFlags.edit && (
-                            <DropdownMenuItem onClick={handleEditOption}>
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Edit Message
-                            </DropdownMenuItem>
-                          )}
+                  <div className="flex flex-col-reverse sm:flex-row items-center space-x-2">
+                    {props.bookmarkTimestamp && (
+                      <Badge
+                        variant={"secondary"}
+                        className={`text-xs rounded-xl dark:text-foreground sm:inline-flex hidden`}
+                      >
+                        <>Added {getTimeElapsed(props.bookmarkTimestamp)}</>
+                      </Badge>
+                    )}
 
-                          {accessControlFlags.delete && (
-                            <>
-                              <DropdownMenuSeparator />
-
-                              <DropdownMenuItem
-                                variant={"destructive"}
-                                onClick={() => {
-                                  setDeleteDialog(true);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Message
+                    {Object.values(accessControlFlags).some((val) => val) && (
+                      <TooltipProvider>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size={"sm"}
+                              variant={"ghost"}
+                              className="cursor-pointer"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {accessControlFlags.edit && (
+                              <DropdownMenuItem onClick={handleEditOption}>
+                                <Edit2 className="h-4 w-4 mr-2" />
+                                Edit Message
                               </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TooltipProvider>
-                  )}
+                            )}
+
+                            {accessControlFlags.delete && (
+                              <>
+                                <DropdownMenuSeparator />
+
+                                <DropdownMenuItem
+                                  variant={"destructive"}
+                                  onClick={() => {
+                                    setDeleteDialog(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Message
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TooltipProvider>
+                    )}
+                  </div>
                 </div>
 
                 {/* Message Content */}

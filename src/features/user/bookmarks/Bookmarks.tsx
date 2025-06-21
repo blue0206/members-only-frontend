@@ -132,6 +132,7 @@ export default function Bookmarks() {
                 withAuthor={true}
                 editMessageId={editMessageId}
                 setEditMessageId={setEditMessageId}
+                bookmarkTimestamp={bookmark.timestamp}
               />
             ))}
           {isSuccess && filteredData.length === 0 && (
