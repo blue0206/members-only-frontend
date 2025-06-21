@@ -20,7 +20,9 @@ import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
 import { logger } from "@/utils/logger";
-import convertToFormData from "@/utils/convertToFormData";
+import convertToFormData, {
+  UploadAvatarRequestDto,
+} from "@/utils/convertToFormData";
 import {
   clearCredentials,
   setUserAvatar,
@@ -66,9 +68,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: (body: EditUserRequestDto) => ({
         url: "/users",
         method: HttpMethod.PATCH,
-        body: convertToFormData<EditUserRequestDto>(body) satisfies
-          | EditUserRequestDto
-          | FormData,
+        body,
         credentials: "include",
       }),
       transformResponse: (result: ApiResponseSuccess<EditUserResponseDto>) => {
@@ -172,6 +172,16 @@ export const userApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
       invalidatesTags: ["Messages", "Bookmarks", "Users"],
+    }),
+    uploadAvatar: builder.mutation<void, UploadAvatarRequestDto>({
+      query: (body: UploadAvatarRequestDto) => ({
+        url: "/users/avatar",
+        method: HttpMethod.PATCH,
+        body: convertToFormData<UploadAvatarRequestDto>(body) satisfies
+          | UploadAvatarRequestDto
+          | FormData,
+        credentials: "include",
+      }),
     }),
     deleteAvatar: builder.mutation<void, void>({
       query: () => ({
