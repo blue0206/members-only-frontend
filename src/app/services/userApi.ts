@@ -99,6 +99,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
         // Dispatch action to update auth state.
         mutationLifeCycleApi.dispatch(updateUserDetails(data));
 
+        // Reset user in Sentry.
+        Sentry.setUser({
+          id: data.id,
+          username: data.username,
+        });
+
         // Refresh user tokens so that the tokens have updated details in payload.
         await mutationLifeCycleApi.dispatch(
           authApiSlice.endpoints.tokenRefresh.initiate()
