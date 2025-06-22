@@ -4,6 +4,7 @@
 
 import {
   ApiResponseSuccess,
+  ErrorCodes,
   LoginRequestDto,
   LoginResponseDto,
   LoginResponseSchema,
@@ -200,7 +201,11 @@ export const authApiSlice = apiSlice.injectEndpoints({
           });
 
           // ONLY LOGOUT FOR UNAUTHORIZED ERRORS
-          if (isApiErrorPayload(error) && error.statusCode === 401) {
+          if (
+            isApiErrorPayload(error) &&
+            error.statusCode === 401 &&
+            error.code !== ErrorCodes.INCORRECT_PASSWORD
+          ) {
             // Reset RTK Query cache.
             mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
             // Dispatch action to clear auth state.

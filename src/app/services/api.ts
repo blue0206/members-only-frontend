@@ -175,7 +175,8 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
           );
           if (
             isApiErrorPayload(transformedError) &&
-            transformedError.statusCode === 401
+            transformedError.statusCode === 401 &&
+            transformedError.code !== ErrorCodes.INCORRECT_PASSWORD
           ) {
             forceLogout(api);
           } else {
