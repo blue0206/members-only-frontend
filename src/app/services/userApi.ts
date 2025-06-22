@@ -15,6 +15,8 @@ import {
   MessageParamsDto,
   ResetPasswordRequestDto,
   Role,
+  UploadAvatarResponseDto,
+  UploadAvatarResponseSchema,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
@@ -179,7 +181,10 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
-    uploadAvatar: builder.mutation<void, UploadAvatarRequestDto>({
+    uploadAvatar: builder.mutation<
+      UploadAvatarResponseDto,
+      UploadAvatarRequestDto
+    >({
       query: (body: UploadAvatarRequestDto) => ({
         url: "/users/avatar",
         method: HttpMethod.PATCH,
@@ -188,6 +193,39 @@ export const userApiSlice = apiSlice.injectEndpoints({
           | FormData,
         credentials: "include",
       }),
+      transformResponse: (
+        result: ApiResponseSuccess<UploadAvatarResponseDto>
+      ) => {
+        // Validate the response against schema.
+        const parsedResult = UploadAvatarResponseSchema.safeParse(
+          result.payload
+        );
+
+        // Throw error if validation fails.
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+
+        // Return the response payload conforming to the DTO.
+        return parsedResult.data;
+      },
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        const { data } = await mutationLifeCycleApi.queryFulfilled;
+
+        // Log the response success event.
+        logger.info(
+          { newAvatar: data.avatar },
+          "Uploaded user avatar successfully."
+        );
+
+        // Dispatch action to update auth state.
+        mutationLifeCycleApi.dispatch(setUserAvatar(data.avatar));
+      },
+      invalidatesTags: ["Users", "Messages", "Bookmarks"],
     }),
     deleteAvatar: builder.mutation<void, void>({
       query: () => ({
@@ -399,4 +437,5 @@ export const {
   useGetBookmarksQuery,
   useAddBookmarkMutation,
   useRemoveBookmarkMutation,
+  useUploadAvatarMutation,
 } = userApiSlice;
