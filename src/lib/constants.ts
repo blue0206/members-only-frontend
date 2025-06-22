@@ -25,6 +25,15 @@ export const UserStatusFilterOptions = {
 export type UserStatusFilterOptionsType =
   (typeof UserStatusFilterOptions)[keyof typeof UserStatusFilterOptions];
 
+export const ProfileSettingsTabOptions = {
+  editProfile: "edit-profile",
+  account: "account",
+  sessions: "sessions",
+  dangerZone: "danger-zone",
+};
+export type ProfileSettingsTabOptionsType =
+  (typeof ProfileSettingsTabOptions)[keyof typeof ProfileSettingsTabOptions];
+
 export const sessionExpiredQuery = "SESSION_EXPIRED";
 export const unauthorizedRedirectionQuery = "UNAUTHORIZED";
 export const serverErrorQuery = "SERVER_ERROR";
