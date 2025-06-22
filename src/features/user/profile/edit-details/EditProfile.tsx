@@ -186,7 +186,7 @@ export default function EditProfile() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
+          <CardTitle className="text-2xl">Profile Information</CardTitle>
           <CardDescription>Update your profile details.</CardDescription>
         </CardHeader>
 
