@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import EditProfile from "./edit-details/EditProfile";
 import Account from "./account/Account";
+import Sessions from "./sessions/Sessions";
 
 export default function ProfileSettings() {
   const isDesktop = useMediaQuery({
@@ -87,6 +88,11 @@ export default function ProfileSettings() {
             <TabsContent value={ProfileSettingsTabOptions.account}>
               <Account />
             </TabsContent>
+
+            {/* Sessions Tab */}
+            <TabsContent value={ProfileSettingsTabOptions.sessions}>
+              <Sessions />
+            </TabsContent>
           </Tabs>
         </main>
       </div>
@@ -147,6 +153,9 @@ export default function ProfileSettings() {
 
           {/* Account Tab (Reset Password) */}
           {activeTab === ProfileSettingsTabOptions.account && <Account />}
+
+          {/* Sessions Tab */}
+          {activeTab === ProfileSettingsTabOptions.sessions && <Sessions />}
         </div>
       </main>
     </div>
