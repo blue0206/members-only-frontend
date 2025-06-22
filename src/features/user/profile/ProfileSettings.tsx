@@ -15,6 +15,7 @@ import { AlertTriangle, Lock, Shield, User, UserCog } from "lucide-react";
 import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import EditProfile from "./edit-details/EditProfile";
+import Account from "./account/Account";
 
 export default function ProfileSettings() {
   const isDesktop = useMediaQuery({
@@ -81,6 +82,11 @@ export default function ProfileSettings() {
             <TabsContent value={ProfileSettingsTabOptions.editProfile}>
               <EditProfile />
             </TabsContent>
+
+            {/* Account Tab (Reset Password) */}
+            <TabsContent value={ProfileSettingsTabOptions.account}>
+              <Account />
+            </TabsContent>
           </Tabs>
         </main>
       </div>
@@ -138,6 +144,9 @@ export default function ProfileSettings() {
           {activeTab === ProfileSettingsTabOptions.editProfile && (
             <EditProfile />
           )}
+
+          {/* Account Tab (Reset Password) */}
+          {activeTab === ProfileSettingsTabOptions.account && <Account />}
         </div>
       </main>
     </div>
