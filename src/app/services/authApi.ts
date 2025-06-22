@@ -13,6 +13,8 @@ import {
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
+  UserSessionsResponseDto,
+  UserSessionsResponseSchema,
 } from "@blue0206/members-only-shared-types";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
@@ -238,6 +240,35 @@ export const authApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
+    getSessions: builder.query<UserSessionsResponseDto, void>({
+      query: () => ({
+        url: "/auth/sessions",
+        method: HttpMethod.GET,
+        credentials: "include",
+      }),
+      transformResponse: (
+        result: ApiResponseSuccess<UserSessionsResponseDto>
+      ) => {
+        // Validate the result against schema.
+        const parsedResult = UserSessionsResponseSchema.safeParse(
+          result.payload
+        );
+
+        // Throw error if validation fails.
+        if (!parsedResult.success) {
+          throw new ValidationError(
+            parsedResult.error.message,
+            parsedResult.error.flatten()
+          );
+        }
+
+        // Log the response success event.
+        logger.info("Fetched user sessions successfully.");
+
+        // Return the response payload conforming to the DTO.
+        return parsedResult.data;
+      },
+    }),
   }),
 });
 
@@ -246,4 +277,5 @@ export const {
   useLoginUserMutation,
   useLogoutUserMutation,
   useTokenRefreshMutation,
+  useGetSessionsQuery,
 } = authApiSlice;
