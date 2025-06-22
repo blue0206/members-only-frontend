@@ -234,25 +234,11 @@ export const userApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
       }),
       onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
-        //------------------------------OPTIMISTIC UPDATE--------------------------------
-
-        // We perform the optimistic update to auth slice.
-        const deletedAvatar = (mutationLifeCycleApi.getState() as RootState)
-          .auth.user?.avatar;
+        // Update user state on successful delete.
+        await mutationLifeCycleApi.queryFulfilled;
         mutationLifeCycleApi.dispatch(setUserAvatar(null));
-
-        // Next, we wait for query to fulfill and if there are any errors
-        // we roll back the optimistic update.
-        try {
-          await mutationLifeCycleApi.queryFulfilled;
-        } catch (error) {
-          logger.error({ error }, "Error deleting user avatar.");
-
-          // Roll back the optimistic update.
-          mutationLifeCycleApi.dispatch(setUserAvatar(deletedAvatar));
-        }
       },
-      invalidatesTags: ["Messages", "Bookmarks"],
+      invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
     getBookmarks: builder.query<GetUserBookmarksResponseDto, void>({
       query: () => ({
