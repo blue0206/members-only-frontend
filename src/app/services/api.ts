@@ -50,6 +50,7 @@ const baseQuery = fetchBaseQuery({
       "removeBookmark",
       "uploadAvatar",
       "getSessions",
+      "revokeSession",
     ];
     // Define endpoints where only CSRF token is required.
     const csrfEndpoints = [...commonEndpoints, "tokenRefresh"];

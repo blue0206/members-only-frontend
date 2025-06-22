@@ -13,6 +13,7 @@ import {
   RegisterRequestDto,
   RegisterResponseDto,
   RegisterResponseSchema,
+  SessionIdParamsDto,
   UserSessionsResponseDto,
   UserSessionsResponseSchema,
 } from "@blue0206/members-only-shared-types";
@@ -270,6 +271,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: ["Sessions"],
     }),
+    revokeSession: builder.mutation<void, SessionIdParamsDto>({
+      query: (queryArg: SessionIdParamsDto) => ({
+        url: `/auth/sessions/${queryArg.sessionId}`,
+        method: HttpMethod.DELETE,
+        credentials: "include",
+      }),
+      invalidatesTags: ["Sessions"],
+    }),
   }),
 });
 
@@ -279,4 +288,5 @@ export const {
   useLogoutUserMutation,
   useTokenRefreshMutation,
   useGetSessionsQuery,
+  useRevokeSessionMutation,
 } = authApiSlice;
