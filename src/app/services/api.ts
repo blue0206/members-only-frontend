@@ -48,6 +48,7 @@ const baseQuery = fetchBaseQuery({
       "unlikeMessage",
       "addBookmark",
       "removeBookmark",
+      "uploadAvatar",
     ];
     // Define endpoints where only CSRF token is required.
     const csrfEndpoints = [...commonEndpoints, "tokenRefresh"];
