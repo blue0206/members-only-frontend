@@ -34,6 +34,15 @@ export const ProfileSettingsTabOptions = {
 export type ProfileSettingsTabOptionsType =
   (typeof ProfileSettingsTabOptions)[keyof typeof ProfileSettingsTabOptions];
 
+// All constants except desktop match the type returned by backend (ua-parser-js)
+export const DeviceType = {
+  desktop: "desktop",
+  smarttv: "smarttv",
+  mobile: "mobile",
+  tablet: "tablet",
+};
+export type UserDeviceType = (typeof DeviceType)[keyof typeof DeviceType];
+
 export const sessionExpiredQuery = "SESSION_EXPIRED";
 export const unauthorizedRedirectionQuery = "UNAUTHORIZED";
 export const serverErrorQuery = "SERVER_ERROR";
