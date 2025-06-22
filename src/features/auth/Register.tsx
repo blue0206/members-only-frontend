@@ -452,12 +452,12 @@ export function Register() {
               <Button
                 type={"submit"}
                 size={"lg"}
-                className="px-8 cursor-pointer"
+                className="px-8 cursor-pointer w-[16ch]"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <Spinner
-                    className="text-background w-[6ch] dark:text-foreground"
+                    className="text-background dark:text-foreground"
                     size={"small"}
                   />
                 ) : (
