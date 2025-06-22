@@ -49,6 +49,7 @@ const baseQuery = fetchBaseQuery({
       "addBookmark",
       "removeBookmark",
       "uploadAvatar",
+      "getSessions",
     ];
     // Define endpoints where only CSRF token is required.
     const csrfEndpoints = [...commonEndpoints, "tokenRefresh"];
@@ -297,7 +298,7 @@ const customizedBaseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: customizedBaseQueryWithReauth,
-  tagTypes: ["Messages", "Bookmarks", "Users"],
+  tagTypes: ["Messages", "Bookmarks", "Users", "Sessions"],
   endpoints: () => ({}),
 });
 

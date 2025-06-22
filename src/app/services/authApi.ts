@@ -268,6 +268,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         // Return the response payload conforming to the DTO.
         return parsedResult.data;
       },
+      providesTags: ["Sessions"],
     }),
   }),
 });
