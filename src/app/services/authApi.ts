@@ -279,6 +279,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Sessions"],
     }),
+    revokeAllSessions: builder.mutation<void, void>({
+      query: () => ({
+        url: "/auth/sessions",
+        method: HttpMethod.DELETE,
+        credentials: "include",
+      }),
+      invalidatesTags: ["Sessions"],
+    }),
   }),
 });
 
@@ -289,4 +297,5 @@ export const {
   useTokenRefreshMutation,
   useGetSessionsQuery,
   useRevokeSessionMutation,
+  useRevokeAllSessionsMutation,
 } = authApiSlice;
