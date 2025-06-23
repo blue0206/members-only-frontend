@@ -17,6 +17,7 @@ import { useMediaQuery } from "react-responsive";
 import EditProfile from "./edit-details/EditProfile";
 import Account from "./account/Account";
 import Sessions from "./sessions/Sessions";
+import DangerZone from "./danger-zone/DangerZone";
 
 export default function ProfileSettings() {
   const isDesktop = useMediaQuery({
@@ -93,6 +94,11 @@ export default function ProfileSettings() {
             <TabsContent value={ProfileSettingsTabOptions.sessions}>
               <Sessions />
             </TabsContent>
+
+            {/* Danger Zone Tab */}
+            <TabsContent value={ProfileSettingsTabOptions.dangerZone}>
+              <DangerZone />
+            </TabsContent>
           </Tabs>
         </main>
       </div>
@@ -156,6 +162,9 @@ export default function ProfileSettings() {
 
           {/* Sessions Tab */}
           {activeTab === ProfileSettingsTabOptions.sessions && <Sessions />}
+
+          {/* Danger Zone Tab */}
+          {activeTab === ProfileSettingsTabOptions.dangerZone && <DangerZone />}
         </div>
       </main>
     </div>
