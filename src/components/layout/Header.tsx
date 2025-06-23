@@ -1,11 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import {
-  isAuthenticated,
-  getUserAvatar,
-  getUser,
-  clearCredentials,
-} from "@/features/auth/authSlice";
+import { isAuthenticated, getUser } from "@/features/auth/authSlice";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,19 +25,17 @@ import {
 import { useLogoutUserMutation } from "@/app/services/authApi";
 import { getTheme, setTheme } from "@/features/ui/uiSlice";
 import { getRoleBadge } from "@/utils/getRoleBadge";
-import { useEffect } from "react";
-import { logger } from "@/utils/logger";
-import * as Sentry from "@sentry/react";
 import { Role } from "@blue0206/members-only-shared-types";
 import { useMediaQuery } from "react-responsive";
 
 export function Header() {
   const isAuth = useAppSelector(isAuthenticated);
   const user = useAppSelector(getUser);
-  const avatar = useAppSelector(getUserAvatar);
-  const [logoutUser, { isError, error, reset }] = useLogoutUserMutation();
-  const dispatch = useAppDispatch();
   const currentTheme = useAppSelector(getTheme);
+
+  const dispatch = useAppDispatch();
+
+  const [logoutUser, { reset }] = useLogoutUserMutation();
 
   const isDesktop = useMediaQuery({
     query: "(min-width: 611px)",
@@ -50,21 +43,15 @@ export function Header() {
 
   const navigate = useNavigate();
 
-  // Logout error handling
-  useEffect(() => {
-    if (isError) {
-      logger.error({ error }, "Unexpected error during logout mutation call.");
-      dispatch(clearCredentials());
-      reset();
-      Sentry.setUser(null);
-    }
-  }, [dispatch, error, isError, reset]);
-
   const logoutHandler = async (): Promise<void> => {
     await logoutUser()
       .unwrap()
       .then(() => {
+        reset();
         void navigate("/");
+      })
+      .catch(() => {
+        reset();
       });
   };
 
@@ -111,7 +98,7 @@ export function Header() {
                     className="h-11 w-11 rounded-full p-0.5 cursor-pointer"
                   >
                     <Avatar className="w-11 h-11">
-                      <AvatarImage src={avatar ?? ""} />
+                      <AvatarImage src={user?.avatar ?? ""} />
                       <AvatarFallback>
                         <User className="h-11 w-11" />
                       </AvatarFallback>
