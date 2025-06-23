@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Header } from "@/components/layout";
 import { getUserRole, isAuthenticated } from "@/features/auth/authSlice";
 import {
@@ -12,7 +12,7 @@ import {
   Role,
 } from "@blue0206/members-only-shared-types";
 import MarkdownTextEditor from "@/features/message/MarkdownTextEditor";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -22,16 +22,34 @@ import {
 } from "@/components/ui/select";
 import { ArrowUpDown } from "lucide-react";
 import sortMessages from "@/utils/messageSort";
-import { SortOptions, SortOptionsType } from "@/lib/constants";
+import {
+  accountDeletedByAdminQuery,
+  accountDeletedQuery,
+  SortOptions,
+  SortOptionsType,
+} from "@/lib/constants";
 import LoginBanner from "@/components/layout/LoginBanner";
 import MembershipBanner from "@/features/user/MembershipBanner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import ScrollButtons from "@/components/shared/ScrollButtons";
+import { useNavigate, useSearchParams } from "react-router";
+import { nanoid } from "@reduxjs/toolkit";
+import {
+  addNotification,
+  removeNotification,
+} from "@/features/notification/notificationSlice";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
-  const { data, isSuccess, isError, error } = useGetMessagesWithAuthorQuery();
+  const isAuth = useAppSelector(isAuthenticated);
+
+  const { data, isSuccess, isError, error } = useGetMessagesWithAuthorQuery(
+    undefined,
+    {
+      skip: !isAuth,
+    }
+  );
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
   const errorDetails = useApiErrorHandler(error);
@@ -110,6 +128,63 @@ function MessagesWithoutAuthor({
 export default function Home() {
   const isAuth = useAppSelector(isAuthenticated);
   const role = useAppSelector(getUserRole);
+
+  const [searchParams] = useSearchParams();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const redirectReason = searchParams.get("reason");
+    let notificationId = "";
+
+    if (redirectReason && redirectReason === accountDeletedQuery) {
+      notificationId = nanoid();
+
+      dispatch(
+        addNotification({
+          type: "info",
+          message: "Your account has been deleted from our servers.",
+          id: notificationId,
+          toastOptions: {
+            position: "top-center",
+            closeButton: true,
+            duration: 11000,
+          },
+        })
+      );
+
+      void navigate("/", { replace: true });
+    }
+
+    if (redirectReason && redirectReason === accountDeletedByAdminQuery) {
+      notificationId = nanoid();
+
+      dispatch(
+        addNotification({
+          type: "info",
+          message: "Your account has been deleted by an administrator.",
+          id: notificationId,
+          toastOptions: {
+            position: "top-center",
+            closeButton: true,
+            duration: 11000,
+          },
+        })
+      );
+
+      void navigate("/", { replace: true });
+    }
+
+    return () => {
+      if (
+        redirectReason &&
+        (redirectReason === accountDeletedQuery ||
+          redirectReason === accountDeletedByAdminQuery)
+      ) {
+        dispatch(removeNotification(notificationId));
+      }
+    };
+  }, [searchParams, dispatch, navigate]);
 
   const [sortOption, setSortOption] = useState<SortOptionsType>("newest");
 
