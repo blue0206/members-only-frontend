@@ -318,7 +318,7 @@ export const { useHealthCheckQuery } = apiSlice;
 const forceLogout = (api: BaseQueryApi): void => {
   // Clears redux state, RTK Query Cache and remove user from Sentry.
   api.dispatch(clearCredentials());
-  apiSlice.util.resetApiState();
+  api.dispatch(apiSlice.util.resetApiState());
   Sentry.setUser(null);
 
   logger.warn(
