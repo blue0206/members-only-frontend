@@ -43,8 +43,8 @@ authErrorListenerMiddleware.startListening({
 
       // Log the error for development.
       logger.error(
-        { error: action.payload },
-        "RTK Query Serialized error. Possible reason: Validation failure inside `transformResponse` of RTK Query."
+        "RTK Query Serialized error. Possible reason: Validation failure inside `transformResponse` of RTK Query.",
+        action.payload
       );
     }
   },
@@ -64,7 +64,7 @@ authErrorListenerMiddleware.startListening({
         action.payload.code === ErrorCodes.MISSING_REFRESH_TOKEN
       ) {
         // Log the error for development.
-        logger.error({ error: action.payload }, action.payload.message);
+        logger.error(action.payload, action.payload.message);
 
         // Reset the API state.
         listenerApi.dispatch(apiSlice.util.resetApiState());

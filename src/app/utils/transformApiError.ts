@@ -49,7 +49,7 @@ export const transformNonAuthErrorResponse = (
       },
     });
 
-    logger.error({ error: error.data.errorPayload }, "API Error");
+    logger.error("API Error", error.data.errorPayload);
 
     // Extract actual error payload and return.
     return error.data.errorPayload;
@@ -71,7 +71,7 @@ export const transformNonAuthErrorResponse = (
       },
     });
 
-    logger.error({ error: error.data }, "RTK Query Error");
+    logger.error("RTK Query Error", error);
 
     // Return the error without any extraction since the
     // error is from RTK Query.
@@ -92,8 +92,8 @@ export const transformRetryQueryError = (
       error.data.errorPayload.code === ErrorCodes.AUTHENTICATION_REQUIRED)
   ) {
     logger.error(
-      { error: error.data },
-      "Access token expired in retried query after refresh. Logging out the user."
+      "Access token expired in retried query after refresh. Logging out the user.",
+      error.data
     );
 
     Sentry.captureException(error.data.errorPayload, {
