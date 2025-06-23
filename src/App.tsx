@@ -23,7 +23,10 @@ function App() {
   const accessToken = useAppSelector(getAccessToken);
 
   // Healthcheck; retries 5 times before redirecting to error page.
-  const { isError, isSuccess, refetch } = useHealthCheckQuery();
+  const { isError, isSuccess, refetch } = useHealthCheckQuery(undefined, {
+    refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
+  });
   const MAX_ATTEMPTS = 5;
   const [attempts, setAttempts] = useState<number>(0);
 
