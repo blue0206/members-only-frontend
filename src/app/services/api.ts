@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
+
 import {
   BaseQueryApi,
   BaseQueryFn,
@@ -301,8 +303,17 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: customizedBaseQueryWithReauth,
   tagTypes: ["Messages", "Bookmarks", "Users", "Sessions"],
-  endpoints: () => ({}),
+  endpoints: (builder) => ({
+    healthCheck: builder.query<string, void>({
+      query: () => ({
+        url: "/healthcheck",
+        method: HttpMethod.GET,
+      }),
+    }),
+  }),
 });
+
+export const { useHealthCheckQuery } = apiSlice;
 
 const forceLogout = (api: BaseQueryApi): void => {
   // Clears redux state, RTK Query Cache and remove user from Sentry.
