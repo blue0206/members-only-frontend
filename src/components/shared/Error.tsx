@@ -41,6 +41,9 @@ export default function Error() {
     case 422:
       errorName = "Unprocessable Entity";
       break;
+    case 503:
+      errorName = "Service Unavailable";
+      break;
     default:
       errorName = "Internal Server Error";
       break;
@@ -55,7 +58,7 @@ export default function Error() {
       void navigate("/error", {
         replace: true,
         state: {
-          statusCode: 500,
+          statusCode: 503,
           message:
             "Cannot connect to the server. Please check your internet connection and try again later.",
         } satisfies ErrorPageDetailsType,
