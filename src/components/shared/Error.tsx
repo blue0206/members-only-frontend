@@ -1,13 +1,9 @@
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useLocation } from "react-router";
 import { ErrorPageDetailsType } from "@/types";
 import { Button } from "../ui/button";
-import { useEffect } from "react";
-import { serverErrorQuery } from "@/lib/constants";
+import useQueryParamsSideEffects from "@/hooks/useQueryParamsSideEffects";
 
 export default function Error() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
   // Extract data from location state.
   const locationState: unknown = useLocation().state;
 
@@ -51,20 +47,7 @@ export default function Error() {
 
   // Error handling for when user is navigated to error page
   // from outside component using window.location.replace('/error?reason=server-error');
-  useEffect(() => {
-    const redirectReason = searchParams.get("reason");
-
-    if (redirectReason && redirectReason === serverErrorQuery) {
-      void navigate("/error", {
-        replace: true,
-        state: {
-          statusCode: 503,
-          message:
-            "Cannot connect to the server. Please check your internet connection and try again later.",
-        } satisfies ErrorPageDetailsType,
-      });
-    }
-  }, [searchParams, navigate]);
+  useQueryParamsSideEffects();
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-accent px-4">

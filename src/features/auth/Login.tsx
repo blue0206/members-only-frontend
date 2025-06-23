@@ -5,7 +5,7 @@ import {
 } from "@blue0206/members-only-shared-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Header } from "@/components/layout";
 import {
   Card,
@@ -33,19 +33,11 @@ import {
   ErrorPageDetailsType,
   UnauthorizedRedirectionStateType,
 } from "@/types";
-import {
-  sessionExpiredQuery,
-  unauthorizedRedirectionQuery,
-} from "@/lib/constants";
 import { useAppDispatch } from "@/app/hooks";
-import {
-  addNotification,
-  removeNotification,
-} from "../notification/notificationSlice";
-import { nanoid } from "@reduxjs/toolkit";
+import { addNotification } from "../notification/notificationSlice";
+import useQueryParamsSideEffects from "@/hooks/useQueryParamsSideEffects";
 
 export function Login() {
-  const [searchParams] = useSearchParams();
   const dispatch = useAppDispatch();
 
   const location = useLocation();
@@ -75,64 +67,7 @@ export function Login() {
 
   // Show notification when user logged out as a result of session expiry
   // or if the user is redirected for authentication.
-  useEffect(() => {
-    const redirectReason = searchParams.get("reason");
-    let notificationId = "";
-
-    if (redirectReason && redirectReason === sessionExpiredQuery) {
-      notificationId = nanoid();
-
-      dispatch(
-        addNotification({
-          id: notificationId,
-          message: "Your session has expired. Please login again to continue.",
-          type: "warning",
-          toastOptions: {
-            position: "top-center",
-            closeButton: true,
-            duration: 11000,
-          },
-        })
-      );
-
-      // Replace the current URL with the login page
-      // to get rid of session expiry query param.
-      void navigate("/login", { replace: true });
-    }
-
-    if (redirectReason && redirectReason === unauthorizedRedirectionQuery) {
-      notificationId = nanoid();
-
-      dispatch(
-        addNotification({
-          id: notificationId,
-          message: "Please login to continue.",
-          type: "info",
-          toastOptions: {
-            position: "top-center",
-            closeButton: true,
-            duration: 11000,
-          },
-        })
-      );
-
-      // We persist the state to navigate the user on successful login.
-      void navigate("/login", {
-        replace: true,
-        state: redirectedFrom,
-      });
-    }
-
-    return () => {
-      if (
-        redirectReason &&
-        (redirectReason === sessionExpiredQuery ||
-          redirectReason === unauthorizedRedirectionQuery)
-      ) {
-        dispatch(removeNotification(notificationId));
-      }
-    };
-  }, [dispatch, navigate, searchParams, redirectedFrom]);
+  useQueryParamsSideEffects();
 
   // Handle form submission success.
   useEffect(() => {
