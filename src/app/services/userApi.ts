@@ -38,6 +38,7 @@ import {
 } from "@/types/";
 import { RootState } from "../store";
 import { messageApiSlice } from "./messageApi";
+import { accountDeletedQuery } from "@/lib/constants";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -150,7 +151,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
           // Remove user from Sentry.
           Sentry.setUser(null);
           // Navigate to login page.
-          window.location.replace("/login");
+          window.location.replace(`/?reason=${accountDeletedQuery}`);
         }
       },
       invalidatesTags: ["Messages", "Bookmarks", "Users"],

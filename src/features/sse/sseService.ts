@@ -16,6 +16,7 @@ import { addNotification } from "../notification/notificationSlice";
 import { authApiSlice } from "@/app/services/authApi";
 import * as Sentry from "@sentry/react";
 import { clearCredentials } from "../auth/authSlice";
+import { accountDeletedByAdminQuery } from "@/lib/constants";
 
 class SseService {
   private eventSource: EventSource | null = null;
@@ -262,8 +263,10 @@ class SseService {
         //    then we cleanly log them out from the client-side.
         if (payload.targetId === state.auth.user?.id) {
           dispatch(clearCredentials());
+          dispatch(apiSlice.util.resetApiState());
           Sentry.setUser(null);
-          window.location.replace("/");
+          window.location.replace(`/?reason=${accountDeletedByAdminQuery}`);
+          return;
         }
 
         dispatch(

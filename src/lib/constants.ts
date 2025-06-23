@@ -46,3 +46,5 @@ export type UserDeviceType = (typeof DeviceType)[keyof typeof DeviceType];
 export const sessionExpiredQuery = "SESSION_EXPIRED";
 export const unauthorizedRedirectionQuery = "UNAUTHORIZED";
 export const serverErrorQuery = "SERVER_ERROR";
+export const accountDeletedQuery = "ACCOUNT_DELETED";
+export const accountDeletedByAdminQuery = "ACCOUNT_DELETED_BY_ADMIN";
