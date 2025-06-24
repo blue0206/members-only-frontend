@@ -37,6 +37,7 @@ import { ErrorPageDetailsType } from "@/types";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import RevokeAllSessions from "./RevokeAllSessions";
 import { useMediaQuery } from "react-responsive";
+import SessionSkeleton from "@/components/skeleton/SessionSkeleton";
 
 function GetDeviceIcon(ua: string) {
   const deviceType: UserDeviceType = getDeviceType(ua);
@@ -63,7 +64,7 @@ export default function Sessions() {
 
   const navigate = useNavigate();
 
-  const { data, isError, error } = useGetSessionsQuery();
+  const { data, isError, error, isSuccess, isLoading } = useGetSessionsQuery();
   const errorDetails = useApiErrorHandler(error);
 
   // Make the session in data array with currentSession === true the first element.
@@ -109,79 +110,86 @@ export default function Sessions() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {sessions.map((session) => (
-              <div
-                key={session.sessionId}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg space-y-3 sm:space-y-0 bg-background/50"
-              >
-                <div className="flex items-start space-x-4">
-                  <div className="mt-1">{GetDeviceIcon(session.userAgent)}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <p className="font-medium truncate">
-                        {getDevice(session.userAgent)}
-                      </p>
-                      {session.currentSession && (
-                        <Badge
-                          variant={"secondary"}
-                          className="text-xs rounded-md"
-                        >
-                          Current
-                        </Badge>
-                      )}
+            {isSuccess &&
+              sessions.map((session) => (
+                <div
+                  key={session.sessionId}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg space-y-3 sm:space-y-0 bg-background/50"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="mt-1">
+                      {GetDeviceIcon(session.userAgent)}
                     </div>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <p>
-                        {getBrowser(session.userAgent)} •{" "}
-                        {getOs(session.userAgent)}
-                      </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <p className="font-medium truncate">
+                          {getDevice(session.userAgent)}
+                        </p>
+                        {session.currentSession && (
+                          <Badge
+                            variant={"secondary"}
+                            className="text-xs rounded-md"
+                          >
+                            Current
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        <p>
+                          {getBrowser(session.userAgent)} •{" "}
+                          {getOs(session.userAgent)}
+                        </p>
 
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="h-3.5 w-3.5" />
-                        <span>{session.userLocation}</span>
-                        <span>•</span>
-                        <span>
-                          {isValidIp(session.userIp)
-                            ? session.userIp
-                            : "Unknown IP"}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>
-                          {session.currentSession
-                            ? "Active Now"
-                            : getTimeElapsed(session.lastUsedOn)}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Timer className="h-3.5 w-3.5" />
-                        <span>
-                          Expires {getDateFromTimestamp(session.expires)}
-                        </span>
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          <span>{session.userLocation}</span>
+                          <span>•</span>
+                          <span>
+                            {isValidIp(session.userIp)
+                              ? session.userIp
+                              : "Unknown IP"}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>
+                            {session.currentSession
+                              ? "Active Now"
+                              : getTimeElapsed(session.lastUsedOn)}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Timer className="h-3.5 w-3.5" />
+                          <span>
+                            Expires {getDateFromTimestamp(session.expires)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex justify-end">
-                  {!session.currentSession && (
-                    <Button
-                      variant={"destructive"}
-                      size={"sm"}
-                      onClick={() => {
-                        setRevokeSessionId(session.sessionId);
-                        setRevokeDialog(true);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      <span>Logout</span>
-                    </Button>
-                  )}
+                  <div className="flex justify-end">
+                    {!session.currentSession && (
+                      <Button
+                        variant={"destructive"}
+                        size={"sm"}
+                        onClick={() => {
+                          setRevokeSessionId(session.sessionId);
+                          setRevokeDialog(true);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        <span>Logout</span>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            {isLoading &&
+              Array.from({ length: 4 }, (_, index: number) => (
+                <SessionSkeleton key={index} />
+              ))}
           </div>
         </CardContent>
         <CardFooter></CardFooter>
