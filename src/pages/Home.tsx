@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Header } from "@/components/layout";
 import { getUserRole, isAuthenticated } from "@/features/auth/authSlice";
 import {
@@ -12,7 +12,7 @@ import {
   Role,
 } from "@blue0206/members-only-shared-types";
 import MarkdownTextEditor from "@/features/message/MarkdownTextEditor";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -26,14 +26,18 @@ import { SortOptions, SortOptionsType } from "@/lib/constants";
 import LoginBanner from "@/components/layout/LoginBanner";
 import MembershipBanner from "@/features/user/MembershipBanner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
-import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import ScrollButtons from "@/components/shared/ScrollButtons";
 import useQueryParamsSideEffects from "@/hooks/useQueryParamsSideEffects";
 import MessageSkeleton from "@/components/skeleton/MessageSkeleton";
+import { apiSlice } from "@/app/services/api";
+import { useNavigate } from "react-router";
+import { ErrorPageDetailsType } from "@/types";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
   const isAuth = useAppSelector(isAuthenticated);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { data, isSuccess, isError, error, isLoading } =
     useGetMessagesWithAuthorQuery(undefined, {
@@ -42,11 +46,24 @@ function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
   const errorDetails = useApiErrorHandler(error);
-  useUiErrorHandler({
-    errorDetails,
-    isError,
-    reset: () => null,
-  });
+
+  // Handle api call errors.
+  useEffect(() => {
+    if (isError) {
+      if (errorDetails.isNetworkError) {
+        // We just dispatch a call to the health check endpoint to check if the server is up.
+        // If not, the user will be redirected to the error page as set in that endpoint.
+        void dispatch(apiSlice.endpoints.healthCheck.initiate());
+      } else {
+        void navigate("/error", {
+          state: {
+            statusCode: errorDetails.statusCode ?? 500,
+            message: errorDetails.message,
+          } satisfies ErrorPageDetailsType,
+        });
+      }
+    }
+  }, [isError, errorDetails, navigate, dispatch]);
 
   const sortedData: GetMessagesResponseDto = useMemo(() => {
     return data ? sortMessages<GetMessagesResponseDto>(data, sortOption) : [];
@@ -83,15 +100,31 @@ function MessagesWithoutAuthor({
 }: {
   sortOption: SortOptionsType;
 }) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const { data, isSuccess, isError, error, isLoading } =
     useGetMessagesWithoutAuthorQuery();
 
   const errorDetails = useApiErrorHandler(error);
-  useUiErrorHandler({
-    errorDetails,
-    isError,
-    reset: () => null,
-  });
+
+  // Handle api call errors.
+  useEffect(() => {
+    if (isError) {
+      if (errorDetails.isNetworkError) {
+        // We just dispatch a call to the health check endpoint to check if the server is up.
+        // If not, the user will be redirected to the error page as set in that endpoint.
+        void dispatch(apiSlice.endpoints.healthCheck.initiate());
+      } else {
+        void navigate("/error", {
+          state: {
+            statusCode: errorDetails.statusCode ?? 500,
+            message: errorDetails.message,
+          } satisfies ErrorPageDetailsType,
+        });
+      }
+    }
+  }, [isError, errorDetails, navigate, dispatch]);
 
   const sortedData: GetMessagesWithoutAuthorResponseDto = useMemo(() => {
     return data
@@ -101,7 +134,7 @@ function MessagesWithoutAuthor({
 
   return (
     <>
-      {!isSuccess &&
+      {isSuccess &&
         sortedData.map((message) => (
           <Message
             key={message.messageId}
