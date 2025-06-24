@@ -163,7 +163,7 @@ export default function Home() {
   // by themselves or by an admin.
   useQueryParamsSideEffects();
 
-  const [sortOption, setSortOption] = useState<SortOptionsType>("newest");
+  const [sortOption, setSortOption] = useState<SortOptionsType>("oldest");
 
   return (
     <div className="min-h-screen bg-background">
