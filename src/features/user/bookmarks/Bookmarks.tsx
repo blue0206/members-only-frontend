@@ -1,5 +1,6 @@
 import { useGetBookmarksQuery } from "@/app/services/userApi";
 import { Header } from "@/components/layout";
+import MessageSkeleton from "@/components/skeleton/MessageSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ export default function Bookmarks() {
   const [sortOption, setSortOption] = useState<SortOptionsType>("newest");
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
-  const { data, isSuccess, isError, error } = useGetBookmarksQuery();
+  const { data, isSuccess, isError, error, isLoading } = useGetBookmarksQuery();
   const errorDetails = useApiErrorHandler(error);
 
   const navigate = useNavigate();
@@ -150,6 +151,10 @@ export default function Bookmarks() {
               </div>
             </Card>
           )}
+          {isLoading &&
+            Array.from({ length: 4 }, (_, index: number) => (
+              <MessageSkeleton key={index} bookmark />
+            ))}
         </div>
       </main>
     </div>

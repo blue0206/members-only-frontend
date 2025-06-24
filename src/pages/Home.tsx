@@ -29,17 +29,16 @@ import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import ScrollButtons from "@/components/shared/ScrollButtons";
 import useQueryParamsSideEffects from "@/hooks/useQueryParamsSideEffects";
+import MessageSkeleton from "@/components/skeleton/MessageSkeleton";
 
 // Messages Without Author Component
 function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
   const isAuth = useAppSelector(isAuthenticated);
 
-  const { data, isSuccess, isError, error } = useGetMessagesWithAuthorQuery(
-    undefined,
-    {
+  const { data, isSuccess, isError, error, isLoading } =
+    useGetMessagesWithAuthorQuery(undefined, {
       skip: !isAuth,
-    }
-  );
+    });
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
   const errorDetails = useApiErrorHandler(error);
@@ -65,7 +64,11 @@ function MessagesWithAuthor({ sortOption }: { sortOption: SortOptionsType }) {
             editMessageId={editMessageId}
           />
         ))}
-      {(isError || sortedData.length === 0) && (
+      {isLoading &&
+        Array.from({ length: 5 }, (_, index: number) => (
+          <MessageSkeleton key={index} />
+        ))}
+      {sortedData.length === 0 && (
         <div className="text-center text-muted-foreground">
           There are no messages to show.
         </div>
@@ -80,7 +83,7 @@ function MessagesWithoutAuthor({
 }: {
   sortOption: SortOptionsType;
 }) {
-  const { data, isSuccess, isError, error } =
+  const { data, isSuccess, isError, error, isLoading } =
     useGetMessagesWithoutAuthorQuery();
 
   const errorDetails = useApiErrorHandler(error);
@@ -98,7 +101,7 @@ function MessagesWithoutAuthor({
 
   return (
     <>
-      {isSuccess &&
+      {!isSuccess &&
         sortedData.map((message) => (
           <Message
             key={message.messageId}
@@ -106,7 +109,11 @@ function MessagesWithoutAuthor({
             withAuthor={false}
           />
         ))}
-      {(isError || sortedData.length === 0) && (
+      {isLoading &&
+        Array.from({ length: 5 }, (_, index: number) => (
+          <MessageSkeleton key={index} />
+        ))}
+      {sortedData.length === 0 && (
         <div className="text-center text-muted-foreground">
           There are no messages to show.
         </div>
