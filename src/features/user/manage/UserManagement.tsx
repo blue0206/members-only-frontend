@@ -56,6 +56,7 @@ import {
 import userFilter, { getUserStatus } from "@/utils/userFilter";
 import DeleteUser from "./DeleteUser";
 import ChangeRole from "./ChangeRole";
+import UserDetailSkeleton from "@/components/skeleton/UserDetailSkeleton";
 
 const getRoleIcon = (role: Role) => {
   switch (role) {
@@ -121,7 +122,7 @@ export default function UserManagement() {
 
   const authUser = useAppSelector(getUser);
 
-  const { data, isSuccess, isError, error } = useGetUsersQuery();
+  const { data, isSuccess, isError, error, isLoading } = useGetUsersQuery();
   const errorDetails = useApiErrorHandler(error);
 
   const navigate = useNavigate();
@@ -264,102 +265,103 @@ export default function UserManagement() {
               </TableHeader>
 
               <TableBody>
-                {filteredData.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={user.avatar ?? ""}
-                            loading="lazy"
-                            alt="User Avatar"
-                          />
-                          <AvatarFallback>
-                            <User />
-                          </AvatarFallback>
-                        </Avatar>
+                {isSuccess &&
+                  filteredData.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={user.avatar ?? ""}
+                              loading="lazy"
+                              alt="User Avatar"
+                            />
+                            <AvatarFallback>
+                              <User />
+                            </AvatarFallback>
+                          </Avatar>
 
-                        <div className="min-w-0">
-                          <p className="font-medium truncate">
-                            {user.firstname} {user.middlename} {user.lastname}
-                          </p>
-                          <p className="text-xs text-muted-foreground runcate">
-                            @{user.username}
-                          </p>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">
+                              {user.firstname} {user.middlename} {user.lastname}
+                            </p>
+                            <p className="text-xs text-muted-foreground runcate">
+                              @{user.username}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        {getRoleIcon(user.role)}
-                        {getRoleBadge(user.role)}
-                      </div>
-                    </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          {getRoleIcon(user.role)}
+                          {getRoleBadge(user.role)}
+                        </div>
+                      </TableCell>
 
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{getDateFromTimestamp(user.joinDate)}</span>
-                      </div>
-                    </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{getDateFromTimestamp(user.joinDate)}</span>
+                        </div>
+                      </TableCell>
 
-                    <TableCell className="hidden md:table-cell">
-                      <Badge
-                        variant={
-                          getUserStatus(user.lastActive) === "active"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={`text-xs rounded-xl dark:text-foreground`}
-                      >
-                        {getTimeElapsed(user.lastActive)}
-                      </Badge>
-                    </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge
+                          variant={
+                            getUserStatus(user.lastActive) === "active"
+                              ? "default"
+                              : "secondary"
+                          }
+                          className={`text-xs rounded-xl dark:text-foreground`}
+                        >
+                          {getTimeElapsed(user.lastActive)}
+                        </Badge>
+                      </TableCell>
 
-                    <TableCell className="text-right">
-                      {user.id === authUser?.id ? (
-                        <></>
-                      ) : (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant={"ghost"}
-                              size={"sm"}
-                              className="h-8 w-8 p-0"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
+                      <TableCell className="text-right">
+                        {user.id === authUser?.id ? (
+                          <></>
+                        ) : (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant={"ghost"}
+                                size={"sm"}
+                                className="h-8 w-8 p-0"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
 
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setChangeRoleDialog(true);
-                                setChangeRoleUser(user);
-                              }}
-                            >
-                              <Crown className="h-4 w-4 mr-2" />
-                              Change Role
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              variant={"destructive"}
-                              onClick={() => {
-                                setDeleteDialog(true);
-                                setDeleteUser(user);
-                              }}
-                            >
-                              <UserX className="h-4 w-4 mr-2" />
-                              Delete User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setChangeRoleDialog(true);
+                                  setChangeRoleUser(user);
+                                }}
+                              >
+                                <Crown className="h-4 w-4 mr-2" />
+                                Change Role
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                variant={"destructive"}
+                                onClick={() => {
+                                  setDeleteDialog(true);
+                                  setDeleteUser(user);
+                                }}
+                              >
+                                <UserX className="h-4 w-4 mr-2" />
+                                Delete User
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
 
-                {filteredData.length === 0 && (
+                {isSuccess && filteredData.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
                       <div className="flex flex-col items-center justify-center">
@@ -367,7 +369,7 @@ export default function UserManagement() {
                         <p className="text-muted-foreground text-center">
                           No users found
                         </p>
-                        {data && data.length > 0 && (
+                        {data.length > 0 && (
                           <p className="text-sm text-muted-foreground">
                             Try adjusting your search or filters
                           </p>
@@ -376,6 +378,11 @@ export default function UserManagement() {
                     </TableCell>
                   </TableRow>
                 )}
+
+                {isLoading &&
+                  Array.from({ length: 16 }, (_, index: number) => (
+                    <UserDetailSkeleton key={index} />
+                  ))}
               </TableBody>
             </Table>
           </div>
