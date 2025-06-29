@@ -51,13 +51,24 @@ export default function EditMessage({
 
   return (
     <>
-      <Textarea
-        value={editMessageContent}
-        onChange={(e) => {
-          setEditMessageContent(e.target.value);
-        }}
-        className="min-h-[150px]"
-      />
+      <div>
+        <Textarea
+          value={editMessageContent}
+          onChange={(e) => {
+            setEditMessageContent(e.target.value);
+          }}
+          className="min-h-[150px]"
+        />
+        <div
+          className={`w-full flex justify-end ${
+            editMessageContent.length < 200 ? "hidden" : ""
+          }`}
+        >
+          <p className="text-sm text-muted-foreground">
+            ({editMessageContent.length} / 2000)
+          </p>
+        </div>
+      </div>
       <div className="flex items-center justify-end space-x-2">
         <Button
           variant={"outline"}
@@ -75,7 +86,7 @@ export default function EditMessage({
           size={"sm"}
           className="cursor-pointer w-[15ch] space-x-2"
           onClick={() => void handleMessageEdit()}
-          disabled={isLoading}
+          disabled={isLoading || editMessageContent.length > 2000}
         >
           {isLoading ? (
             <Spinner size={"small"} className="text-white" />

@@ -98,7 +98,17 @@ export default function MarkdownTextEditor() {
               onChange={(e) => {
                 setText(e.target.value);
               }}
+              maxLength={2000}
             />
+            <div
+              className={`w-full flex justify-end ${
+                text.length < 200 ? "hidden" : ""
+              }`}
+            >
+              <p className="text-sm text-muted-foreground">
+                ({text.length} / 2000)
+              </p>
+            </div>
           </TabsContent>
           <TabsContent value="preview">
             <div className="min-w-full w-full border-input sm:min-h-[200px] min-h-[100px] dark:bg-input/30 px-3 py-2 rounded-md border bg-transparent shadow-xs prose prose-blue dark:prose-invert lg:prose-lg">
@@ -142,7 +152,7 @@ export default function MarkdownTextEditor() {
           <p className="text-sm text-muted-foreground">Supports Markdown</p>
           <Button
             className="cursor-pointer w-[16ch] sm:w-[18ch] flex items-center justify-center space-x-2"
-            disabled={!text.trim() || isLoading}
+            disabled={!text.trim() || isLoading || text.length > 2000}
             onClick={() => void sendHandler()}
           >
             {isLoading ? (
