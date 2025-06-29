@@ -12,6 +12,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import { useMediaQuery } from "react-responsive";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const placeholderTextDesktop = `Write your message in Markdown...
 
@@ -101,7 +103,31 @@ export default function MarkdownTextEditor() {
           <TabsContent value="preview">
             <div className="min-w-full w-full border-input sm:min-h-[200px] min-h-[100px] dark:bg-input/30 px-3 py-2 rounded-md border bg-transparent shadow-xs prose prose-blue dark:prose-invert lg:prose-lg">
               {text.trim() ? (
-                <Markdown remarkPlugins={[remarkGfm]}>{text}</Markdown>
+                <Markdown
+                  remarkPlugins={[remarkGfm]}
+                  children={text}
+                  components={{
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    code({ node, className, children, style, ref, ...props }) {
+                      const match = /language-(\w+)/.exec(className ?? "");
+                      return match ? (
+                        <SyntaxHighlighter
+                          language={match[1]}
+                          PreTag={"div"}
+                          style={vscDarkPlus}
+                          {...props}
+                        >
+                          {/* eslint-disable-next-line @typescript-eslint/no-base-to-string */}
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                />
               ) : (
                 <p className="text-muted-foreground italic text-sm">
                   Nothing to preview yet. Switch to Edit tab to write your

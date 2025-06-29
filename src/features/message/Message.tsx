@@ -27,6 +27,8 @@ import DeleteMessage from "./DeleteMessage";
 import LikeMessage from "./LikeMessage";
 import BookmarkMessage from "./BookmarkMessage";
 import { Badge } from "@/components/ui/badge";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 type MessagePropsType =
   | {
@@ -192,9 +194,40 @@ function Message(props: MessagePropsType) {
 
                 {/* Message Content */}
                 <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
-                  <Markdown remarkPlugins={[remarkGfm]}>
-                    {messageData.message}
-                  </Markdown>
+                  <Markdown
+                    remarkPlugins={[remarkGfm]}
+                    children={messageData.message}
+                    components={{
+                      code({
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        node,
+                        className,
+                        children,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        style,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        ref,
+                        ...props
+                      }) {
+                        const match = /language-(\w+)/.exec(className ?? "");
+                        return match ? (
+                          <SyntaxHighlighter
+                            language={match[1]}
+                            PreTag={"div"}
+                            style={vscDarkPlus}
+                            {...props}
+                          >
+                            {/* eslint-disable-next-line @typescript-eslint/no-base-to-string */}
+                            {String(children).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                        ) : (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  />
                 </div>
 
                 {/* Message Footer (Like and Bookmark) */}
@@ -299,9 +332,40 @@ function Message(props: MessagePropsType) {
 
             {/* Message Content */}
             <div className="prose prose-sm max-w-none prose-blue dark:prose-invert 2xl:prose-lg">
-              <Markdown remarkPlugins={[remarkGfm]}>
-                {messageData.message}
-              </Markdown>
+              <Markdown
+                remarkPlugins={[remarkGfm]}
+                children={messageData.message}
+                components={{
+                  code({
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    node,
+                    className,
+                    children,
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    style,
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    ref,
+                    ...props
+                  }) {
+                    const match = /language-(\w+)/.exec(className ?? "");
+                    return match ? (
+                      <SyntaxHighlighter
+                        language={match[1]}
+                        PreTag={"div"}
+                        style={vscDarkPlus}
+                        {...props}
+                      >
+                        {/* eslint-disable-next-line @typescript-eslint/no-base-to-string */}
+                        {String(children).replace(/\n$/, "")}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                }}
+              />
             </div>
 
             {/* Message Footer (Like and Bookmark) */}
