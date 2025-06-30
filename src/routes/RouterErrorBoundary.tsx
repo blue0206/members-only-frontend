@@ -19,7 +19,7 @@ export default function RouterErrorBoundary(): ReactNode {
         variant={"outline"}
         className="cursor-pointer mt-4"
         onClick={() => {
-          window.location.replace("/");
+          window.location.reload();
         }}
       >
         Reload Page
