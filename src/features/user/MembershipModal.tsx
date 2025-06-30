@@ -207,6 +207,11 @@ export default function MembershipModal(props: MembershipModalPropsType) {
                     setSecretKey(e.target.value);
                     if (formError) setFormError("");
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && secretKey) {
+                      void upgradeHandler();
+                    }
+                  }}
                 />
                 <Key className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground" />
               </div>
