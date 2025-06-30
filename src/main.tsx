@@ -43,9 +43,13 @@ createRoot(document.getElementById("root")!).render(
           {/* Sentry Error Boundary wrapper for App. */}
           <Sentry.ErrorBoundary
             fallback={
-              <div>
-                <h2>Oops! Something went wrong.</h2>
+              <div className="w-screen h-screen flex flex-col items-center justify-center bg-accent px-4">
+                <h1 className="text-5xl mb-5 font-semibold text-center">
+                  Oops! Something went wrong.
+                </h1>
                 <Button
+                  variant={"outline"}
+                  className="cursor-pointer mt-4"
                   onClick={() => {
                     window.location.reload();
                   }}
