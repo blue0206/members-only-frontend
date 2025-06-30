@@ -10,9 +10,9 @@ import {
   Edit3,
   Eye,
   Command,
-  Grid2X2,
   CornerDownLeft,
   Send,
+  SquareChevronUp,
 } from "lucide-react";
 import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types";
 import { Spinner } from "@/components/ui/spinner";
@@ -108,7 +108,11 @@ export default function MarkdownTextEditor() {
               }}
               maxLength={2000}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && e.metaKey && text.trim()) {
+                if (
+                  e.key === "Enter" &&
+                  (isMac ? e.metaKey : e.ctrlKey) &&
+                  text.trim()
+                ) {
                   void sendHandler();
                 }
               }}
@@ -181,9 +185,7 @@ export default function MarkdownTextEditor() {
                   <p className="text-sm text-muted-foreground">•</p>
 
                   <div className="text-sm text-muted-foreground flex items-center space-x-1">
-                    <kbd className="kbd">
-                      <Grid2X2 className="h-4 w-4 mr-1" /> Enter
-                    </kbd>
+                    <kbd className="kbd">Ctrl + Enter</kbd>
                     <div>to Send</div>
                   </div>
                 </>
@@ -212,7 +214,7 @@ export default function MarkdownTextEditor() {
                 <>
                   <span className="mr-2">Send</span>
                   <div className="flex items-center space-x-0">
-                    <Grid2X2 className="h-4 w-4" />
+                    <SquareChevronUp className="h-4 w-4" />
                     <CornerDownLeft className="h-4 w-4" />
                   </div>
                 </>

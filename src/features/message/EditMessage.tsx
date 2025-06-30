@@ -5,7 +5,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types";
-import { X, Command, Grid2X2, CornerDownLeft, Check } from "lucide-react";
+import {
+  X,
+  Command,
+  CornerDownLeft,
+  Check,
+  SquareChevronUp,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useMediaQuery } from "react-responsive";
 
@@ -64,7 +70,11 @@ export default function EditMessage({
             setEditMessageContent(e.target.value);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && e.metaKey && editMessageContent.trim()) {
+            if (
+              e.key === "Enter" &&
+              (isMac ? e.metaKey : e.ctrlKey) &&
+              editMessageContent.trim()
+            ) {
               void handleMessageEdit();
             }
           }}
@@ -90,9 +100,7 @@ export default function EditMessage({
                   <p className="text-sm text-muted-foreground">•</p>
 
                   <div className="text-sm text-muted-foreground flex items-center space-x-1">
-                    <kbd className="kbd">
-                      <Grid2X2 className="h-4 w-4 mr-1" /> Enter
-                    </kbd>
+                    <kbd className="kbd">Ctrl + Enter</kbd>
                     <div>to Save</div>
                   </div>
                 </>
@@ -143,7 +151,7 @@ export default function EditMessage({
               <>
                 <span className="mr-2">Save</span>
                 <div className="flex items-center space-x-0">
-                  <Grid2X2 className="h-4 w-4" />
+                  <SquareChevronUp className="h-4 w-4" />
                   <CornerDownLeft className="h-4 w-4" />
                 </div>
               </>
