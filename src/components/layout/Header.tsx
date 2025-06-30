@@ -74,18 +74,13 @@ export function Header() {
               >
                 Home
               </NavLink>
-              <NavLink
+              {/* TODO: Implement About page with personal details or something.*/}
+              {/* <NavLink
                 to="/about"
                 className="cursor-pointer px-4 py-2 rounded-md hover:bg-foreground/10"
               >
                 About
-              </NavLink>
-              <NavLink
-                to="/guidelines"
-                className="cursor-pointer px-4 py-2 rounded-md hover:bg-foreground/10"
-              >
-                Guidelines
-              </NavLink>
+              </NavLink> */}
             </nav>
           </div>
 
