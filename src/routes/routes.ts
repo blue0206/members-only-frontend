@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import Home from "@/pages/Home";
+import RouterErrorBoundary from "./RouterErrorBoundary";
 import Error from "@/components/shared/Error";
 import { Login, Register } from "@/features/auth";
 import ProtectedRoute from "./ProtectedRoute";
@@ -12,18 +13,22 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Home,
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     path: "/login",
     Component: Login,
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     path: "/register",
     Component: Register,
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     path: "/error",
     Component: Error,
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     Component: () =>
@@ -34,6 +39,7 @@ const router = createBrowserRouter([
         Component: ProfileSettings,
       },
     ],
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     Component: () =>
@@ -44,6 +50,7 @@ const router = createBrowserRouter([
         Component: Bookmarks,
       },
     ],
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     Component: () => ProtectedRoute({ allowedRoles: [Role.ADMIN] }),
@@ -53,6 +60,7 @@ const router = createBrowserRouter([
         Component: UserManagement,
       },
     ],
+    ErrorBoundary: RouterErrorBoundary,
   },
   {
     path: "*",
