@@ -5,8 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types";
-import { Check, X } from "lucide-react";
+import { X, Command, Grid2X2, CornerDownLeft, Check } from "lucide-react";
 import { useEffect } from "react";
+import { useMediaQuery } from "react-responsive";
 
 interface EditMessagePropsType {
   currentMessageId: GetMessagesResponseDto[number]["messageId"];
@@ -20,6 +21,11 @@ export default function EditMessage({
   setEditMessageContent,
   ...props
 }: EditMessagePropsType) {
+  const isDesktop = useMediaQuery({
+    query: "(min-width: 768px)",
+  });
+  const isMac = navigator.userAgent.includes("Macintosh");
+
   // Message Edit Mutation
   const [editMessage, { isSuccess, reset, isError, error, isLoading }] =
     useEditMessageMutation();
@@ -57,17 +63,51 @@ export default function EditMessage({
           onChange={(e) => {
             setEditMessageContent(e.target.value);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.metaKey && editMessageContent.trim()) {
+              void handleMessageEdit();
+            }
+          }}
           className="min-h-[150px]"
         />
-        <div
-          className={`w-full flex justify-end ${
-            editMessageContent.length < 200 ? "hidden" : ""
-          }`}
-        >
-          <p className="text-sm text-muted-foreground">
-            ({editMessageContent.length} / 2000)
-          </p>
-        </div>
+        {isDesktop && (
+          <div className="w-full flex justify-between items-center mt-2">
+            <div className="flex items-center space-x-1">
+              <p className="text-sm text-muted-foreground">Supports Markdown</p>
+              {isMac ? (
+                <>
+                  <p className="text-sm text-muted-foreground">•</p>
+
+                  <div className="text-sm text-muted-foreground flex items-center space-x-1">
+                    <kbd className="kbd">
+                      <Command className="h-4 w-4 mr-1" /> Return
+                    </kbd>
+                    <div>to Save</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">•</p>
+
+                  <div className="text-sm text-muted-foreground flex items-center space-x-1">
+                    <kbd className="kbd">
+                      <Grid2X2 className="h-4 w-4 mr-1" /> Enter
+                    </kbd>
+                    <div>to Save</div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <p
+              className={`text-sm text-muted-foreground ${
+                editMessageContent.length < 200 ? "hidden" : ""
+              }`}
+            >
+              ({editMessageContent.length} / 2000)
+            </p>
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-end space-x-2">
         <Button
@@ -90,6 +130,24 @@ export default function EditMessage({
         >
           {isLoading ? (
             <Spinner size={"small"} className="text-white" />
+          ) : isDesktop ? (
+            isMac ? (
+              <>
+                <span className="mr-2">Save</span>
+                <div className="flex items-center space-x-0">
+                  <Command className="h-4 w-4" />
+                  <CornerDownLeft className="h-4 w-4" />
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="mr-2">Save</span>
+                <div className="flex items-center space-x-0">
+                  <Grid2X2 className="h-4 w-4" />
+                  <CornerDownLeft className="h-4 w-4" />
+                </div>
+              </>
+            )
           ) : (
             <>
               <Check className="h-4 w-4 mr-2" />

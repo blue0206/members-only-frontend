@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Edit3, Eye, Send } from "lucide-react";
+import {
+  Edit3,
+  Eye,
+  Command,
+  Grid2X2,
+  CornerDownLeft,
+  Send,
+} from "lucide-react";
 import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
@@ -29,8 +36,9 @@ const placeholderTextMobile = "Write your message...";
 
 export default function MarkdownTextEditor() {
   const isDesktop = useMediaQuery({
-    query: "(min-width: 611px)",
+    query: "(min-width: 768px)",
   });
+  const isMac = navigator.userAgent.includes("Macintosh");
 
   const [text, setText] = useState<string>("");
 
@@ -99,6 +107,11 @@ export default function MarkdownTextEditor() {
                 setText(e.target.value);
               }}
               maxLength={2000}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.metaKey && text.trim()) {
+                  void sendHandler();
+                }
+              }}
             />
             <div
               className={`w-full flex justify-end ${
@@ -149,7 +162,33 @@ export default function MarkdownTextEditor() {
         </Tabs>
 
         <div className="flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">Supports Markdown</p>
+          <div className="flex items-center space-x-1">
+            <p className="text-sm text-muted-foreground">Supports Markdown</p>
+            {isDesktop &&
+              (isMac ? (
+                <>
+                  <p className="text-sm text-muted-foreground">•</p>
+
+                  <div className="text-sm text-muted-foreground flex items-center space-x-1">
+                    <kbd className="kbd">
+                      <Command className="h-4 w-4 mr-1" /> Return
+                    </kbd>
+                    <div>to Send</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">•</p>
+
+                  <div className="text-sm text-muted-foreground flex items-center space-x-1">
+                    <kbd className="kbd">
+                      <Grid2X2 className="h-4 w-4 mr-1" /> Enter
+                    </kbd>
+                    <div>to Send</div>
+                  </div>
+                </>
+              ))}
+          </div>
           <Button
             className="cursor-pointer w-[16ch] sm:w-[18ch] flex items-center justify-center space-x-2"
             disabled={!text.trim() || isLoading || text.length > 2000}
@@ -160,9 +199,27 @@ export default function MarkdownTextEditor() {
                 className="text-background dark:text-foreground"
                 size={"small"}
               />
+            ) : isDesktop ? (
+              isMac ? (
+                <>
+                  <span className="mr-2">Send</span>
+                  <div className="flex items-center space-x-0">
+                    <Command className="h-4 w-4" />
+                    <CornerDownLeft className="h-4 w-4" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="mr-2">Send</span>
+                  <div className="flex items-center space-x-0">
+                    <Grid2X2 className="h-4 w-4" />
+                    <CornerDownLeft className="h-4 w-4" />
+                  </div>
+                </>
+              )
             ) : (
               <>
-                <Send />
+                <Send className="h-4 w-4 mr-2" />
                 <span>Send Message</span>
               </>
             )}
