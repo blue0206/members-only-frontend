@@ -40,25 +40,29 @@ export default function ScrollButtons() {
   if (!showButtons) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 flex flex-col space-y-2 z-40">
-      {!isAtTop && (
-        <Button
-          size={"icon"}
-          className="h-11 w-11 rounded-full shadow-lg"
-          onClick={scrollToTop}
-        >
-          <ChevronUp className="h-5 w-5" />
-        </Button>
-      )}
-      {!isAtBottom && (
-        <Button
-          size={"icon"}
-          className="h-11 w-11 rounded-full shadow-lg"
-          onClick={scrollToBottom}
-        >
-          <ChevronDown className="h-5 w-5" />
-        </Button>
-      )}
-    </div>
+    <>
+      <div className="fixed top-20 left-0 right-0 z-40 flex justify-center pointer-events-none">
+        {!isAtTop && (
+          <Button
+            size={"icon"}
+            className="h-11 w-11 rounded-full shadow-lg pointer-events-auto cursor-pointer"
+            onClick={scrollToTop}
+          >
+            <ChevronUp className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+      <div className="fixed bottom-56 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        {!isAtBottom && (
+          <Button
+            size={"icon"}
+            className="h-11 w-11 rounded-full shadow-lg pointer-events-auto cursor-pointer"
+            onClick={scrollToBottom}
+          >
+            <ChevronDown className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
+    </>
   );
 }
