@@ -3,7 +3,7 @@ import { Header } from "@/components/layout";
 import { getUserRole, isAuthenticated } from "@/features/auth/authSlice";
 import { Role } from "@blue0206/members-only-shared-types";
 import MarkdownTextEditor from "@/features/message/MarkdownTextEditor";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -26,8 +26,6 @@ import {
 export default function Home() {
   const isAuth = useAppSelector(isAuthenticated);
   const role = useAppSelector(getUserRole);
-
-  const [messageCountChanged, setMessageCountChanged] = useState(false);
 
   const [sortOption, setSortOption] = useState<SortOptionsType>("oldest");
 
@@ -96,15 +94,6 @@ export default function Home() {
     fourthLastMessageEntry?.isIntersecting,
   ]);
 
-  // If the message count has changed, invokes the scrollToNewestMessage function
-  // to decide whether to auto-scroll to newest message or not based on user position.
-  useEffect(() => {
-    if (messageCountChanged) {
-      scrollToNewestMessage();
-      setMessageCountChanged(false);
-    }
-  }, [messageCountChanged, sortOption, scrollToNewestMessage]);
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -150,7 +139,7 @@ export default function Home() {
               {isAuth && role !== Role.USER ? (
                 <MessagesWithAuthor
                   sortOption={sortOption}
-                  setMessageCountChanged={setMessageCountChanged}
+                  smartScrollCallback={scrollToNewestMessage}
                   firstMessageRef={firstMessageRef}
                   fourthMessageRef={fourthMessageRef}
                   lastMessageRef={lastMessageRef}
@@ -159,7 +148,7 @@ export default function Home() {
               ) : (
                 <MessagesWithoutAuthor
                   sortOption={sortOption}
-                  setMessageCountChanged={setMessageCountChanged}
+                  smartScrollCallback={scrollToNewestMessage}
                   firstMessageRef={firstMessageRef}
                   fourthMessageRef={fourthMessageRef}
                   lastMessageRef={lastMessageRef}

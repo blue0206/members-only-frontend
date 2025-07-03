@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { RefObject, useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { isAuthenticated } from "../auth/authSlice";
 import { useNavigate } from "react-router";
@@ -17,20 +17,21 @@ import {
 import sortMessages from "@/utils/messageSort";
 import Message from "./Message";
 import MessageSkeleton from "@/components/skeleton/MessageSkeleton";
+import useOnNewMessagesReceived from "@/hooks/useOnNewMessagesReceived";
 
 interface MessageListPropsType {
   sortOption: SortOptionsType;
-  setMessageCountChanged: React.Dispatch<React.SetStateAction<boolean>>;
   firstMessageRef: RefObject<HTMLDivElement | null>;
   fourthMessageRef: RefObject<HTMLDivElement | null>;
   lastMessageRef: RefObject<HTMLDivElement | null>;
   fourthLastMessageRef: RefObject<HTMLDivElement | null>;
+  smartScrollCallback: () => void;
 }
 
 // Messages Without Author Component
 export function MessagesWithAuthor({
   sortOption,
-  setMessageCountChanged,
+  smartScrollCallback,
   ...refs
 }: MessageListPropsType) {
   const isAuth = useAppSelector(isAuthenticated);
@@ -44,8 +45,6 @@ export function MessagesWithAuthor({
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
   const errorDetails = useApiErrorHandler(error);
-
-  const messageListSizeRef = useRef(data?.length ?? 0);
 
   // Handle api call errors.
   useEffect(() => {
@@ -70,16 +69,7 @@ export function MessagesWithAuthor({
   }, [data, sortOption]);
 
   // Adjust scroll view on message count change.
-  useEffect(() => {
-    if (data) {
-      // We only want to adjust the scroll view if the message list size has increased,
-      // i.e., a new message has been added.
-      if (data.length > messageListSizeRef.current) {
-        setMessageCountChanged(true);
-      }
-      messageListSizeRef.current = data.length;
-    }
-  }, [setMessageCountChanged, data]);
+  useOnNewMessagesReceived(data, smartScrollCallback);
 
   return (
     <>
@@ -120,7 +110,7 @@ export function MessagesWithAuthor({
 // Messages With Author Component
 export function MessagesWithoutAuthor({
   sortOption,
-  setMessageCountChanged,
+  smartScrollCallback,
   ...refs
 }: MessageListPropsType) {
   const dispatch = useAppDispatch();
@@ -130,8 +120,6 @@ export function MessagesWithoutAuthor({
     useGetMessagesWithoutAuthorQuery();
 
   const errorDetails = useApiErrorHandler(error);
-
-  const messageListSizeRef = useRef(data?.length ?? 0);
 
   // Handle api call errors.
   useEffect(() => {
@@ -158,15 +146,7 @@ export function MessagesWithoutAuthor({
   }, [data, sortOption]);
 
   // Adjust scroll view on message count change.
-  useEffect(() => {
-    // Set to true only if new length is greater than previous.
-    if (data) {
-      if (data.length > messageListSizeRef.current) {
-        setMessageCountChanged(true);
-      }
-      messageListSizeRef.current = data.length;
-    }
-  }, [setMessageCountChanged, data]);
+  useOnNewMessagesReceived(data, smartScrollCallback);
 
   return (
     <>
