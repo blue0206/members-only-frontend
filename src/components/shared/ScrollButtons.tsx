@@ -1,30 +1,33 @@
-import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export default function ScrollButtons() {
-  const [showButtons, setShowButtons] = useState<boolean>(false);
+interface ScrollButtonsPropsType {
+  topElementIntersectionEntry: IntersectionObserverEntry | null;
+  bottomElementIntersectionEntry: IntersectionObserverEntry | null;
+}
+
+export default function ScrollButtons({
+  topElementIntersectionEntry,
+  bottomElementIntersectionEntry,
+}: ScrollButtonsPropsType) {
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
-  const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
+  const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
 
+  // Checks if the topmost message and the bottommost message are visible
+  // to the user and sets the isAtTop and isAtBottom states accordingly.
   useEffect(() => {
-    const scrollHandler = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
+    if (typeof topElementIntersectionEntry?.isIntersecting === "boolean") {
+      setIsAtTop(topElementIntersectionEntry.isIntersecting);
+    }
 
-      setShowButtons(scrollTop > 100);
-
-      setIsAtTop(scrollTop < 100);
-      setIsAtBottom(scrollTop + windowHeight >= documentHeight - 100);
-    };
-
-    window.addEventListener("scroll", scrollHandler);
-
-    return () => {
-      window.removeEventListener("scroll", scrollHandler);
-    };
-  }, []);
+    if (typeof bottomElementIntersectionEntry?.isIntersecting === "boolean") {
+      setIsAtBottom(bottomElementIntersectionEntry.isIntersecting);
+    }
+  }, [
+    topElementIntersectionEntry?.isIntersecting,
+    bottomElementIntersectionEntry?.isIntersecting,
+  ]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -36,8 +39,6 @@ export default function ScrollButtons() {
       behavior: "smooth",
     });
   };
-
-  if (!showButtons) return null;
 
   return (
     <>

@@ -36,11 +36,13 @@ type MessagePropsType =
       withAuthor: true;
       editMessageId: number | null;
       setEditMessageId: React.Dispatch<React.SetStateAction<number | null>>;
+      ref: React.RefObject<HTMLDivElement | null> | null;
       bookmarkTimestamp?: string | Date;
     }
   | {
       messageData: GetMessagesWithoutAuthorResponseDto[number];
       withAuthor: false;
+      ref: React.RefObject<HTMLDivElement | null> | null;
       setEditMessageId?: never;
     };
 
@@ -81,7 +83,7 @@ function Message(props: MessagePropsType) {
 
     return (
       <>
-        <Card className="p-5 hover:shadow-md transition-shadow">
+        <Card ref={props.ref} className="p-5 hover:shadow-md transition-shadow">
           <div className="space-y-4">
             {/* We edit message if:
                 1. The user is member and the message is their own message. OR
@@ -255,7 +257,7 @@ function Message(props: MessagePropsType) {
     // For Unregistered Users or USER role.
     return (
       <>
-        <Card className="p-5 hover:shadow-md transition-shadow">
+        <Card ref={props.ref} className="p-5 hover:shadow-md transition-shadow">
           <div className="space-y-4">
             {/* Message Header (Author Details + Options) */}
             <div className="flex items-center justify-between">
