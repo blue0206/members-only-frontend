@@ -21,8 +21,17 @@ import useUiErrorHandler from "@/hooks/useUiErrorHandler";
 import { useMediaQuery } from "react-responsive";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { SortOptionsType } from "@/lib/constants";
 
-export default function MarkdownTextEditor() {
+interface MarkdownTextEditorPropsType {
+  messageViewType: SortOptionsType;
+  className?: string;
+}
+
+export default function MarkdownTextEditor({
+  messageViewType,
+  ...props
+}: MarkdownTextEditorPropsType) {
   const isDesktop = useMediaQuery({
     query: "(min-width: 768px)",
   });
@@ -45,9 +54,26 @@ export default function MarkdownTextEditor() {
   useEffect(() => {
     if (isSuccess) {
       setText("");
+      // Scroll to latest message after a short delay
+      // to ensure the fresh list has been fetched.
+      setTimeout(() => {
+        if (messageViewType === "newest") {
+          // Scroll to extreme top.
+          scrollTo({
+            top: 0,
+            behavior: "instant",
+          });
+        } else {
+          // Scroll to extreme bottom.
+          scrollTo({
+            top: document.body.scrollHeight + 1000,
+            behavior: "instant",
+          });
+        }
+      }, 50);
       reset();
     }
-  }, [isSuccess, reset]);
+  }, [isSuccess, reset, messageViewType]);
 
   const sendHandler = async () => {
     if (!text.trim()) return;
@@ -59,9 +85,9 @@ export default function MarkdownTextEditor() {
   };
 
   return (
-    <Card className="w-full h-full p-5">
-      <div className="space-y-4">
-        <div className="flex gap-2">
+    <Card className={`w-full h-full p-3.5 ${props.className ?? ""}`}>
+      <div className="space-y-2">
+        <div className="hidden sm:flex gap-2">
           <Edit3 className="text-blue-500" />
           <h2 className="font-semibold">Share your thoughts</h2>
         </div>
@@ -84,9 +110,9 @@ export default function MarkdownTextEditor() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="edit" className="w-full space-y-4">
+          <TabsContent value="edit" className="w-full space-y-2">
             <Textarea
-              className="resize-none min-h-[100px] sm:min-h-[50px] overflow-auto max-h-[200px]"
+              className="resize-none min-h-[80px] sm:min-h-[50px] overflow-auto max-h-[200px]"
               placeholder={"Write your message..."}
               value={text}
               onChange={(e) => {
@@ -114,7 +140,7 @@ export default function MarkdownTextEditor() {
             </div>
           </TabsContent>
           <TabsContent value="preview">
-            <div className="min-w-full w-full border-input min-h-[100px] sm:min-h-[50px] dark:bg-input/30 px-3 py-2 rounded-md border bg-transparent shadow-xs prose prose-blue dark:prose-invert lg:prose-lg">
+            <div className="min-w-full w-full border-input min-h-[100px] sm:min-h-[50px] max-h-[500px] overflow-auto dark:bg-input/30 px-3 py-2 rounded-md border bg-transparent shadow-xs prose prose-blue dark:prose-invert lg:prose-lg">
               {text.trim() ? (
                 <Markdown
                   remarkPlugins={[remarkGfm]}
