@@ -1,56 +1,51 @@
-# members-only-frontend
-An exclusive clubhouse application where members can write anonymous posts.
-# React + TypeScript + Vite
+# Members Only - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Vercel Deployment](https://vercel.com/button)](https://example.vercel.app)
 
-Currently, two official plugins are available:
+This repository contains the frontend code for **Members Only**, a real-time discussion platform built with modern web technologies. This application serves as a comprehensive showcase of a feature-rich, secure, and performant single-page application (SPA).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The live version of this branch can be found here: **[https://example.vercel.app](https://example.vercel.app)**
 
-## Expanding the ESLint configuration
+> **Note:** This repository represents the frontend for the monolithic deployment of the application. The ongoing development for a refactored serverless architecture is taking place on the `main` branch of the project repositories.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 🚀 Features
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Secure Authentication:** Robust JWT-based authentication flow with Access and Refresh Tokens.
+- **Cookie-Based Session Management:** Secure `HttpOnly` cookies for refresh tokens to prevent XSS attacks.
+- **CSRF Protection:** Implemented the Double Submit Cookie pattern to protect against Cross-Site Request Forgery on state-changing actions.
+- **Role-Based Access Control (RBAC):** UI and data visibility dynamically change based on user roles (Admin, Member, User).
+- **Real-time Event Handling (SSE):** Uses Server-Sent Events to receive real-time signals from the backend, triggering automatic data refetches for a live user experience (e.g., new messages, profile updates).
+- **Message Board:** Users can create messages (with Markdown support), view a live message feed, and interact with posts.
+- **Avatar Uploads:** Seamless image upload functionality integrated with Cloudinary for image processing and storage.
+- **Session Management:** Users can view and revoke their active sessions from a dedicated settings page.
+- **Dark Mode & Theming:** A persistent, system-aware dark mode built with Tailwind CSS and Shadcn.
+- **Advanced State Management:** Utilizes Redux Toolkit and RTK Query for efficient server state caching, invalidation, and a seamless re-authentication flow.
+- **Robust Error Handling:** Integrated with Sentry for real-time error reporting, with user-friendly toast notifications for API and client-side errors.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 🛠️ Tech Stack
+
+- **Framework:** React 19 with Vite
+- **Language:** TypeScript
+- **State Management:** Redux Toolkit (RTK) & RTK Query
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui
+- **Routing:** React Router v7
+- **Form Management:** React Hook Form with Zod for schema validation
+- **Linting & Formatting:** ESLint & Prettier
+- **Error Reporting:** Sentry
+
+---
+
+## Running Locally
+
+To run the frontend locally, you will need the backend server running simultaneously. The easiest way to run the entire stack is by using the central Docker Compose setup located in the [`members-only-docker-compose`](https://github.com/blue0206/members-only-docker-compose) repository.
+
+---
+
+## Deployment
+
+This branch is deployed to **Vercel**.
