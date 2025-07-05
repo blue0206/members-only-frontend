@@ -184,7 +184,9 @@ export const userApiSlice = apiSlice.injectEndpoints({
         // Wait for the query to be fulfilled.
         await mutationLifeCycleApi.queryFulfilled;
         // Refresh user tokens.
-        authApiSlice.endpoints.tokenRefresh.initiate();
+        await mutationLifeCycleApi.dispatch(
+          authApiSlice.endpoints.tokenRefresh.initiate()
+        );
       },
       invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
