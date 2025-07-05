@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { isAuthenticated } from "../auth/authSlice";
 import { useNavigate } from "react-router";
@@ -21,10 +21,10 @@ import useOnNewMessagesReceived from "@/hooks/useOnNewMessagesReceived";
 
 interface MessageListPropsType {
   sortOption: SortOptionsType;
-  firstMessageRef: RefObject<HTMLDivElement | null>;
-  fourthMessageRef: RefObject<HTMLDivElement | null>;
-  lastMessageRef: RefObject<HTMLDivElement | null>;
-  fourthLastMessageRef: RefObject<HTMLDivElement | null>;
+  firstMessageRef: (node: HTMLDivElement | null) => void;
+  fourthMessageRef: (node: HTMLDivElement | null) => void;
+  lastMessageRef: (node: HTMLDivElement | null) => void;
+  fourthLastMessageRef: (node: HTMLDivElement | null) => void;
   smartScrollCallback: () => void;
 }
 

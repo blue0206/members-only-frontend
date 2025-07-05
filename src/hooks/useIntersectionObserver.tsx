@@ -10,8 +10,8 @@ export default function useIntersectionObserver(
   options: ObserverOptionsType = {}
 ) {
   const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null);
+  const [node, setNode] = useState<HTMLElement | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
-  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (observer.current) {
@@ -23,18 +23,15 @@ export default function useIntersectionObserver(
     }, options);
 
     const { current: currentObserver } = observer;
-    const { current: currentElement } = ref;
 
-    if (currentElement) {
-      currentObserver.observe(currentElement);
+    if (node) {
+      currentObserver.observe(node);
     }
 
     return () => {
-      if (currentElement) {
-        currentObserver.disconnect();
-      }
+      currentObserver.disconnect();
     };
-  }, [ref, options]);
+  }, [node, options]);
 
-  return { ref, entry };
+  return { ref: setNode, entry };
 }
