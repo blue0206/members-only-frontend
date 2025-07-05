@@ -52,7 +52,7 @@ export default function Home() {
   // ensuring that message is not considered visible when behind text editor.
   const { ref: fourthLastMessageRef, entry: fourthLastMessageEntry } =
     useIntersectionObserver({
-      rootMargin: "0px 0px -208px 0px",
+      rootMargin: isAuth ? "0px 0px -208px 0px" : undefined,
     });
 
   // If the sorting is based on newest message, then newly received messages will
