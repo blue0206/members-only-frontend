@@ -180,6 +180,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: HttpMethod.PATCH,
         credentials: "include",
       }),
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        await mutationLifeCycleApi.queryFulfilled;
+        // Refresh user tokens.
+        authApiSlice.endpoints.tokenRefresh.initiate();
+      },
       invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
     uploadAvatar: builder.mutation<
