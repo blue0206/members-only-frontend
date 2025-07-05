@@ -9,6 +9,7 @@ import { ThemeProvider } from "./components/layout/";
 import * as Sentry from "@sentry/react";
 import { Button } from "./components/ui/button.tsx";
 import { Spinner } from "./components/ui/spinner.tsx";
+import { Analytics } from "@vercel/analytics/react";
 
 // Sentry initialization for production.
 if (import.meta.env.PROD) {
@@ -65,5 +66,6 @@ createRoot(document.getElementById("root")!).render(
         </ThemeProvider>
       </PersistGate>
     </Provider>
+    <Analytics />
   </StrictMode>
 );
