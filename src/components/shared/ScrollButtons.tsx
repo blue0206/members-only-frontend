@@ -1,6 +1,8 @@
+import { useAppSelector } from "@/app/hooks";
 import { Button } from "../ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { isAuthenticated } from "@/features/auth/authSlice";
 
 interface ScrollButtonsPropsType {
   topElementIntersectionEntry: IntersectionObserverEntry | null;
@@ -11,6 +13,7 @@ export default function ScrollButtons({
   topElementIntersectionEntry,
   bottomElementIntersectionEntry,
 }: ScrollButtonsPropsType) {
+  const isAuth = useAppSelector(isAuthenticated);
   const [isAtTop, setIsAtTop] = useState<boolean>(true);
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
 
@@ -53,7 +56,11 @@ export default function ScrollButtons({
           </Button>
         )}
       </div>
-      <div className="fixed bottom-56 left-0 right-0 z-50 flex justify-center pointer-events-none">
+      <div
+        className={`fixed ${
+          isAuth ? "bottom-56" : "bottom-8"
+        } left-0 right-0 z-50 flex justify-center pointer-events-none`}
+      >
         {!isAtBottom && (
           <Button
             size={"icon"}
