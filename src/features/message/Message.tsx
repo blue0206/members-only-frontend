@@ -36,13 +36,15 @@ type MessagePropsType =
       withAuthor: true;
       editMessageId: number | null;
       setEditMessageId: React.Dispatch<React.SetStateAction<number | null>>;
-      ref: React.RefObject<HTMLDivElement | null> | null;
+      // ref: React.RefObject<HTMLDivElement | null> | null;
+      ref: ((node: HTMLDivElement | null) => void) | null;
       bookmarkTimestamp?: string | Date;
     }
   | {
       messageData: GetMessagesWithoutAuthorResponseDto[number];
       withAuthor: false;
-      ref: React.RefObject<HTMLDivElement | null> | null;
+      // ref: React.RefObject<HTMLDivElement | null> | null;
+      ref: ((node: HTMLDivElement | null) => void) | null;
       setEditMessageId?: never;
     };
 
