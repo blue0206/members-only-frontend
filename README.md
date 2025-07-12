@@ -1,10 +1,10 @@
 # Members Only - Frontend
 
-[![Vercel Deployment](https://vercel.com/button)](https://example.vercel.app)
+[![Vercel Deployment](https://vercel.com/button)](https://app.nevery.shop)
 
 This repository contains the frontend code for **Members Only**, a real-time discussion platform built with modern web technologies. This application serves as a comprehensive showcase of a feature-rich, secure, and performant single-page application (SPA).
 
-The live version of this branch can be found here: **[https://example.vercel.app](https://example.vercel.app)**
+The live version of this branch can be found here: **[https://example.vercel.app](https://app.nevery.shop)**
 
 > **Note:** This repository represents the frontend for the monolithic deployment of the application. The ongoing development for a refactored serverless architecture is taking place on the `main` branch of the project repositories.
 
