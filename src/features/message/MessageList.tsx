@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { isAuthenticated } from "../auth/authSlice";
 import { useNavigate } from "react-router";
-import { SortOptionsType } from "@/lib/constants";
+import { serverErrorQuery, SortOptionsType } from "@/lib/constants";
 import {
+  messageApiSlice,
   useGetMessagesWithAuthorQuery,
   useGetMessagesWithoutAuthorQuery,
 } from "@/app/services/messageApi";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
-import { apiSlice } from "@/app/services/api";
 import { ErrorPageDetailsType } from "@/types";
 import {
   GetMessagesResponseDto,
@@ -51,8 +51,17 @@ export function MessagesWithAuthor({
     if (isError) {
       if (errorDetails.isNetworkError) {
         // We just dispatch a call to the health check endpoint to check if the server is up.
-        // If not, the user will be redirected to the error page as set in that endpoint.
-        void dispatch(apiSlice.endpoints.healthCheck.initiate());
+        // If not, the user will be redirected to the error page.
+        void dispatch(messageApiSlice.endpoints.healthCheck.initiate()).catch(
+          () => {
+            if (
+              window.location.pathname !== "/error" &&
+              window.location.pathname !== `/error?reason=${serverErrorQuery}`
+            ) {
+              window.location.replace(`/error?reason=${serverErrorQuery}`);
+            }
+          }
+        );
       } else {
         void navigate("/error", {
           state: {
@@ -126,8 +135,17 @@ export function MessagesWithoutAuthor({
     if (isError) {
       if (errorDetails.isNetworkError) {
         // We just dispatch a call to the health check endpoint to check if the server is up.
-        // If not, the user will be redirected to the error page as set in that endpoint.
-        void dispatch(apiSlice.endpoints.healthCheck.initiate());
+        // If not, the user will be redirected to the error page.
+        void dispatch(messageApiSlice.endpoints.healthCheck.initiate()).catch(
+          () => {
+            if (
+              window.location.pathname !== "/error" &&
+              window.location.pathname !== `/error?reason=${serverErrorQuery}`
+            ) {
+              window.location.replace(`/error?reason=${serverErrorQuery}`);
+            }
+          }
+        );
       } else {
         void navigate("/error", {
           state: {

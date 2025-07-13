@@ -492,6 +492,12 @@ export const messageApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Messages", "Bookmarks"],
     }),
+    healthCheck: builder.query<string, void>({
+      query: () => ({
+        url: "/messages/healthcheck",
+        method: HttpMethod.GET,
+      }),
+    }),
   }),
 });
 
@@ -503,4 +509,5 @@ export const {
   useDeleteMessageMutation,
   useLikeMessageMutation,
   useUnlikeMessageMutation,
+  useHealthCheckQuery,
 } = messageApiSlice;
