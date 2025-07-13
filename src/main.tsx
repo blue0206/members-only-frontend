@@ -10,6 +10,7 @@ import * as Sentry from "@sentry/react";
 import { Button } from "./components/ui/button.tsx";
 import { Spinner } from "./components/ui/spinner.tsx";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Sentry initialization for production.
 if (import.meta.env.PROD) {
@@ -66,6 +67,7 @@ createRoot(document.getElementById("root")!).render(
         </ThemeProvider>
       </PersistGate>
     </Provider>
+    <SpeedInsights />
     <Analytics />
   </StrictMode>
 );
