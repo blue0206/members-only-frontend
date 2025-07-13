@@ -1,6 +1,6 @@
 import { isApiResponseError } from "@/utils/errorUtils";
 import { logger } from "@/utils/logger";
-import { ErrorCodes } from "@blue0206/members-only-shared-types";
+import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
 import { BaseQueryApi, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import * as Sentry from "@sentry/react";
 import { RootState } from "../store";

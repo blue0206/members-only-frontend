@@ -1,4 +1,4 @@
-import { RegisterRequestDto } from "@blue0206/members-only-shared-types";
+import { RegisterRequestDto } from "@blue0206/members-only-shared-types/dtos/auth.dto";
 
 export interface UploadAvatarRequestDto {
   avatar: File | Blob | string;

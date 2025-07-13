@@ -28,7 +28,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getDateFromTimestamp, getTimeElapsed } from "@/utils/timestampFormat";
-import { GetUsersResponseDto, Role } from "@blue0206/members-only-shared-types";
+import { GetUsersResponseDto } from "@blue0206/members-only-shared-types/dtos/user.dto";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import {
   Calendar,

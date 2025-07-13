@@ -1,9 +1,11 @@
 import {
   ApiErrorCode,
+  ErrorCodes,
+} from "@blue0206/members-only-shared-types/api/error-codes";
+import {
   ApiErrorPayload,
   ApiResponseError,
-  ErrorCodes,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/api/base";
 import { SerializedError } from "@reduxjs/toolkit";
 
 export const isApiResponseError = (

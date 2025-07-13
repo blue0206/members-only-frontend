@@ -1,4 +1,4 @@
-import { Role } from "@blue0206/members-only-shared-types";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 
 export const SortOptions = {
   newest: "newest",

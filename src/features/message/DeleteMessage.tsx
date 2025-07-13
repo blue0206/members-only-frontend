@@ -18,7 +18,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types";
+import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types/dtos/message.dto";
 import { AlertTriangle, MessageSquareX, X } from "lucide-react";
 import { useMediaQuery } from "react-responsive";
 import { addNotification } from "../notification/notificationSlice";

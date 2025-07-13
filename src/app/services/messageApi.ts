@@ -3,7 +3,6 @@
 // for no arguments in RTK Query.
 
 import {
-  ApiResponseSuccess,
   CreateMessageRequestDto,
   CreateMessageResponseDto,
   CreateMessageResponseSchema,
@@ -14,8 +13,9 @@ import {
   GetMessagesWithoutAuthorResponseDto,
   GetMessagesWithoutAuthorResponseSchema,
   MessageParamsDto,
-  Role,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/message.dto";
+import { ApiResponseSuccess } from "@blue0206/members-only-shared-types/api/base";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";

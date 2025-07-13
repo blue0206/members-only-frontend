@@ -3,8 +3,6 @@
 // for no arguments in RTK Query.
 
 import {
-  ApiResponseSuccess,
-  ErrorCodes,
   LoginRequestDto,
   LoginResponseDto,
   LoginResponseSchema,
@@ -16,7 +14,9 @@ import {
   SessionIdParamsDto,
   UserSessionsResponseDto,
   UserSessionsResponseSchema,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/auth.dto";
+import { ApiResponseSuccess } from "@blue0206/members-only-shared-types/api/base";
+import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";

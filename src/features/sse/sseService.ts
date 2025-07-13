@@ -2,16 +2,16 @@ import { apiSlice } from "@/app/services/api";
 import { AppDispatch, AppStore, RootState } from "@/app/store";
 import { logger } from "@/utils/logger";
 import {
-  EventReason,
   MessageEventPayloadDto,
   MessageEventPayloadSchema,
   MultiEventPayloadDto,
   MultiEventPayloadSchema,
-  Role,
-  SseEventNames,
   UserEventPayloadDto,
   UserEventPayloadSchema,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/event.dto";
+import { EventReason } from "@blue0206/members-only-shared-types/enums/eventReason.enum";
+import { SseEventNames } from "@blue0206/members-only-shared-types/api/event-names";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { addNotification } from "../notification/notificationSlice";
 import { authApiSlice } from "@/app/services/authApi";
 import * as Sentry from "@sentry/react";

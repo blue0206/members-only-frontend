@@ -7,12 +7,12 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
 import { Mutex } from "async-mutex";
+import { ApiResponseSuccess } from "@blue0206/members-only-shared-types/api/base";
+import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
 import {
-  ApiResponseSuccess,
-  ErrorCodes,
   RefreshResponseDto,
   RefreshResponseSchema,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/auth.dto";
 import { clearCredentials, setCredentials } from "@/features/auth/authSlice";
 import { CustomBaseQueryError, HttpMethod } from "@/types";
 import { isApiErrorPayload, isApiResponseError } from "@/utils/errorUtils";

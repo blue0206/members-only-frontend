@@ -4,7 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";
-import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types";
+import { GetMessagesResponseDto } from "@blue0206/members-only-shared-types/dtos/message.dto";
 import {
   X,
   Command,

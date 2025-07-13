@@ -1,4 +1,4 @@
-import { GetUserBookmarksResponseDto } from "@blue0206/members-only-shared-types";
+import { GetUserBookmarksResponseDto } from "@blue0206/members-only-shared-types/dtos/user.dto";
 
 export default function bookmarksFilter(
   data: GetUserBookmarksResponseDto,

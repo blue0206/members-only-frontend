@@ -1,7 +1,7 @@
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/message.dto";
 import { useEffect, useRef } from "react";
 
 // A hook that calls the provided callback function (for smart scrolling on new messages)

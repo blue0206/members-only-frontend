@@ -17,7 +17,7 @@ import { SortOptions, SortOptionsType } from "@/lib/constants";
 import { ErrorPageDetailsType } from "@/types";
 import bookmarksFilter from "@/utils/bookmarksFilter";
 import sortMessages from "@/utils/messageSort";
-import { GetUserBookmarksResponseDto } from "@blue0206/members-only-shared-types";
+import { GetUserBookmarksResponseDto } from "@blue0206/members-only-shared-types/dtos/user.dto";
 import { ArrowUpDown, Bookmark, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";

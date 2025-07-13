@@ -26,11 +26,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getUser } from "@/features/auth/authSlice";
 import { addNotification } from "@/features/notification/notificationSlice";
+import { AvatarSchema } from "@blue0206/members-only-shared-types/dtos/file.dto";
 import {
-  AvatarSchema,
   EditUserRequestDto,
   EditUserRequestSchema,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/user.dto";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save, Trash2, Upload, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

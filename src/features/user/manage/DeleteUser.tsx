@@ -22,7 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { addNotification } from "@/features/notification/notificationSlice";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { ErrorPageDetailsType } from "@/types";
-import { GetUsersResponseDto } from "@blue0206/members-only-shared-types";
+import { GetUsersResponseDto } from "@blue0206/members-only-shared-types/dtos/user.dto";
 import { AlertTriangle, UserX, X } from "lucide-react";
 import { useEffect } from "react";
 import { useMediaQuery } from "react-responsive";

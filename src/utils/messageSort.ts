@@ -2,8 +2,8 @@ import { SortOptions, SortOptionsType } from "@/lib/constants";
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
-  GetUserBookmarksResponseDto,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/message.dto";
+import { GetUserBookmarksResponseDto } from "@blue0206/members-only-shared-types/dtos/user.dto";
 
 /**
  * Sorts an array of messages according to the given sort option.

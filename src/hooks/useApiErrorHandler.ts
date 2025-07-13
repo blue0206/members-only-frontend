@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ErrorCodes } from "@blue0206/members-only-shared-types";
+import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
 import { CustomBaseQueryError } from "@/types";
 import { SerializedError } from "@reduxjs/toolkit";
 import { isApiErrorPayload, isSerializedError } from "@/utils/errorUtils";

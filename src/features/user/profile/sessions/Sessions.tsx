@@ -18,7 +18,7 @@ import {
   isValidIp,
 } from "@/utils/sessionManagementUtils";
 import { getDateFromTimestamp, getTimeElapsed } from "@/utils/timestampFormat";
-import { UserSessionsResponseDto } from "@blue0206/members-only-shared-types";
+import { UserSessionsResponseDto } from "@blue0206/members-only-shared-types/dtos/auth.dto";
 import {
   Calendar,
   LogOut,

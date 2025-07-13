@@ -1,5 +1,5 @@
 import React from "react";
-import { Role } from "@blue0206/members-only-shared-types";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { Badge } from "@/components/ui/badge";
 import { User, Crown, Shield } from "lucide-react";
 

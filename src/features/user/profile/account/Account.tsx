@@ -22,10 +22,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { addNotification } from "@/features/notification/notificationSlice";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { ErrorPageDetailsType } from "@/types";
-import {
-  ErrorCodes,
-  ResetPasswordRequestSchema,
-} from "@blue0206/members-only-shared-types";
+import { ResetPasswordRequestSchema } from "@blue0206/members-only-shared-types/dtos/user.dto";
+import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import { useEffect } from "react";

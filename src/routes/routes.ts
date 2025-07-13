@@ -4,7 +4,7 @@ import RouterErrorBoundary from "./RouterErrorBoundary";
 import Error from "@/components/shared/Error";
 import { Login, Register } from "@/features/auth";
 import ProtectedRoute from "./ProtectedRoute";
-import { Role } from "@blue0206/members-only-shared-types";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import UserManagement from "@/features/user/manage/UserManagement";
 import Bookmarks from "@/features/user/bookmarks/Bookmarks";
 import ProfileSettings from "@/features/user/profile/ProfileSettings";

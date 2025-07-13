@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserDto, Role } from "@blue0206/members-only-shared-types";
+import { UserDto } from "@blue0206/members-only-shared-types/dtos/auth.dto";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 
 export interface AuthState {
   user: UserDto | null;

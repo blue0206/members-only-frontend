@@ -14,7 +14,7 @@ import {
   Send,
   SquareChevronUp,
 } from "lucide-react";
-import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types";
+import { CreateMessageRequestDto } from "@blue0206/members-only-shared-types/dtos/message.dto";
 import { Spinner } from "@/components/ui/spinner";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import useUiErrorHandler from "@/hooks/useUiErrorHandler";

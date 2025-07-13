@@ -3,7 +3,6 @@
 // for no arguments in RTK Query.
 
 import {
-  ApiResponseSuccess,
   EditUserRequestDto,
   EditUserResponseDto,
   EditUserResponseSchema,
@@ -12,12 +11,12 @@ import {
   GetUsersResponseSchema,
   GetUsersResponseDto,
   MemberRoleUpdateRequestDto,
-  MessageParamsDto,
   ResetPasswordRequestDto,
-  Role,
   UploadAvatarResponseDto,
   UploadAvatarResponseSchema,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/user.dto";
+import { ApiResponseSuccess } from "@blue0206/members-only-shared-types/api/base";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { apiSlice } from "./api";
 import { HttpMethod } from "@/types";
 import { ValidationError } from "@/utils/error";
@@ -266,8 +265,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: ["Bookmarks"],
     }),
-    addBookmark: builder.mutation<null, MessageParamsDto["messageId"]>({
-      query: (messageId: MessageParamsDto["messageId"]) => ({
+    addBookmark: builder.mutation<null, number>({
+      query: (messageId: number) => ({
         url: `/users/bookmarks/${messageId.toString()}`,
         method: HttpMethod.POST,
         credentials: "include",
@@ -338,8 +337,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Messages", "Bookmarks"],
     }),
-    removeBookmark: builder.mutation<void, MessageParamsDto["messageId"]>({
-      query: (messageId: MessageParamsDto["messageId"]) => ({
+    removeBookmark: builder.mutation<void, number>({
+      query: (messageId: number) => ({
         url: `/users/bookmarks/${messageId.toString()}`,
         method: HttpMethod.DELETE,
         credentials: "include",

@@ -3,8 +3,8 @@ import { getTimeElapsed } from "@/utils/timestampFormat";
 import {
   GetMessagesWithoutAuthorResponseDto,
   GetMessagesResponseDto,
-  Role,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/message.dto";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User, Clock, MoreHorizontal, Edit2, Trash2 } from "lucide-react";

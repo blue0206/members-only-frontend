@@ -3,7 +3,7 @@ import {
   SerializedError,
   UnknownAction,
 } from "@reduxjs/toolkit";
-import { ApiErrorPayload } from "@blue0206/members-only-shared-types";
+import { ApiErrorPayload } from "@blue0206/members-only-shared-types/api/base";
 import { isApiErrorCode } from "@/utils/errorUtils";
 
 // Type guard to check if the error payload of action

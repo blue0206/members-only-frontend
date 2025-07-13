@@ -25,7 +25,7 @@ import {
 import { useLogoutUserMutation } from "@/app/services/authApi";
 import { getTheme, setTheme } from "@/features/ui/uiSlice";
 import { getRoleBadge } from "@/utils/getRoleBadge";
-import { Role } from "@blue0206/members-only-shared-types";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { useMediaQuery } from "react-responsive";
 
 export function Header() {

@@ -9,8 +9,8 @@ import {
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
-  Role,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/message.dto";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { ThumbsUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getUser } from "../auth/authSlice";

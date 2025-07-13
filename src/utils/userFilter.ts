@@ -4,7 +4,7 @@ import {
   UserStatusFilterOptions,
   UserStatusFilterOptionsType,
 } from "@/lib/constants";
-import { GetUsersResponseDto } from "@blue0206/members-only-shared-types";
+import { GetUsersResponseDto } from "@blue0206/members-only-shared-types/dtos/user.dto";
 
 export default function userFilter(
   data: GetUsersResponseDto,

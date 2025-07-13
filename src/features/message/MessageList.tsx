@@ -13,7 +13,7 @@ import { ErrorPageDetailsType } from "@/types";
 import {
   GetMessagesResponseDto,
   GetMessagesWithoutAuthorResponseDto,
-} from "@blue0206/members-only-shared-types";
+} from "@blue0206/members-only-shared-types/dtos/message.dto";
 import sortMessages from "@/utils/messageSort";
 import Message from "./Message";
 import MessageSkeleton from "@/components/skeleton/MessageSkeleton";

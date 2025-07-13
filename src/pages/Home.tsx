@@ -1,7 +1,7 @@
 import { useAppSelector } from "@/app/hooks";
 import { Header } from "@/components/layout";
 import { getUserRole, isAuthenticated } from "@/features/auth/authSlice";
-import { Role } from "@blue0206/members-only-shared-types";
+import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import MarkdownTextEditor from "@/features/message/MarkdownTextEditor";
 import { useCallback, useState } from "react";
 import {
