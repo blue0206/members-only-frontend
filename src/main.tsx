@@ -23,7 +23,7 @@ if (import.meta.env.PROD) {
       Sentry.replayIntegration(),
     ],
     tracesSampleRate: 0.8,
-    tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
+    tracePropagationTargets: [`${import.meta.env.VITE_API_BASE_URL}/*`],
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     environment: import.meta.env.MODE,
