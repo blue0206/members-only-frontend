@@ -66,7 +66,7 @@ class SseService {
     this.currentToken = newToken;
 
     const sseUrl = `${
-      import.meta.env.VITE_API_BASE_URL
+      import.meta.env.SSE_BASE_URL
     }/events?accessToken=${newToken}`;
     this.eventSource = new EventSource(sseUrl);
 
