@@ -35,6 +35,7 @@ import { authApiSlice } from "@/app/services/authApi";
 import { clearCredentials } from "../auth/authSlice";
 import { apiSlice } from "@/app/services/api";
 import * as Sentry from "@sentry/react";
+import { unauthorizedRedirectionQuery } from "@/lib/constants";
 
 interface MembershipModalPropsType {
   openModal: boolean;
@@ -83,7 +84,7 @@ export default function MembershipModal(props: MembershipModalPropsType) {
           dispatch(clearCredentials());
           dispatch(apiSlice.util.resetApiState());
           Sentry.setUser(null);
-          void navigate("/login?reason=${unauthorizedRedirectionQuery}", {
+          void navigate(`/login?reason=${unauthorizedRedirectionQuery}`, {
             state: {
               from: location,
             } satisfies UnauthorizedRedirectionStateType,
