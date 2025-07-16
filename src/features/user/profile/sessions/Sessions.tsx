@@ -38,6 +38,8 @@ import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import RevokeAllSessions from "./RevokeAllSessions";
 import { useMediaQuery } from "react-responsive";
 import SessionSkeleton from "@/components/skeleton/SessionSkeleton";
+import { useAppSelector } from "@/app/hooks";
+import { isAuthenticated } from "@/features/auth/authSlice";
 
 function GetDeviceIcon(ua: string) {
   const deviceType: UserDeviceType = getDeviceType(ua);
@@ -64,7 +66,14 @@ export default function Sessions() {
 
   const navigate = useNavigate();
 
-  const { data, isError, error, isSuccess, isLoading } = useGetSessionsQuery();
+  const isAuth = useAppSelector(isAuthenticated);
+
+  const { data, isError, error, isSuccess, isLoading } = useGetSessionsQuery(
+    undefined,
+    {
+      skip: !isAuth,
+    }
+  );
   const errorDetails = useApiErrorHandler(error);
 
   // Make the session in data array with currentSession === true the first element.

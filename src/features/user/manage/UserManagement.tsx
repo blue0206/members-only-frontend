@@ -44,7 +44,7 @@ import {
   UserX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getUser } from "@/features/auth/authSlice";
+import { getUser, isAuthenticated } from "@/features/auth/authSlice";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { useNavigate } from "react-router";
 import { ErrorPageDetailsType } from "@/types";
@@ -122,8 +122,14 @@ export default function UserManagement() {
   >(null);
 
   const authUser = useAppSelector(getUser);
+  const isAuth = useAppSelector(isAuthenticated);
 
-  const { data, isSuccess, isError, error, isLoading } = useGetUsersQuery();
+  const { data, isSuccess, isError, error, isLoading } = useGetUsersQuery(
+    undefined,
+    {
+      skip: !isAuth,
+    }
+  );
   const errorDetails = useApiErrorHandler(error);
 
   const navigate = useNavigate();

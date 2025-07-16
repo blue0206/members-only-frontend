@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/app/hooks";
 import { useGetBookmarksQuery } from "@/app/services/userApi";
 import { Header } from "@/components/layout";
 import MessageSkeleton from "@/components/skeleton/MessageSkeleton";
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { isAuthenticated } from "@/features/auth/authSlice";
 import Message from "@/features/message/Message";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { SortOptions, SortOptionsType } from "@/lib/constants";
@@ -27,7 +29,14 @@ export default function Bookmarks() {
   const [sortOption, setSortOption] = useState<SortOptionsType>("newest");
   const [editMessageId, setEditMessageId] = useState<number | null>(null);
 
-  const { data, isSuccess, isError, error, isLoading } = useGetBookmarksQuery();
+  const isAuth = useAppSelector(isAuthenticated);
+
+  const { data, isSuccess, isError, error, isLoading } = useGetBookmarksQuery(
+    undefined,
+    {
+      skip: !isAuth,
+    }
+  );
   const errorDetails = useApiErrorHandler(error);
 
   const navigate = useNavigate();
