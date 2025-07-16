@@ -16,7 +16,10 @@ import { addNotification } from "../notification/notificationSlice";
 import { authApiSlice } from "@/app/services/authApi";
 import * as Sentry from "@sentry/react";
 import { clearCredentials } from "../auth/authSlice";
-import { accountDeletedByAdminQuery } from "@/lib/constants";
+import {
+  accountDeletedByAdminQuery,
+  unauthorizedRedirectionQuery,
+} from "@/lib/constants";
 
 class SseService {
   private eventSource: EventSource | null = null;
@@ -230,8 +233,25 @@ class SseService {
                 })
               );
             })
-            .catch((e: unknown) => {
-              logger.error("SSE MULTI_EVENT: Error refreshing token.", e);
+            .catch(() => {
+              dispatch(
+                addNotification({
+                  type: "info",
+                  message: `Your role has been changed to ${
+                    payload.targetUserRole ?? ""
+                  } by @${payload.originUsername ?? ""}`,
+                })
+              );
+              // In case of refresh failure, we log out the user
+              // and prompt them to log in again to ensure
+              // the page doesn't crash and the user gets
+              // a fresh session with no stale data.
+              dispatch(clearCredentials());
+              dispatch(apiSlice.util.resetApiState());
+              Sentry.setUser(null);
+              window.location.replace(
+                `/login?reason=${unauthorizedRedirectionQuery}`
+              );
             });
         }
 
