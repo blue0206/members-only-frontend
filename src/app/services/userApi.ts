@@ -24,7 +24,11 @@ import { logger } from "@/utils/logger";
 import convertToFormData, {
   UploadAvatarRequestDto,
 } from "@/utils/convertToFormData";
-import { setUserAvatar, updateUserDetails } from "@/features/auth/authSlice";
+import {
+  clearCredentials,
+  setUserAvatar,
+  updateUserDetails,
+} from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import { authApiSlice } from "./authApi";
 import {
@@ -33,7 +37,11 @@ import {
 } from "@/types/";
 import { RootState } from "../store";
 import { messageApiSlice } from "./messageApi";
-import { accountDeletedQuery } from "@/lib/constants";
+import {
+  accountDeletedQuery,
+  unauthorizedRedirectionQuery,
+} from "@/lib/constants";
+import { addNotification } from "@/features/notification/notificationSlice";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -159,6 +167,37 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body,
         credentials: "include",
       }),
+      onQueryStarted: async (_queryArgument, mutationLifeCycleApi) => {
+        // Wait for the query to be fulfilled.
+        await mutationLifeCycleApi.queryFulfilled;
+
+        try {
+          await mutationLifeCycleApi.dispatch(
+            authApiSlice.endpoints.tokenRefresh.initiate()
+          );
+          mutationLifeCycleApi.dispatch(
+            addNotification({
+              type: "success",
+              message: "Congratulations! You are now a member.",
+            })
+          );
+        } catch (error: unknown) {
+          logger.error(
+            error,
+            "Error refreshing token after member role update."
+          );
+          // In case of refresh failure, we log out the user
+          // and prompt them to log in again to ensure
+          // the page doesn't crash and the user gets
+          // a fresh session with no stale data.
+          mutationLifeCycleApi.dispatch(clearCredentials());
+          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+          Sentry.setUser(null);
+          window.location.replace(
+            `/login?reason=${unauthorizedRedirectionQuery}`
+          );
+        }
+      },
       // Invalidate messages endpoint to fetch the new list with author names instead.
       invalidatesTags: ["Messages", "Bookmarks"],
     }),

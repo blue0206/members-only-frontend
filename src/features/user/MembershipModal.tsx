@@ -24,18 +24,10 @@ import { useAppDispatch } from "@/app/hooks";
 import { useMemberRoleUpdateMutation } from "@/app/services/userApi";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { addNotification } from "@/features/notification/notificationSlice";
-import { useLocation, useNavigate } from "react-router";
-import {
-  ErrorPageDetailsType,
-  UnauthorizedRedirectionStateType,
-} from "@/types";
+import { useNavigate } from "react-router";
+import { ErrorPageDetailsType } from "@/types";
 import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
 import { Spinner } from "@/components/ui/spinner";
-import { authApiSlice } from "@/app/services/authApi";
-import { clearCredentials } from "../auth/authSlice";
-import { apiSlice } from "@/app/services/api";
-import * as Sentry from "@sentry/react";
-import { unauthorizedRedirectionQuery } from "@/lib/constants";
 
 interface MembershipModalPropsType {
   openModal: boolean;
@@ -52,7 +44,6 @@ export default function MembershipModal(props: MembershipModalPropsType) {
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const location = useLocation();
 
   const [memberRoleUpdate, { isSuccess, isError, error, reset, isLoading }] =
     useMemberRoleUpdateMutation();
@@ -61,40 +52,10 @@ export default function MembershipModal(props: MembershipModalPropsType) {
   // Handle api success.
   useEffect(() => {
     if (isSuccess) {
-      dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
-        .then(() => {
-          // User details update happens as part of token refresh,
-          // no need to manually update here.
-          dispatch(
-            apiSlice.util.invalidateTags(["Messages", "Users", "Bookmarks"])
-          );
-          dispatch(
-            addNotification({
-              type: "success",
-              message: "Congratulations! You are now a member.",
-            })
-          );
-          props.setOpenModal(false);
-        })
-        .catch(() => {
-          // In case of refresh failure, we log out the user
-          // and prompt them to log in again to ensure
-          // the page doesn't crash and the user gets
-          // a fresh session with no stale data.
-          dispatch(clearCredentials());
-          dispatch(apiSlice.util.resetApiState());
-          Sentry.setUser(null);
-          void navigate(`/login?reason=${unauthorizedRedirectionQuery}`, {
-            state: {
-              from: location,
-            } satisfies UnauthorizedRedirectionStateType,
-          });
-        })
-        .finally(() => {
-          reset();
-        });
+      props.setOpenModal(false);
+      reset();
     }
-  }, [isSuccess, dispatch, props, reset, navigate, location]);
+  }, [isSuccess, props, reset]);
 
   // Handle api errors.
   useEffect(() => {
