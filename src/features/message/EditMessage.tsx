@@ -132,7 +132,7 @@ export default function EditMessage({
 
         <Button
           size={"sm"}
-          className="cursor-pointer w-[15ch] space-x-2"
+          className="cursor-pointer w-[18ch] space-x-2"
           onClick={() => void handleMessageEdit()}
           disabled={isLoading || editMessageContent.length > 2000}
         >

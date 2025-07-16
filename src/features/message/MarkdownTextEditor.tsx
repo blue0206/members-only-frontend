@@ -204,7 +204,7 @@ export default function MarkdownTextEditor({
               ))}
           </div>
           <Button
-            className="cursor-pointer w-[16ch] sm:w-[18ch] flex items-center justify-center space-x-2"
+            className="cursor-pointer w-[18ch] flex items-center justify-center space-x-2"
             disabled={!text.trim() || isLoading || text.length > 2000}
             onClick={() => void sendHandler()}
           >
