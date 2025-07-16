@@ -24,8 +24,6 @@ import { useAppDispatch } from "@/app/hooks";
 import { useMemberRoleUpdateMutation } from "@/app/services/userApi";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { addNotification } from "@/features/notification/notificationSlice";
-import { useNavigate } from "react-router";
-import { ErrorPageDetailsType } from "@/types";
 import { ErrorCodes } from "@blue0206/members-only-shared-types";
 import { useNavigate } from "react-router";
 import { ErrorPageDetailsType } from "@/types";
