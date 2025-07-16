@@ -24,13 +24,17 @@ import { useAppDispatch } from "@/app/hooks";
 import { useMemberRoleUpdateMutation } from "@/app/services/userApi";
 import { useApiErrorHandler } from "@/hooks/useApiErrorHandler";
 import { addNotification } from "@/features/notification/notificationSlice";
-import { useNavigate } from "react-router";
-import { ErrorPageDetailsType } from "@/types";
+import { useLocation, useNavigate } from "react-router";
+import {
+  ErrorPageDetailsType,
+  UnauthorizedRedirectionStateType,
+} from "@/types";
 import { ErrorCodes } from "@blue0206/members-only-shared-types/api/error-codes";
-import { Role } from "@blue0206/members-only-shared-types/enums/roles.enum";
 import { Spinner } from "@/components/ui/spinner";
-import { useTokenRefreshMutation } from "@/app/services/authApi";
-import { updateUserRole } from "../auth/authSlice";
+import { authApiSlice } from "@/app/services/authApi";
+import { clearCredentials } from "../auth/authSlice";
+import { apiSlice } from "@/app/services/api";
+import * as Sentry from "@sentry/react";
 
 interface MembershipModalPropsType {
   openModal: boolean;
@@ -47,34 +51,49 @@ export default function MembershipModal(props: MembershipModalPropsType) {
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const location = useLocation();
 
   const [memberRoleUpdate, { isSuccess, isError, error, reset, isLoading }] =
     useMemberRoleUpdateMutation();
-  const [tokenRefresh] = useTokenRefreshMutation();
   const errorDetails = useApiErrorHandler(error);
 
   // Handle api success.
   useEffect(() => {
     if (isSuccess) {
-      dispatch(
-        addNotification({
-          type: "success",
-          message: "Congratulations! You are now a member.",
-        })
-      );
-
-      // Refresh access token to get new token with fresh payload.
-      void tokenRefresh()
+      dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
         .then(() => {
-          // On successful refresh, close modal and update user's new role in auth state.
+          // User details update happens as part of token refresh,
+          // no need to manually update here.
+          dispatch(
+            apiSlice.util.invalidateTags(["Messages", "Users", "Bookmarks"])
+          );
+          dispatch(
+            addNotification({
+              type: "success",
+              message: "Congratulations! You are now a member.",
+            })
+          );
           props.setOpenModal(false);
-          dispatch(updateUserRole(Role.MEMBER));
+        })
+        .catch(() => {
+          // In case of refresh failure, we log out the user
+          // and prompt them to log in again to ensure
+          // the page doesn't crash and the user gets
+          // a fresh session with no stale data.
+          dispatch(clearCredentials());
+          dispatch(apiSlice.util.resetApiState());
+          Sentry.setUser(null);
+          void navigate("/login?reason=${unauthorizedRedirectionQuery}", {
+            state: {
+              from: location,
+            } satisfies UnauthorizedRedirectionStateType,
+          });
         })
         .finally(() => {
           reset();
         });
     }
-  }, [isSuccess, dispatch, props, reset, tokenRefresh]);
+  }, [isSuccess, dispatch, props, reset, navigate, location]);
 
   // Handle api errors.
   useEffect(() => {
