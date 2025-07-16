@@ -261,18 +261,6 @@ class SseService {
 
         break;
       }
-      case EventReason.MEMBER_UPDATE: {
-        // We only invalidate tags if user is not the one who became member.
-        // This is because the actual logic for member update stays outside SSE
-        // and in the component triggering the update.
-        // This is to prevent premature re-render before component-logic has finished execution.
-        if (payload.originId !== state.auth.user?.id) {
-          dispatch(
-            apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
-          );
-        }
-        break;
-      }
       case EventReason.USER_DELETED_BY_ADMIN: {
         // In this case, the ADMIN has deleted a user.
         // There are two main tasks to perform:
@@ -291,6 +279,20 @@ class SseService {
         dispatch(
           apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
         );
+        break;
+      }
+      case EventReason.MEMBER_UPDATE:
+      case EventReason.USER_DELETED: {
+        // We only invalidate tags if the user is not the one who is affected.
+        // This is because the actual logic for affected user is setup inside the
+        // component triggering the action, or the side effects of the RTK mutations
+        // of such actions.
+        // This is to prevent premature re-render before component-logic has finished execution.
+        if (payload.originId !== state.auth.user?.id) {
+          dispatch(
+            apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+          );
+        }
         break;
       }
       default: {
