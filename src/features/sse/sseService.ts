@@ -217,35 +217,22 @@ class SseService {
         // 2. If the user receiving this event is the affected user,
         //    then we notify the user with a toast.
         if (payload.targetId === state.auth.user?.id) {
-          if (state.auth.user?.role === Role.USER) {
-            // If the affected user has USER role, then we'd need to manually refresh
-            // their token so that they can access and fetch MEMBER/ADMIN data.
-            // MEMBER/ADMIN data can access all data (and hence the fetching is automatic)
-            // but the reverse is not true for USER and hence we give a little 'push' with a refresh.
-            dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
-              .then(() => {
-                dispatch(
-                  addNotification({
-                    type: "info",
-                    message: `Your role has been changed to ${
-                      payload.targetUserRole ?? ""
-                    } by @${payload.originUsername ?? ""}`,
-                  })
-                );
-              })
-              .catch((e: unknown) => {
-                logger.error("SSE MULTI_EVENT: Error refreshing token.", e);
-              });
-          } else {
-            dispatch(
-              addNotification({
-                type: "info",
-                message: `Your role has been changed to ${
-                  payload.targetUserRole ?? ""
-                } by @${payload.originUsername ?? ""}`,
-              })
-            );
-          }
+          // For the affected user, we'd need to manually refresh
+          // their token so that they can access and fetch data as per their new role.
+          dispatch(authApiSlice.endpoints.tokenRefresh.initiate())
+            .then(() => {
+              dispatch(
+                addNotification({
+                  type: "info",
+                  message: `Your role has been changed to ${
+                    payload.targetUserRole ?? ""
+                  } by @${payload.originUsername ?? ""}`,
+                })
+              );
+            })
+            .catch((e: unknown) => {
+              logger.error("SSE MULTI_EVENT: Error refreshing token.", e);
+            });
         }
 
         dispatch(
