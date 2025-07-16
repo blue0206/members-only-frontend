@@ -25,11 +25,7 @@ import { logger } from "@/utils/logger";
 import convertToFormData, {
   UploadAvatarRequestDto,
 } from "@/utils/convertToFormData";
-import {
-  clearCredentials,
-  setUserAvatar,
-  updateUserDetails,
-} from "@/features/auth/authSlice";
+import { setUserAvatar, updateUserDetails } from "@/features/auth/authSlice";
 import * as Sentry from "@sentry/react";
 import { authApiSlice } from "./authApi";
 import {
@@ -142,15 +138,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
         );
 
         // If user has deleted their own account (Case-1), clear auth state
-        // and perform necessary actions.
+        // and perform necessary actions (which are handled in useQueryParamsSideEffects hook).
         if (!queryArgument.username) {
-          // Clear credentials.
-          mutationLifeCycleApi.dispatch(clearCredentials());
-          // Reset RTK Query cache.
-          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
-          // Remove user from Sentry.
-          Sentry.setUser(null);
-          // Navigate to login page.
           window.location.replace(`/?reason=${accountDeletedQuery}`);
         }
       },
