@@ -57,8 +57,8 @@ export default function DeleteAccount(props: DeleteUserPropsType) {
   const deleteAccountHandler = async () => {
     await deleteAccount({
       username: null,
-    }).then(() => {
-      // reset();
+    }).finally(() => {
+      reset();
     });
   };
 
@@ -96,7 +96,7 @@ export default function DeleteAccount(props: DeleteUserPropsType) {
 
             <Button
               variant={"destructive"}
-              className="cursor-pointer w-[16ch] space-x-2"
+              className="cursor-pointer w-[22ch] space-x-2"
               disabled={isLoading}
               onClick={() => {
                 void deleteAccountHandler();
@@ -107,7 +107,7 @@ export default function DeleteAccount(props: DeleteUserPropsType) {
               ) : (
                 <>
                   <UserX className="h-4 w-4" />
-                  <span>Delete User</span>
+                  <span>Delete Account</span>
                 </>
               )}
             </Button>
@@ -167,7 +167,7 @@ export default function DeleteAccount(props: DeleteUserPropsType) {
             ) : (
               <>
                 <UserX className="h-4 w-4 mr-2" />
-                <span>Delete User</span>
+                <span>Delete Account</span>
               </>
             )}
           </Button>

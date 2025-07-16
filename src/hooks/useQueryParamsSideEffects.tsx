@@ -18,6 +18,9 @@ import { logger } from "@/utils/logger";
 import { nanoid } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
+import * as Sentry from "@sentry/react";
+import { clearCredentials } from "@/features/auth/authSlice";
+import { apiSlice } from "@/app/services/api";
 
 const possibleReasons = [
   sessionExpiredQuery,
@@ -108,8 +111,11 @@ export default function useQueryParamsSideEffects() {
           break;
         }
         case accountDeletedQuery: {
-          notificationId = nanoid();
+          dispatch(clearCredentials());
+          dispatch(apiSlice.util.resetApiState());
+          Sentry.setUser(null);
 
+          notificationId = nanoid();
           dispatch(
             addNotification({
               type: "info",
@@ -127,8 +133,11 @@ export default function useQueryParamsSideEffects() {
           break;
         }
         case accountDeletedByAdminQuery: {
-          notificationId = nanoid();
+          dispatch(clearCredentials());
+          dispatch(apiSlice.util.resetApiState());
+          Sentry.setUser(null);
 
+          notificationId = nanoid();
           dispatch(
             addNotification({
               type: "info",

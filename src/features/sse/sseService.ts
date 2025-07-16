@@ -267,11 +267,8 @@ class SseService {
         // 1. Invalidate affected RTK caches for all users receiving
         //    this event to ensure their data is fresh.
         // 2. If the user receiving this event is the affected user,
-        //    then we cleanly log them out from the client-side.
+        //    then we cleanly log them out from the client-side (handled inside useQueryParamsSideEffects hook).
         if (payload.targetId === state.auth.user?.id) {
-          dispatch(clearCredentials());
-          dispatch(apiSlice.util.resetApiState());
-          Sentry.setUser(null);
           window.location.replace(`/?reason=${accountDeletedByAdminQuery}`);
           return;
         }
