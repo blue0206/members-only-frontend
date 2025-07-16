@@ -269,13 +269,16 @@ class SseService {
         // 2. If the user receiving this event is the affected user,
         //    then we cleanly log them out from the client-side (handled inside useQueryParamsSideEffects hook).
         if (payload.targetId === state.auth.user?.id) {
+          dispatch(clearCredentials());
+          dispatch(apiSlice.util.resetApiState());
+          Sentry.setUser(null);
           window.location.replace(`/?reason=${accountDeletedByAdminQuery}`);
-          return;
+        } else {
+          dispatch(
+            apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
+          );
         }
 
-        dispatch(
-          apiSlice.util.invalidateTags(["Messages", "Bookmarks", "Users"])
-        );
         break;
       }
       case EventReason.MEMBER_UPDATE:

@@ -148,10 +148,17 @@ export const userApiSlice = apiSlice.injectEndpoints({
         // If user has deleted their own account (Case-1), clear auth state
         // and perform necessary actions (which are handled in useQueryParamsSideEffects hook).
         if (!queryArgument.username) {
+          mutationLifeCycleApi.dispatch(clearCredentials());
+          mutationLifeCycleApi.dispatch(apiSlice.util.resetApiState());
+          Sentry.setUser(null);
           window.location.replace(`/?reason=${accountDeletedQuery}`);
+        } else {
+          // Only invalidate tags if user is not deleting their account.
+          mutationLifeCycleApi.dispatch(
+            apiSlice.util.invalidateTags(["Users", "Bookmarks", "Messages"])
+          );
         }
       },
-      invalidatesTags: ["Messages", "Bookmarks", "Users"],
     }),
     resetPassword: builder.mutation<void, ResetPasswordRequestDto>({
       query: (body: ResetPasswordRequestDto) => ({
