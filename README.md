@@ -6,7 +6,7 @@
 ![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-7B52AB?style=for-the-badge&logo=redux)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss)
 
-This repository contains the frontend source code for the **Members Only** application, a modern clubhouse-style message board. It's a fully-featured Single-Page Application (SPA) built with React and a modern toolchain, designed to communicate with a serverless microservice backend.
+This repository contains the frontend source code for the **Members Only** application, a real-time message board. It's a fully-featured Single-Page Application (SPA) built with React and a modern toolchain, designed to communicate with a serverless microservice backend.
 
 **Live Application:** **[cloud.nevery.shop](https://cloud.nevery.shop)**  
 **Backend Repository:** [Members Only Backend Microservice](https://github.com/blue0206/members-only-backend)  
