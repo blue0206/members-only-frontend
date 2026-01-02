@@ -6,7 +6,7 @@ This repository contains the frontend code for **Members Only**, a real-time dis
 
 The live version of this branch can be found here: **[https://app.nevery.shop](https://app.nevery.shop)**
 
-> **Note:** This repository represents the frontend for the monolithic deployment of the application. The ongoing development for a refactored serverless architecture is taking place on the `main` branch of the project repositories.
+> **Note:** This repository represents the frontend for the monolithic deployment of the application. The refactored serverless version is on the `main` branch.
 
 ---
 
